@@ -199,6 +199,12 @@ pip install -e ".[dev,collection]"
 python -m experiments.collect_pilot
 ```
 
+Human labels follow the blind-review and disagreement procedure in
+[`corpus/LABELING.md`](corpus/LABELING.md). The importer requires an explicit
+confirmation of independent review and never overwrites the source corpus. A
+blank form and clearly separated provisional comparison file are provided; the
+provisional file is not ground truth.
+
 ## Current limits
 
 The prototype does not yet define weak or viscosity solution semantics. It also

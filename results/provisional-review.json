@@ -1,0 +1,154 @@
+{
+  "records": [
+    {
+      "failure_modes": [],
+      "id": "sympy-advection-01",
+      "rationale": "Substitution gives an exact zero advection residual and the specialized Fourier mode matches the stated initial and boundary traces.",
+      "verdict": "valid"
+    },
+    {
+      "failure_modes": [],
+      "id": "sympy-advection-02",
+      "rationale": "Substitution gives an exact zero advection residual and the specialized Fourier mode matches the stated initial and boundary traces.",
+      "verdict": "valid"
+    },
+    {
+      "failure_modes": [],
+      "id": "sympy-advection-03",
+      "rationale": "Substitution gives an exact zero advection residual and the specialized Fourier mode matches the stated initial and boundary traces.",
+      "verdict": "valid"
+    },
+    {
+      "failure_modes": [],
+      "id": "sympy-advection-04",
+      "rationale": "Substitution gives an exact zero advection residual and the specialized Fourier mode matches the stated initial and boundary traces.",
+      "verdict": "valid"
+    },
+    {
+      "failure_modes": [],
+      "id": "sympy-advection-05",
+      "rationale": "Substitution gives an exact zero advection residual and the specialized Fourier mode matches the stated initial and boundary traces.",
+      "verdict": "valid"
+    },
+    {
+      "failure_modes": [],
+      "id": "sympy-advection-06",
+      "rationale": "Substitution gives an exact zero advection residual and the specialized Fourier mode matches the stated initial and boundary traces.",
+      "verdict": "valid"
+    },
+    {
+      "failure_modes": [],
+      "id": "sympy-advection-07",
+      "rationale": "Substitution gives an exact zero advection residual and the specialized Fourier mode matches the stated initial and boundary traces.",
+      "verdict": "valid"
+    },
+    {
+      "failure_modes": [],
+      "id": "sympy-advection-08",
+      "rationale": "Substitution gives an exact zero advection residual and the specialized Fourier mode matches the stated initial and boundary traces.",
+      "verdict": "valid"
+    },
+    {
+      "failure_modes": [],
+      "id": "sympy-advection-09",
+      "rationale": "Substitution gives an exact zero advection residual and the specialized Fourier mode matches the stated initial and boundary traces.",
+      "verdict": "valid"
+    },
+    {
+      "failure_modes": [],
+      "id": "sympy-advection-10",
+      "rationale": "Substitution gives an exact zero advection residual and the specialized Fourier mode matches the stated initial and boundary traces.",
+      "verdict": "valid"
+    },
+    {
+      "failure_modes": [
+        "pde_residual",
+        "initial_condition",
+        "boundary_condition"
+      ],
+      "id": "qwen-local-heat-mode-01",
+      "rationale": "The candidate has no heat-equation time decay, adds a nonzero exponential trace, and fails the stated initial and boundary data.",
+      "verdict": "invalid"
+    },
+    {
+      "failure_modes": [
+        "pde_residual",
+        "initial_condition"
+      ],
+      "id": "qwen-local-heat-mode-02",
+      "rationale": "The spatial mode and decay rate do not match the second-mode heat problem, so both the PDE and initial trace fail.",
+      "verdict": "invalid"
+    },
+    {
+      "failure_modes": [
+        "pde_residual"
+      ],
+      "id": "qwen-local-transport-01",
+      "rationale": "The static sine profile satisfies the initial trace but has nonzero spatial derivative in the transport residual.",
+      "verdict": "invalid"
+    },
+    {
+      "failure_modes": [
+        "pde_residual"
+      ],
+      "id": "qwen-local-transport-02",
+      "rationale": "The static cosine profile satisfies the initial trace but omits translation at speed two.",
+      "verdict": "invalid"
+    },
+    {
+      "failure_modes": [
+        "pde_residual",
+        "initial_condition"
+      ],
+      "id": "qwen-local-reaction-01",
+      "rationale": "The added exponential term and stationary sine term do not satisfy u_t + u = 0 or the stated initial trace.",
+      "verdict": "invalid"
+    },
+    {
+      "failure_modes": [
+        "pde_residual",
+        "initial_condition",
+        "boundary_condition"
+      ],
+      "id": "qwen-local-wave-01",
+      "rationale": "The added time exponential breaks the wave equation, both initial data, and the homogeneous spatial boundaries.",
+      "verdict": "invalid"
+    },
+    {
+      "failure_modes": [
+        "pde_residual",
+        "boundary_condition"
+      ],
+      "id": "qwen-local-laplace-01",
+      "rationale": "The y-only expression is not harmonic and does not match the prescribed left and right traces.",
+      "verdict": "invalid"
+    },
+    {
+      "failure_modes": [
+        "pde_residual",
+        "boundary_condition"
+      ],
+      "id": "qwen-local-poisson-01",
+      "rationale": "Direct differentiation does not recover the sine forcing, and the x=1 boundary is generally nonzero.",
+      "verdict": "invalid"
+    },
+    {
+      "failure_modes": [
+        "pde_residual"
+      ],
+      "id": "qwen-local-transport-2d-01",
+      "rationale": "The candidate matches the initial profile but omits both characteristic shifts, leaving a nonzero transport residual.",
+      "verdict": "invalid"
+    },
+    {
+      "failure_modes": [
+        "pde_residual",
+        "initial_condition"
+      ],
+      "id": "qwen-local-klein-gordon-01",
+      "rationale": "The exponential time factor has the wrong second-time derivative and a nonzero initial velocity.",
+      "verdict": "invalid"
+    }
+  ],
+  "review_version": 1
+}

@@ -26,12 +26,15 @@ Before opening a pull request:
 2. Keep the pull request to one main behavior.
 3. Add a regression test or a minimal reproducible example.
 4. Run `pytest` and `ruff check .` locally.
+5. State what the result proves, and what it does not prove.
 
 Candidate-corpus records must retain the unedited generator output and complete
 origin metadata. Do not reconstruct or polish an output and present it as a raw
 sample. New records should remain `pending` until a person applies the published
 labeling protocol.
-5. State what the result proves, and what it does not prove.
+Do not import `results/provisional-review.json` as a human review. Complete the
+blind pass in `corpus/LABELING.md` first, use a public reviewer identifier, and
+retain disagreement notes when a second reviewer is needed.
 
 For soundness-sensitive changes, a new check must not turn finite numerical
 sampling into a `PROVED` result. If the reasoning is incomplete, return
