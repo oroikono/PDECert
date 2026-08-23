@@ -1,5 +1,6 @@
 """Public interface for PDECert."""
 
+from .benchmark import BENCHMARK_VERSION, BenchmarkError, evaluate_corpus
 from .core import (
     PARAMETER_ASSUMPTIONS,
     Constraint,
@@ -34,6 +35,8 @@ from .schema import (
 
 __all__ = [
     "ANNOTATION_STATUSES",
+    "BENCHMARK_VERSION",
+    "BenchmarkError",
     "CORPUS_VERSION",
     "Constraint",
     "CorpusError",
@@ -54,6 +57,7 @@ __all__ = [
     "apply_review",
     "dump_case",
     "dump_corpus",
+    "evaluate_corpus",
     "fixed_collocation_check",
     "load_case",
     "load_corpus",
