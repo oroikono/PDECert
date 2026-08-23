@@ -6,9 +6,10 @@ import ast
 import json
 import keyword
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 import sympy as sp
 from sympy.parsing.sympy_parser import parse_expr, standard_transformations

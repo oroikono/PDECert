@@ -6,8 +6,8 @@ import argparse
 import json
 import math
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 from .core import Status, verify
 from .schema import SchemaError, load_case
