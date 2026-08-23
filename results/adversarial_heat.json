@@ -14,6 +14,7 @@
         "left boundary": "identity",
         "right boundary": "identity"
       },
+      "incomplete_reasons": {},
       "max_sampled_residual": 0.0,
       "status": "PROVED",
       "witness": null
@@ -35,6 +36,7 @@
         "left boundary": "identity",
         "right boundary": "identity"
       },
+      "incomplete_reasons": {},
       "max_sampled_residual": 0.0,
       "status": "PROVED",
       "witness": null
@@ -55,6 +57,9 @@
         "initial condition": "unknown",
         "left boundary": "identity",
         "right boundary": "nonzero"
+      },
+      "incomplete_reasons": {
+        "initial condition": "symbolic simplification did not decide"
       },
       "max_sampled_residual": 0.011300000000000001,
       "status": "REFUTED",
@@ -84,6 +89,9 @@
         "left boundary": "identity",
         "right boundary": "identity"
       },
+      "incomplete_reasons": {
+        "heat PDE": "symbolic simplification did not decide"
+      },
       "max_sampled_residual": 0.014570794765862793,
       "status": "REFUTED",
       "witness": {
@@ -108,6 +116,7 @@
     "pde_only_max_residual": 0.0,
     "pdecert": {
       "exact_checks": {},
+      "incomplete_reasons": {},
       "max_sampled_residual": 0.0,
       "status": "REFUTED",
       "witness": {
@@ -135,6 +144,9 @@
         "left boundary": "identity",
         "parametric heat PDE": "unknown",
         "right boundary": "identity"
+      },
+      "incomplete_reasons": {
+        "parametric heat PDE": "symbolic simplification did not decide"
       },
       "max_sampled_residual": 0.6709607639052284,
       "status": "REFUTED",
@@ -165,6 +177,9 @@
         "initial condition": "identity",
         "left boundary": "identity",
         "right boundary": "identity"
+      },
+      "incomplete_reasons": {
+        "heat PDE": "symbolic simplification did not decide"
       },
       "max_sampled_residual": 1.817439e-14,
       "status": "INCONCLUSIVE",
