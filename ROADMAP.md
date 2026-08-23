@@ -44,13 +44,13 @@ Available:
   amendments and public reviewer identifier;
 - a label-gated report pipeline comparing fixed collocation, direct SymPy
   residual checks, and PDECert with error, abstention, witness, and runtime metrics;
+- a committed pilot comparison bound to the exact labeled-corpus digest;
 - a deterministic, digest-checked Hugging Face release builder with JSONL,
   dataset-card, benchmark-report, and manifest outputs.
 
 Next:
 
 - grow the first public benchmark to at least 100 candidates;
-- publish the pilot comparison after the independent labels are complete;
 - publish the benchmark and data card on Hugging Face.
 
 ## v0.3: integrations

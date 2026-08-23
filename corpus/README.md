@@ -65,6 +65,16 @@ These machine results describe the current verifier, not the corpus labels.
 - one boundary-condition failure mode added after an independently confirmed
   comparison-stage recomputation.
 
+## Pilot benchmark summary
+
+The digest-bound report in `../results/pilot-benchmark.json` compares fixed
+full-condition collocation, direct SymPy residual simplification, and PDECert.
+Fixed collocation and PDECert are decisive and correct on all 20 designed pilot
+records. Direct SymPy simplification is correct whenever decisive and
+inconclusive on 7 records. PDECert returns a concrete witness for all 10 invalid
+records; the two baselines do not produce witnesses in this harness. These
+figures describe this pilot only and are not population-level estimates.
+
 ## Licensing and provenance
 
 PDECert's original metadata and completed annotations are distributed under the
