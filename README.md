@@ -57,11 +57,16 @@ report:
 ```bash
 pdecert verify examples/exact_heat.json
 pdecert verify examples/exact_heat.json --output report.json
+pdecert verify examples/exact_heat.json --symbolic-timeout 5
 ```
 
 Exit code `0` means `PROVED`, `1` means `REFUTED`, `2` means `INCONCLUSIVE`,
 and `64` reports an unreadable or invalid input file. A non-zero result is not
 automatically a software failure; consumers should also read `report.status`.
+The CLI gives each singularity and symbolic-identity check two seconds by
+default. A deadline, unsupported deadline environment, or undecidable symbolic
+operation is recorded under `report.incomplete_reasons` and cannot produce a
+`PROVED` result.
 
 ## Small example
 
@@ -87,7 +92,7 @@ problem = Problem(
     ),
 )
 
-report = verify(problem, (candidate,))
+report = verify(problem, (candidate,), symbolic_timeout=2.0)
 print(report.status)  # Status.PROVED
 ```
 
@@ -117,9 +122,11 @@ later milestone.
 ## Current limits
 
 The prototype does not yet define weak or viscosity solution semantics. It also
-needs resource limits for symbolic simplification, stronger multivariate domain
-analysis, interval arithmetic, and supported a posteriori error bounds. When a
-check is incomplete, the intended behavior is `INCONCLUSIVE`.
+needs operation and memory budgets, stronger multivariate domain analysis,
+interval arithmetic, and supported a posteriori error bounds. Real-time symbolic
+deadlines are currently available only from the main thread on platforms that
+provide interval timers. When a check is incomplete, the intended behavior is
+`INCONCLUSIVE`.
 
 The next milestones are tracked in [ROADMAP.md](ROADMAP.md). Contributions that
 add one focused capability together with tests are welcome.

@@ -26,6 +26,7 @@ class CommandLineTests(unittest.TestCase):
         payload = json.loads(output.getvalue())
         self.assertEqual(exit_code, 0)
         self.assertEqual(payload["report"]["status"], "PROVED")
+        self.assertEqual(payload["report"]["incomplete_reasons"], {})
         self.assertEqual(payload["problem"], "exact_heat_solution")
 
     def test_refuted_case_returns_one_and_includes_witness(self):

@@ -56,6 +56,12 @@ def _build_parser() -> argparse.ArgumentParser:
         default=5,
         help="off-grid samples per variable (default: 5)",
     )
+    verify_parser.add_argument(
+        "--symbolic-timeout",
+        type=_positive_float,
+        default=2.0,
+        help="seconds allowed for each symbolic check (default: 2)",
+    )
     return parser
 
 
@@ -67,6 +73,7 @@ def _run_verify(arguments: argparse.Namespace) -> int:
             case.candidate_expressions,
             tolerance=arguments.tolerance,
             samples_per_axis=arguments.samples_per_axis,
+            symbolic_timeout=arguments.symbolic_timeout,
         )
     except (OSError, SchemaError) as error:
         print(f"pdecert: {error}", file=sys.stderr)
