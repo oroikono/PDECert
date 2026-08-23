@@ -39,14 +39,15 @@ Available:
 - a 20-record pilot with 10 reproducible SymPy outputs and 10 pinned local
   open-model generations;
 - a blind human-review protocol, blank review form, guarded annotation importer,
-  and clearly separated provisional comparison file.
+  and clearly separated provisional comparison file;
+- a label-gated report pipeline comparing fixed collocation, direct SymPy
+  residual checks, and PDECert with error, abstention, witness, and runtime metrics.
 
 Next:
 
 - complete independent human labels for all 20 pilot records;
 - grow the first public benchmark to at least 100 candidates;
-- compare fixed collocation, SymPy checks, and PDECert on false acceptance,
-  false rejection, inconclusive rate, witness quality, and runtime;
+- publish the pilot comparison after the independent labels are complete;
 - publish the benchmark and data card on Hugging Face.
 
 ## v0.3: integrations

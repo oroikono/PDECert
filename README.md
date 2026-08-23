@@ -205,6 +205,19 @@ confirmation of independent review and never overwrites the source corpus. A
 blank form and clearly separated provisional comparison file are provided; the
 provisional file is not ground truth.
 
+Once every annotation is complete, run the reproducible comparison report:
+
+```bash
+python -m experiments.run_benchmark corpus/pilot.json \
+  --output results/pilot-benchmark.json
+```
+
+The report compares fixed full-condition collocation, direct SymPy residual
+simplification, and PDECert. It records false acceptance, false rejection,
+inconclusive rate, witness coverage, per-record outcomes, and runtime. The
+report binds those results to a corpus digest and records the runtime
+environment. The command refuses to run while any annotation is pending.
+
 ## Current limits
 
 The prototype does not yet define weak or viscosity solution semantics. It also
