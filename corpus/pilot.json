@@ -1,0 +1,6 @@
+{
+  "corpus_version": 1,
+  "description": "Pilot corpus of unedited candidate outputs from symbolic solvers and open models.",
+  "name": "PDECert natural-candidate pilot",
+  "records": []
+}

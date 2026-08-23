@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/oroikono/PDECert/schema/corpus-v1.schema.json",
+  "title": "PDECert candidate corpus",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["corpus_version", "name", "description", "records"],
+  "properties": {
+    "corpus_version": { "const": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "description": { "type": "string", "minLength": 1 },
+    "records": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/record" }
+    }
+  },
+  "$defs": {
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "case", "origin", "raw_output", "output_sha256", "annotation"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "case": { "type": "object" },
+        "origin": { "$ref": "#/$defs/origin" },
+        "raw_output": { "type": "string", "minLength": 1 },
+        "output_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "annotation": { "$ref": "#/$defs/annotation" }
+      }
+    },
+    "origin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "producer",
+        "version",
+        "identifier",
+        "revision",
+        "source_url",
+        "license",
+        "generated_at",
+        "input"
+      ],
+      "properties": {
+        "kind": { "enum": ["open_model", "symbolic_solver"] },
+        "producer": { "type": "string", "minLength": 1 },
+        "version": { "type": ["string", "null"], "minLength": 1 },
+        "identifier": { "type": "string", "minLength": 1 },
+        "revision": { "type": ["string", "null"], "minLength": 1 },
+        "source_url": { "type": "string", "format": "uri", "pattern": "^https?://" },
+        "license": { "type": ["string", "null"], "minLength": 1 },
+        "generated_at": { "type": "string", "format": "date-time" },
+        "input": { "type": "string", "minLength": 1 }
+      }
+    },
+    "annotation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "verdict", "failure_modes", "rationale", "annotators"],
+      "properties": {
+        "status": { "enum": ["adjudicated", "labeled", "pending"] },
+        "verdict": { "enum": ["invalid", "unclear", "valid", null] },
+        "failure_modes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "boundary_condition",
+              "domain_singularity",
+              "extraction_error",
+              "initial_condition",
+              "other",
+              "parameter_scope",
+              "pde_residual",
+              "unsupported_semantics"
+            ]
+          }
+        },
+        "rationale": { "type": ["string", "null"], "minLength": 1 },
+        "annotators": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "pending" } } },
+          "then": {
+            "properties": {
+              "verdict": { "const": null },
+              "failure_modes": { "maxItems": 0 },
+              "rationale": { "const": null },
+              "annotators": { "maxItems": 0 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "verdict": { "const": "invalid" } } },
+          "then": { "properties": { "failure_modes": { "minItems": 1 } } },
+          "else": { "properties": { "failure_modes": { "maxItems": 0 } } }
+        }
+      ]
+    }
+  }
+}
