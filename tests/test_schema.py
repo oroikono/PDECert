@@ -34,6 +34,31 @@ class JsonSchemaTests(unittest.TestCase):
             sp.simplify(loaded.candidate_expressions[0] - self.case.candidate_expressions[0]), 0
         )
 
+    def test_version_one_input_remains_readable(self):
+        payload = dict(self.payload)
+        payload["schema_version"] = 1
+        del payload["parameters"]
+        loaded = case_from_dict(payload)
+        self.assertEqual(loaded.problem.parameter_assumptions, {})
+        self.assertEqual(case_to_dict(loaded)["schema_version"], 2)
+
+    def test_parameter_assumptions_round_trip_into_sympy_symbols(self):
+        experiment = build_cases()[5]
+        case = VerificationCase(experiment.problem, (experiment.candidate,))
+        payload = case_to_dict(case)
+        self.assertEqual(payload["parameters"], {"k": ["positive"]})
+
+        loaded = case_from_dict(payload)
+        parameter = loaded.problem.variables[2]
+        self.assertTrue(parameter.is_positive)
+        self.assertEqual(
+            loaded.problem.parameter_assumptions[parameter],
+            frozenset({"positive"}),
+        )
+        report = verify(loaded.problem, loaded.candidate_expressions)
+        self.assertEqual(report.status, Status.REFUTED)
+        self.assertEqual(report.witness.point["k"], 0.2)
+
     def test_file_round_trip_is_deterministic(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "case.json"
@@ -58,6 +83,30 @@ class JsonSchemaTests(unittest.TestCase):
         payload = dict(self.payload)
         payload["candidate_expressions"] = ["sin(pi*y)"]
         with self.assertRaisesRegex(SchemaError, "unknown symbol: y"):
+            case_from_dict(payload)
+
+    def test_unknown_parameter_is_rejected(self):
+        payload = dict(self.payload)
+        payload["parameters"] = {"k": ["positive"]}
+        with self.assertRaisesRegex(SchemaError, r"unknown parameter\(s\): k"):
+            case_from_dict(payload)
+
+    def test_unsupported_parameter_assumption_is_rejected(self):
+        payload = dict(self.payload)
+        payload["parameters"] = {"x": ["prime"]}
+        with self.assertRaisesRegex(SchemaError, "unsupported assumption: prime"):
+            case_from_dict(payload)
+
+    def test_conflicting_parameter_assumptions_are_rejected(self):
+        payload = dict(self.payload)
+        payload["parameters"] = {"x": ["positive", "negative"]}
+        with self.assertRaisesRegex(SchemaError, "assumptions are inconsistent"):
+            case_from_dict(payload)
+
+    def test_parameter_assumption_must_match_domain(self):
+        payload = dict(self.payload)
+        payload["parameters"] = {"x": ["positive"]}
+        with self.assertRaisesRegex(SchemaError, "domain for positive parameter x"):
             case_from_dict(payload)
 
     def test_non_increasing_domain_is_rejected(self):

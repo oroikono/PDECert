@@ -10,7 +10,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from .core import Status, verify
-from .schema import SchemaError, load_case
+from .schema import SCHEMA_VERSION, SchemaError, load_case
 
 
 EXIT_CODES = {
@@ -82,7 +82,7 @@ def _run_verify(arguments: argparse.Namespace) -> int:
     payload = {
         "problem": case.problem.name,
         "report": report.to_dict(),
-        "schema_version": 1,
+        "schema_version": SCHEMA_VERSION,
     }
     rendered = json.dumps(payload, indent=2, sort_keys=True) + "\n"
     if arguments.output is None:

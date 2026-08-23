@@ -23,6 +23,39 @@ class ProblemValidationTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             Problem("empty", (x,), {x: (0.0, 1.0)}, ())
 
+    def test_parameter_must_be_declared(self):
+        x, k = sp.symbols("x k", real=True)
+        with self.assertRaisesRegex(ValueError, "undeclared variables: k"):
+            Problem(
+                "unknown parameter",
+                (x,),
+                {x: (0.0, 1.0)},
+                (Constraint("zero", sp.Integer(0)),),
+                parameter_assumptions={k: frozenset({"positive"})},
+            )
+
+    def test_parameter_assumption_must_match_domain(self):
+        k = sp.symbols("k", real=True)
+        with self.assertRaisesRegex(ValueError, "positive parameter k"):
+            Problem(
+                "bad positive domain",
+                (k,),
+                {k: (-1.0, 1.0)},
+                (Constraint("zero", sp.Integer(0)),),
+                parameter_assumptions={k: frozenset({"positive"})},
+            )
+
+    def test_integer_parameter_domain_must_contain_an_integer(self):
+        n = sp.symbols("n", real=True)
+        with self.assertRaisesRegex(ValueError, "contains no integers"):
+            Problem(
+                "empty integer domain",
+                (n,),
+                {n: (1.2, 1.8)},
+                (Constraint("zero", sp.Integer(0)),),
+                parameter_assumptions={n: frozenset({"integer"})},
+            )
+
 
 class VerificationTests(unittest.TestCase):
     @classmethod
@@ -75,8 +108,39 @@ class VerificationTests(unittest.TestCase):
             include_conditions=True,
             grid=case.baseline_grid,
         )
+        report = verify(case.problem, (case.candidate,))
         self.assertTrue(accepted)
-        self.assertEqual(verify(case.problem, (case.candidate,)).status, Status.REFUTED)
+        self.assertEqual(report.status, Status.REFUTED)
+        self.assertEqual(report.witness.point["k"], 0.2)
+
+    def test_integer_parameter_is_sampled_only_at_integers(self):
+        n = sp.symbols("n", real=True)
+        problem = Problem(
+            "integer parameter",
+            (n,),
+            {n: (1.2, 4.8)},
+            (Constraint("integer residual", n - sp.Rational(5, 2)),),
+            parameter_assumptions={n: frozenset({"integer", "positive"})},
+        )
+        report = verify(problem, (n,))
+        self.assertEqual(report.status, Status.REFUTED)
+        self.assertEqual(report.witness.point["n"], 2.0)
+
+    def test_parameter_sampling_does_not_repeat_when_more_than_five_points_are_requested(self):
+        k = sp.symbols("k", real=True)
+        roots = [sp.Rational(0), sp.Rational(1), sp.Rational(113, 1000)]
+        roots.extend([sp.Rational(419, 1000), sp.Rational(787, 1000)])
+        residual = sp.prod(k - root for root in roots)
+        problem = Problem(
+            "expanded parameter sample",
+            (k,),
+            {k: (0.0, 1.0)},
+            (Constraint("sample residual", residual),),
+            parameter_assumptions={k: frozenset()},
+        )
+        report = verify(problem, (residual,), samples_per_axis=6)
+        self.assertEqual(report.status, Status.REFUTED)
+        self.assertEqual(report.witness.point["k"], 1 / 6)
 
     def test_sub_tolerance_error_is_not_falsely_proved(self):
         case = self.cases["below_numeric_tolerance"]

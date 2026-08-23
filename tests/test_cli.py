@@ -28,6 +28,7 @@ class CommandLineTests(unittest.TestCase):
         self.assertEqual(payload["report"]["status"], "PROVED")
         self.assertEqual(payload["report"]["incomplete_reasons"], {})
         self.assertEqual(payload["problem"], "exact_heat_solution")
+        self.assertEqual(payload["schema_version"], 2)
 
     def test_refuted_case_returns_one_and_includes_witness(self):
         with tempfile.TemporaryDirectory() as directory:

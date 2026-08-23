@@ -17,13 +17,13 @@ Available:
 - exact residual and initial/boundary-condition checks;
 - off-grid numerical counterexamples and singularity witnesses;
 - per-check symbolic deadlines with explicit incomplete reasons;
+- explicit parameter roles, assumptions, and domain-aware sampling;
 - a versioned JSON case format with restricted expression parsing;
 - a command-line verifier with machine-readable reports.
 
 Release criteria:
 
 - operation and memory budgets for symbolic checks;
-- parameter assumptions represented in the input and report;
 - multiple fields and coupled residual equations;
 - stable error messages, documentation, and tests on supported Python versions.
 

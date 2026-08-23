@@ -27,13 +27,14 @@
     ]
   },
   "name": "exact heat solution",
+  "parameters": {},
   "pde_residuals": [
     {
       "expression": "0",
       "name": "heat PDE"
     }
   ],
-  "schema_version": 1,
+  "schema_version": 2,
   "variables": [
     "x",
     "t"

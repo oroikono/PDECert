@@ -12,12 +12,14 @@ from pathlib import Path
 from typing import Any
 
 import sympy as sp
+from sympy.core.facts import InconsistentAssumptions
 from sympy.parsing.sympy_parser import parse_expr, standard_transformations
 
-from .core import Constraint, Problem
+from .core import PARAMETER_ASSUMPTIONS, Constraint, Problem
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
+_SUPPORTED_SCHEMA_VERSIONS = frozenset({1, SCHEMA_VERSION})
 
 _FUNCTIONS: dict[str, Any] = {
     "Abs": sp.Abs,
@@ -180,9 +182,20 @@ def _parse_constraints(
 
 
 def case_from_dict(value: object) -> VerificationCase:
-    """Validate and parse one version-1 verification case."""
+    """Validate and parse one supported verification case."""
 
     payload = _object(value, "$")
+    if "schema_version" not in payload:
+        raise _error("$", "missing field(s): schema_version")
+    version = payload["schema_version"]
+    if (
+        isinstance(version, bool)
+        or not isinstance(version, int)
+        or version not in _SUPPORTED_SCHEMA_VERSIONS
+    ):
+        supported = ", ".join(str(item) for item in sorted(_SUPPORTED_SCHEMA_VERSIONS))
+        raise _error("$.schema_version", f"expected one of: {supported}")
+
     fields = {
         "schema_version",
         "name",
@@ -192,11 +205,9 @@ def case_from_dict(value: object) -> VerificationCase:
         "conditions",
         "candidate_expressions",
     }
+    if version == 2:
+        fields.add("parameters")
     _exact_keys(payload, required=fields, path="$")
-
-    version = payload["schema_version"]
-    if isinstance(version, bool) or not isinstance(version, int) or version != SCHEMA_VERSION:
-        raise _error("$.schema_version", f"expected integer {SCHEMA_VERSION}")
 
     raw_variables = payload["variables"]
     if not isinstance(raw_variables, list) or not raw_variables:
@@ -211,7 +222,38 @@ def case_from_dict(value: object) -> VerificationCase:
         if name in variable_names:
             raise _error(f"$.variables[{index}]", f"duplicate variable: {name}")
         variable_names.append(name)
-    symbols = {name: sp.Symbol(name, real=True) for name in variable_names}
+    parameter_assumptions: dict[str, frozenset[str]] = {}
+    if version == 2:
+        raw_parameters = _object(payload["parameters"], "$.parameters")
+        unknown_parameters = set(raw_parameters) - set(variable_names)
+        if unknown_parameters:
+            names = ", ".join(sorted(str(item) for item in unknown_parameters))
+            raise _error("$.parameters", f"unknown parameter(s): {names}")
+        for name, raw_assumptions in raw_parameters.items():
+            if not isinstance(name, str):
+                raise _error("$.parameters", "parameter names must be strings")
+            path = f"$.parameters.{name}"
+            if not isinstance(raw_assumptions, list):
+                raise _error(path, "expected a list of assumptions")
+            assumptions: list[str] = []
+            for index, raw_assumption in enumerate(raw_assumptions):
+                assumption = _text(raw_assumption, f"{path}[{index}]")
+                if assumption not in PARAMETER_ASSUMPTIONS:
+                    raise _error(f"{path}[{index}]", f"unsupported assumption: {assumption}")
+                if assumption in assumptions:
+                    raise _error(f"{path}[{index}]", f"duplicate assumption: {assumption}")
+                assumptions.append(assumption)
+            parameter_assumptions[name] = frozenset(assumptions)
+
+    symbols: dict[str, sp.Symbol] = {}
+    for name in variable_names:
+        assumptions = parameter_assumptions.get(name, frozenset())
+        symbol_properties = {item: True for item in assumptions}
+        symbol_properties["real"] = True
+        try:
+            symbols[name] = sp.Symbol(name, **symbol_properties)
+        except InconsistentAssumptions as error:
+            raise _error(f"$.parameters.{name}", "assumptions are inconsistent") from error
 
     raw_domains = _object(payload["domains"], "$.domains")
     domain_names = set(raw_domains)
@@ -262,18 +304,24 @@ def case_from_dict(value: object) -> VerificationCase:
         for index, item in enumerate(raw_candidates)
     )
 
-    problem = Problem(
-        name=_text(payload["name"], "$.name"),
-        variables=tuple(symbols[name] for name in variable_names),
-        domains=domains,
-        pde_residuals=pde_residuals,
-        conditions=conditions,
-    )
+    try:
+        problem = Problem(
+            name=_text(payload["name"], "$.name"),
+            variables=tuple(symbols[name] for name in variable_names),
+            domains=domains,
+            pde_residuals=pde_residuals,
+            conditions=conditions,
+            parameter_assumptions={
+                symbols[name]: assumptions for name, assumptions in parameter_assumptions.items()
+            },
+        )
+    except ValueError as error:
+        raise _error("$", str(error)) from error
     return VerificationCase(problem, candidates)
 
 
 def case_to_dict(case: VerificationCase) -> dict[str, object]:
-    """Convert a verification case into its version-1 JSON representation."""
+    """Convert a verification case into the latest JSON representation."""
 
     variable_names = [str(variable) for variable in case.problem.variables]
 
@@ -287,6 +335,10 @@ def case_to_dict(case: VerificationCase) -> dict[str, object]:
         "domains": {
             str(variable): list(case.problem.domains[variable])
             for variable in case.problem.variables
+        },
+        "parameters": {
+            str(variable): sorted(assumptions)
+            for variable, assumptions in case.problem.parameter_assumptions.items()
         },
         "pde_residuals": constraints(case.problem.pde_residuals),
         "conditions": constraints(case.problem.conditions),
