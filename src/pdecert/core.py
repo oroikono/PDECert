@@ -13,10 +13,13 @@ from collections.abc import Callable, Iterable, Mapping
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from itertools import product
-from typing import TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 import mpmath
 import sympy as sp
+
+if TYPE_CHECKING:
+    from .checks import CheckerRegistry
 
 
 _Result = TypeVar("_Result")
@@ -310,6 +313,7 @@ def verify(
     tolerance: float = 1e-9,
     samples_per_axis: int = 5,
     symbolic_timeout: float | None = None,
+    checker_registry: CheckerRegistry | None = None,
 ) -> Report:
     """Verify residuals and conditions for a symbolic candidate.
 
@@ -343,65 +347,16 @@ def verify(
         raise ValueError("at least one candidate expression is required")
     if any(not isinstance(expression, sp.Expr) for _, expression in expressions):
         raise TypeError("candidate expressions must be SymPy expressions")
-    constraints = problem.pde_residuals + problem.conditions
-    report = Report(status=Status.INCONCLUSIVE)
+    from .checks import CheckContext, default_checker_registry, run_checks
 
-    singularity, domain_check_complete, domain_reasons = _find_singularity(
-        problem,
-        expressions,
-        symbolic_timeout,
+    context = CheckContext(
+        problem=problem,
+        candidate_fields=expressions,
+        tolerance=tolerance,
+        samples_per_axis=samples_per_axis,
+        symbolic_timeout=symbolic_timeout,
     )
-    report.incomplete_reasons.update(domain_reasons)
-    if singularity is not None:
-        report.status = Status.REFUTED
-        report.witness = singularity
-        return report
-
-    decisions: list[bool | None] = []
-    for constraint in constraints:
-        decision, error = _run_bounded(
-            lambda: _is_zero(constraint.residual),
-            symbolic_timeout,
-        )
-        decisions.append(decision)
-        report.exact_checks[constraint.name] = (
-            "identity" if decision is True else "nonzero" if decision is False else "unknown"
-        )
-        if error is not None:
-            report.incomplete_reasons[constraint.name] = error
-        elif decision is None:
-            report.incomplete_reasons[constraint.name] = "symbolic simplification did not decide"
-
-    if domain_check_complete and all(decision is True for decision in decisions):
-        report.status = Status.PROVED
-        return report
-
-    axes = [_sample_points(problem, variable, samples_per_axis) for variable in problem.variables]
-    max_residual = 0.0
-    for constraint in constraints:
-        for values in product(*axes):
-            try:
-                residual = _numeric_value(constraint.residual, problem.variables, values)
-            except (TypeError, ValueError, ZeroDivisionError, OverflowError):
-                residual = float("inf")
-            max_residual = max(max_residual, residual)
-            if residual > tolerance:
-                report.status = Status.REFUTED
-                report.max_sampled_residual = max_residual
-                report.witness = Witness(
-                    constraint=constraint.name,
-                    point={
-                        str(variable): float(value)
-                        for variable, value in zip(problem.variables, values)
-                        if variable in constraint.residual.free_symbols
-                    },
-                    residual=residual,
-                    reason="off-grid evaluation found a violated obligation",
-                )
-                return report
-
-    report.max_sampled_residual = max_residual
-    return report
+    return run_checks(context, checker_registry or default_checker_registry())
 
 
 def fixed_collocation_check(

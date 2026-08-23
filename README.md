@@ -155,6 +155,34 @@ report = verify(case.problem, case.candidate_fields)
 print(report.to_dict())
 ```
 
+### Extending verification
+
+Verification stages implement a public `Checker` protocol and run through an
+ordered, immutable `CheckerRegistry`. Built-in and external checkers receive the
+same `CheckContext` and return partial evidence as a `CheckResult`. The
+orchestrator accepts proof evidence only for obligations already defined by the
+problem and requires a concrete witness for refutation.
+
+Registries are supplied explicitly so installing an unrelated package cannot
+silently change verification behavior:
+
+```python
+from examples.polynomial_checker import ExpandedPolynomialChecker
+from pdecert import default_checker_registry, verify
+
+registry = default_checker_registry().with_checker(
+    ExpandedPolynomialChecker(),
+    before="exact_identity",
+)
+report = verify(problem, candidate_fields, checker_registry=registry)
+```
+
+The extension API is experimental in version 0.1. See
+[`ADR-0001`](docs/adr/0001-plugin-first-extension-architecture.md) and
+[`CONTRIBUTING.md`](CONTRIBUTING.md) before implementing a checker.
+The complete polynomial example uses only public PDECert objects and can serve
+as the starting point for an external package.
+
 Expression strings use a deliberately restricted arithmetic grammar. Declared
 variables and fields, numeric literals, `pi`, `E`, `D`, `At`, and a documented
 set of SymPy functions are accepted. Attribute access, imports, indexing,

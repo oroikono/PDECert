@@ -2,6 +2,16 @@
 
 All notable changes to PDECert are documented here.
 
+## Unreleased
+
+### Added
+
+- An ordered, immutable checker registry with a public context, result, and
+  checker protocol.
+- Built-in domain, exact-identity, and off-grid checks implemented through the
+  same extension contract available to external checkers.
+- An architecture decision record and runnable polynomial-checker example.
+
 ## 0.1.0 - 2026-08-24
 
 First research release of the verifier and the version 1 pilot benchmark.

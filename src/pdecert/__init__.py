@@ -1,6 +1,15 @@
 """Public interface for PDECert."""
 
 from .benchmark import BENCHMARK_VERSION, BenchmarkError, corpus_sha256, evaluate_corpus
+from .checks import (
+    CheckContext,
+    CheckerError,
+    Checker,
+    CheckerRegistry,
+    CheckResult,
+    default_checker_registry,
+    run_checks,
+)
 from .core import (
     PARAMETER_ASSUMPTIONS,
     Constraint,
@@ -38,6 +47,11 @@ __all__ = [
     "ANNOTATION_STATUSES",
     "BENCHMARK_VERSION",
     "BenchmarkError",
+    "CheckContext",
+    "CheckResult",
+    "Checker",
+    "CheckerError",
+    "CheckerRegistry",
     "CORPUS_VERSION",
     "Constraint",
     "CorpusError",
@@ -63,10 +77,12 @@ __all__ = [
     "dump_case",
     "dump_corpus",
     "evaluate_corpus",
+    "default_checker_registry",
     "fixed_collocation_check",
     "load_case",
     "load_corpus",
     "output_sha256",
+    "run_checks",
     "validate_corpus",
     "validate_release_inputs",
     "verify",

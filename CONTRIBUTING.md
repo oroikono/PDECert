@@ -40,6 +40,19 @@ For soundness-sensitive changes, a new check must not turn finite numerical
 sampling into a `PROVED` result. If the reasoning is incomplete, return
 `INCONCLUSIVE` and record why.
 
+## Checker extensions
+
+New verification techniques should implement the public `Checker` protocol
+rather than adding a branch to `verify()`. Start from a fresh
+`default_checker_registry()` and add the checker explicitly so the execution
+environment remains reproducible. A checker may only prove obligation IDs from
+its `CheckContext`; a refutation must include a concrete `Witness`.
+
+Include tests for supported, unsupported, and inconclusive inputs. State the
+mathematical assumptions under which proof evidence is sound. The architecture
+and trade-offs are recorded in
+[`docs/adr/0001-plugin-first-extension-architecture.md`](docs/adr/0001-plugin-first-extension-architecture.md).
+
 ## Local setup
 
 ```bash

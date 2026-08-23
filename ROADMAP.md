@@ -57,6 +57,8 @@ Next:
 
 ## v0.3: integrations
 
+- an explicit checker registry with immutable run configuration and validated
+  obligation scope;
 - adapters for common SymPy and symbolic-regression workflows;
 - a small agent tool that returns a certificate, counterexample, or inconclusive result;
 - a reproducible notebook or Space for exploring benchmark cases;
