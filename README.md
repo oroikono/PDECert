@@ -79,6 +79,29 @@ report = verify(problem, (candidate,))
 print(report.status)  # Status.PROVED
 ```
 
+## JSON cases
+
+Version 1 of the case format stores a fully instantiated problem: declared real
+variables, rectangular domains, residual expressions, conditions, and the
+candidate expressions used for domain checks. The canonical shape is defined in
+[`schema/problem-v1.schema.json`](schema/problem-v1.schema.json), with a complete
+example in [`examples/exact_heat.json`](examples/exact_heat.json).
+
+```python
+from pdecert import load_case, verify
+
+case = load_case("examples/exact_heat.json")
+report = verify(case.problem, case.candidate_expressions)
+print(report.to_dict())
+```
+
+Expression strings use a deliberately restricted arithmetic grammar. Declared
+variables, numeric literals, `pi`, `E`, and a documented set of SymPy functions
+are accepted. Attribute access, imports, indexing, unknown names, and keyword
+arguments are rejected before parsing. This first schema represents residuals
+after the candidate has been substituted; an operator-level PDE schema is a
+later milestone.
+
 ## Current limits
 
 The prototype does not yet define weak or viscosity solution semantics. It also

@@ -1,0 +1,41 @@
+{
+  "candidate_expressions": [
+    "exp(-pi**2*t)*sin(pi*x)"
+  ],
+  "conditions": [
+    {
+      "expression": "0",
+      "name": "initial condition"
+    },
+    {
+      "expression": "0",
+      "name": "left boundary"
+    },
+    {
+      "expression": "0",
+      "name": "right boundary"
+    }
+  ],
+  "domains": {
+    "t": [
+      0.0,
+      1.0
+    ],
+    "x": [
+      0.0,
+      1.0
+    ]
+  },
+  "name": "exact heat solution",
+  "pde_residuals": [
+    {
+      "expression": "0",
+      "name": "heat PDE"
+    }
+  ],
+  "schema_version": 1,
+  "variables": [
+    "x",
+    "t"
+  ]
+}
