@@ -205,6 +205,12 @@ confirmation of independent review and never overwrites the source corpus. A
 blank form and clearly separated provisional comparison file are provided; the
 provisional file is not ground truth.
 
+For a resumable blind pass with one card at a time and a progress bar:
+
+```bash
+python -m experiments.review_corpus
+```
+
 Once every annotation is complete, run the reproducible comparison report:
 
 ```bash

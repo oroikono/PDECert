@@ -18,11 +18,20 @@ failure mode merely because another checker reports one.
 
 ## Blind primary pass
 
-1. Copy `review-template.json` to a private working file.
+The resumable card runner keeps the answer proposals hidden and saves every
+decision to a git-ignored private directory:
+
+```bash
+python -m experiments.review_corpus
+```
+
+Alternatively, copy `review-template.json` to a private working file.
+
+1. Start the card runner or private template.
 2. For each ID, read only its embedded `case` and raw generator transcript.
 3. Check the candidate domain and regularity on the closed declared domain.
 4. Differentiate the candidate and simplify each PDE residual directly.
-5. substitute every initial and boundary trace.
+5. Substitute every initial and boundary trace.
 6. Record a verdict, all demonstrated failure modes, and a short mathematical
    rationale containing the decisive identity or counterexample.
 7. Do not inspect `results/provisional-review.json`, PDECert output, or baseline
