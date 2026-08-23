@@ -1,29 +1,66 @@
 # Roadmap
 
-The plan is to keep each change small enough to understand, test, and review.
-The days below are work sessions, not promises of artificial daily activity.
+PDECert aims to become a practical verification layer between symbolic PDE
+candidate generators and the people who need to trust their output. The project
+is currently an early research prototype. This roadmap describes public project
+outcomes, not a private development schedule.
 
-## First two weeks
+## v0.1: dependable verification interface
 
-- [x] Day 1: publish the three-state verifier, adversarial heat experiment, and tests.
-- [ ] Day 2: define a JSON problem schema and reject malformed problems with clear errors.
-- [ ] Day 3: add a command-line interface that verifies one problem and writes a JSON report.
-- [ ] Day 4: add per-check time limits and record incomplete symbolic checks.
-- [ ] Day 5: add explicit parameter assumptions and parameter-domain counterexamples.
-- [ ] Day 6: support systems with multiple fields and coupled residual equations.
-- [ ] Day 7: create a versioned candidate-corpus format with provenance fields.
-- [ ] Day 8: collect the first 20 natural candidates from symbolic solvers and open models.
-- [ ] Day 9: label those candidates manually and document the labeling protocol.
-- [ ] Day 10: compare fixed collocation, SymPy, and PDECert on the natural candidates.
+The first release should let a user save one fully instantiated verification
+case, run it locally, and understand why the result is proved, refuted, or
+inconclusive.
 
-## Research milestones
+Available:
 
-- Publish a Hugging Face dataset containing problems, candidates, labels, and witnesses.
-- Add interval-based counterexample search for supported expression classes.
-- Distinguish classical, weak, and other solution semantics in the problem schema.
-- Provide a small agent tool that returns either a certificate, a counterexample, or an
-  inconclusive result.
-- Connect counterexamples back to a candidate generator for verifier-guided repair.
+- conservative `PROVED`, `REFUTED`, and `INCONCLUSIVE` outcomes;
+- exact residual and initial/boundary-condition checks;
+- off-grid numerical counterexamples and singularity witnesses;
+- a versioned JSON case format with restricted expression parsing;
+- a command-line verifier with machine-readable reports.
 
-The scope is intentionally conservative: supported classes should be explicit,
-and unsupported cases should remain inconclusive.
+Release criteria:
+
+- per-check resource limits and explicit incomplete-check reasons;
+- parameter assumptions represented in the input and report;
+- multiple fields and coupled residual equations;
+- stable error messages, documentation, and tests on supported Python versions.
+
+## v0.2: natural-candidate benchmark
+
+The second release will test whether the verifier is useful beyond constructed
+examples.
+
+- define a candidate-corpus format with problem, solver, model, prompt, and
+  provenance fields;
+- publish a pilot set of 20 natural outputs from symbolic solvers and open models;
+- document a manual labeling and disagreement-resolution protocol;
+- grow the first public benchmark to at least 100 candidates;
+- compare fixed collocation, SymPy checks, and PDECert on false acceptance,
+  false rejection, inconclusive rate, witness quality, and runtime;
+- publish the benchmark and data card on Hugging Face.
+
+## v0.3: integrations
+
+- adapters for common SymPy and symbolic-regression workflows;
+- a small agent tool that returns a certificate, counterexample, or inconclusive result;
+- a reproducible notebook or Space for exploring benchmark cases;
+- structured reports that candidate generators can use for repair.
+
+## Longer-term research
+
+- interval-based counterexample search for supported expression classes;
+- explicit classical, weak, and other solution semantics;
+- a posteriori error bounds for supported numerical settings;
+- verifier-guided candidate repair using returned counterexamples;
+- broader PDE families, systems, domains, and boundary operators.
+
+## Where contributions help most
+
+Real failure cases are more valuable than feature volume. Useful contributions
+include a symbolic candidate that passes a common check but violates its stated
+problem, a minimal new PDE example, an improvement to an inconclusive diagnostic,
+or an adapter to a solver people already use.
+
+The scope remains conservative: supported classes should be explicit, and
+unsupported cases should stay inconclusive.
