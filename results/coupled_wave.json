@@ -1,0 +1,56 @@
+[
+  {
+    "case": "exact",
+    "expected_valid": true,
+    "fields": [
+      "u",
+      "v"
+    ],
+    "report": {
+      "exact_checks": {
+        "u initial condition": "identity",
+        "u left boundary": "identity",
+        "u right boundary": "identity",
+        "u_t - v_x": "identity",
+        "v initial condition": "identity",
+        "v_t - u_x": "identity"
+      },
+      "incomplete_reasons": {},
+      "max_sampled_residual": 0.0,
+      "status": "PROVED",
+      "witness": null
+    }
+  },
+  {
+    "case": "perturbed_v",
+    "expected_valid": false,
+    "fields": [
+      "u",
+      "v"
+    ],
+    "report": {
+      "exact_checks": {
+        "u initial condition": "identity",
+        "u left boundary": "identity",
+        "u right boundary": "identity",
+        "u_t - v_x": "unknown",
+        "v initial condition": "identity",
+        "v_t - u_x": "unknown"
+      },
+      "incomplete_reasons": {
+        "u_t - v_x": "symbolic simplification did not decide",
+        "v_t - u_x": "symbolic simplification did not decide"
+      },
+      "max_sampled_residual": 0.011300000000000001,
+      "status": "REFUTED",
+      "witness": {
+        "constraint": "u_t - v_x",
+        "point": {
+          "t": 0.113
+        },
+        "reason": "off-grid evaluation found a violated obligation",
+        "residual": 0.011300000000000001
+      }
+    }
+  }
+]

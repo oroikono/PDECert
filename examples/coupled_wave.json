@@ -1,0 +1,24 @@
+{
+  "conditions": [
+    { "expression": "At(u, t, 0) - sin(pi*x)", "name": "u initial condition" },
+    { "expression": "At(v, t, 0)", "name": "v initial condition" },
+    { "expression": "At(u, x, 0)", "name": "u left boundary" },
+    { "expression": "At(u, x, 1)", "name": "u right boundary" }
+  ],
+  "domains": {
+    "t": [0.0, 1.0],
+    "x": [0.0, 1.0]
+  },
+  "fields": {
+    "u": "sin(pi*x)*cos(pi*t)",
+    "v": "cos(pi*x)*sin(pi*t)"
+  },
+  "name": "coupled first-order wave system",
+  "parameters": {},
+  "pde_residuals": [
+    { "expression": "D(u, t) - D(v, x)", "name": "u_t - v_x" },
+    { "expression": "D(v, t) - D(u, x)", "name": "v_t - u_x" }
+  ],
+  "schema_version": 3,
+  "variables": ["x", "t"]
+}

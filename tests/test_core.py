@@ -8,6 +8,7 @@ import sympy as sp
 
 import pdecert.core as core
 from experiments.adversarial_heat import build_cases
+from experiments.coupled_wave import build_case as build_coupled_case
 from experiments.sigs_poisson_gauss import build_probe
 from pdecert import Constraint, Problem, Status, fixed_collocation_check, verify
 
@@ -147,6 +148,31 @@ class VerificationTests(unittest.TestCase):
         report = verify(case.problem, (case.candidate,))
         self.assertEqual(report.status, Status.INCONCLUSIVE)
         self.assertIn("heat PDE", report.incomplete_reasons)
+
+    def test_exact_coupled_system_is_proved(self):
+        case = build_coupled_case()
+        report = verify(case.problem, case.candidate_fields)
+        self.assertEqual(report.status, Status.PROVED)
+        self.assertEqual(set(case.candidate_fields), {"u", "v"})
+
+    def test_error_in_second_field_refutes_coupled_system(self):
+        case = build_coupled_case(perturb_second_field=True)
+        report = verify(case.problem, case.candidate_fields)
+        self.assertEqual(report.status, Status.REFUTED)
+        self.assertIn(report.witness.constraint, {"u_t - v_x", "v_t - u_x"})
+
+    def test_named_field_appears_in_singularity_witness(self):
+        x = sp.symbols("x", real=True)
+        problem = Problem(
+            "singular field",
+            (x,),
+            {x: (0.0, 1.0)},
+            (Constraint("zero", sp.Integer(0)),),
+        )
+        report = verify(problem, {"pressure": 1 / (x - sp.Rational(1, 2))})
+        self.assertEqual(report.status, Status.REFUTED)
+        self.assertEqual(report.witness.constraint, "pressure domain")
+        self.assertIn("pressure has a singularity", report.witness.reason)
 
     @unittest.skipUnless(core._deadline_supported(), "real-time deadlines unavailable")
     def test_symbolic_timeout_is_reported_as_inconclusive(self):

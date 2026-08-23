@@ -70,7 +70,7 @@ def _run_verify(arguments: argparse.Namespace) -> int:
         case = load_case(arguments.case)
         report = verify(
             case.problem,
-            case.candidate_expressions,
+            case.candidate_fields,
             tolerance=arguments.tolerance,
             samples_per_axis=arguments.samples_per_axis,
             symbolic_timeout=arguments.symbolic_timeout,

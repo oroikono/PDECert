@@ -48,6 +48,7 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 pytest
 python -m experiments.adversarial_heat
+python -m experiments.coupled_wave
 python -m experiments.sigs_poisson_gauss
 ```
 
@@ -98,15 +99,40 @@ print(report.status)  # Status.PROVED
 
 ## JSON cases
 
-Version 2 of the case format stores a fully instantiated problem: declared real
-variables, rectangular domains, residual expressions, conditions, and the
-candidate expressions used for domain checks. It also distinguishes parameter
-symbols from coordinates and records sign, nonzero, or integer assumptions. The
-canonical shape is defined in
-[`schema/problem-v2.schema.json`](schema/problem-v2.schema.json), with a complete
-example in [`examples/exact_heat.json`](examples/exact_heat.json).
+Version 3 of the case format stores a fully instantiated problem: declared real
+variables, rectangular domains, named candidate fields, residual expressions,
+and conditions. It also distinguishes parameter symbols from coordinates and
+records sign, nonzero, or integer assumptions. The canonical shape is defined in
+[`schema/problem-v3.schema.json`](schema/problem-v3.schema.json), with complete
+single-field and coupled examples in [`examples/`](examples/).
 
-Version 1 inputs remain readable. New files are written as version 2.
+Version 1 and version 2 inputs remain readable. Their positional candidate
+expressions are assigned stable names such as `candidate_0` when loaded. New
+files are written as version 3.
+
+Named fields make coupled systems explicit:
+
+```json
+"fields": {
+  "u": "sin(pi*x)*cos(pi*t)",
+  "v": "cos(pi*x)*sin(pi*t)"
+}
+```
+
+Each coupled residual and condition is materialized as an expression. Schema v3
+binds those expressions to the named candidates with two restricted
+operators: `D(u, x, 2)` differentiates field `u` twice with respect to `x`, and
+`At(u, x, 0)` evaluates it at the boundary `x = 0`. PDECert recomputes every
+obligation from the field expressions and performs domain analysis on every
+field. Derivative orders are limited to eight during input parsing. A field name
+is included in any singularity witness.
+
+```json
+"pde_residuals": [
+  {"name": "u_t - v_x", "expression": "D(u, t) - D(v, x)"},
+  {"name": "v_t - u_x", "expression": "D(v, t) - D(u, x)"}
+]
+```
 
 Parameters are declared by name with a list of assumptions:
 
@@ -124,17 +150,17 @@ coordinates. Integer parameters are sampled only at integer values.
 ```python
 from pdecert import load_case, verify
 
-case = load_case("examples/exact_heat.json")
-report = verify(case.problem, case.candidate_expressions)
+case = load_case("examples/coupled_wave.json")
+report = verify(case.problem, case.candidate_fields)
 print(report.to_dict())
 ```
 
 Expression strings use a deliberately restricted arithmetic grammar. Declared
-variables, numeric literals, `pi`, `E`, and a documented set of SymPy functions
-are accepted. Attribute access, imports, indexing, unknown names, and keyword
-arguments are rejected before parsing. This first schema represents residuals
-after the candidate has been substituted; an operator-level PDE schema is a
-later milestone.
+variables and fields, numeric literals, `pi`, `E`, `D`, `At`, and a documented
+set of SymPy functions are accepted. Attribute access, imports, indexing,
+unknown names, and keyword arguments are rejected before parsing. Version 1 and
+2 residuals remain fully instantiated for backward compatibility; version 3
+can bind operators and conditions directly to named fields.
 
 ## Current limits
 

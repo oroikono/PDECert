@@ -6,7 +6,9 @@ from pathlib import Path
 import sympy as sp
 
 from experiments.adversarial_heat import build_cases
+from experiments.coupled_wave import build_case as build_coupled_case
 from pdecert import (
+    Constraint,
     SchemaError,
     Status,
     VerificationCase,
@@ -37,10 +39,36 @@ class JsonSchemaTests(unittest.TestCase):
     def test_version_one_input_remains_readable(self):
         payload = dict(self.payload)
         payload["schema_version"] = 1
+        payload["candidate_expressions"] = list(payload.pop("fields").values())
         del payload["parameters"]
         loaded = case_from_dict(payload)
         self.assertEqual(loaded.problem.parameter_assumptions, {})
-        self.assertEqual(case_to_dict(loaded)["schema_version"], 2)
+        self.assertEqual(loaded.field_names, ("candidate_0",))
+        self.assertEqual(case_to_dict(loaded)["schema_version"], 3)
+
+    def test_version_two_input_remains_readable(self):
+        payload = dict(self.payload)
+        payload["schema_version"] = 2
+        payload["candidate_expressions"] = list(payload.pop("fields").values())
+        loaded = case_from_dict(payload)
+        self.assertEqual(loaded.field_names, ("candidate_0",))
+        self.assertEqual(case_to_dict(loaded)["schema_version"], 3)
+
+    def test_named_coupled_fields_round_trip(self):
+        case = build_coupled_case()
+        payload = case_to_dict(case)
+        self.assertEqual(set(payload["fields"]), {"u", "v"})
+        loaded = case_from_dict(payload)
+        self.assertEqual(loaded.field_names, ("u", "v"))
+        self.assertEqual(verify(loaded.problem, loaded.candidate_fields).status, Status.PROVED)
+
+        payload["fields"] = dict(payload["fields"])
+        payload["fields"]["v"] = "cos(pi*x)*sin(pi*t) + x*t/10"
+        perturbed = case_from_dict(payload)
+        self.assertEqual(
+            verify(perturbed.problem, perturbed.candidate_fields).status,
+            Status.REFUTED,
+        )
 
     def test_parameter_assumptions_round_trip_into_sympy_symbols(self):
         experiment = build_cases()[5]
@@ -81,8 +109,38 @@ class JsonSchemaTests(unittest.TestCase):
 
     def test_unknown_symbol_is_rejected(self):
         payload = dict(self.payload)
-        payload["candidate_expressions"] = ["sin(pi*y)"]
+        payload["fields"] = {"u": "sin(pi*y)"}
         with self.assertRaisesRegex(SchemaError, "unknown symbol: y"):
+            case_from_dict(payload)
+
+    def test_invalid_field_name_is_rejected(self):
+        payload = dict(self.payload)
+        payload["fields"] = {"not-a-name": "0"}
+        with self.assertRaisesRegex(SchemaError, "field names must be ASCII identifiers"):
+            case_from_dict(payload)
+
+        payload["fields"] = {"for": "0"}
+        with self.assertRaisesRegex(SchemaError, "field names must be ASCII identifiers"):
+            case_from_dict(payload)
+
+    def test_field_name_cannot_shadow_a_variable(self):
+        payload = dict(self.payload)
+        payload["fields"] = {"x": "0"}
+        with self.assertRaisesRegex(SchemaError, "field name conflicts with a declared name: x"):
+            case_from_dict(payload)
+
+    def test_invalid_derivative_order_is_rejected(self):
+        payload = dict(self.payload)
+        payload["pde_residuals"] = [
+            {"name": "bad derivative", "expression": "D(candidate_0, x, 0)"}
+        ]
+        with self.assertRaisesRegex(SchemaError, "D order must be a positive integer"):
+            case_from_dict(payload)
+
+        payload["pde_residuals"] = [
+            {"name": "oversized derivative", "expression": "D(candidate_0, x, 9)"}
+        ]
+        with self.assertRaisesRegex(SchemaError, "D order cannot exceed 8"):
             case_from_dict(payload)
 
     def test_unknown_parameter_is_rejected(self):
@@ -117,7 +175,7 @@ class JsonSchemaTests(unittest.TestCase):
 
     def test_expression_does_not_allow_attribute_access(self):
         payload = dict(self.payload)
-        payload["candidate_expressions"] = ["__import__('os').system('echo unsafe')"]
+        payload["fields"] = {"u": "__import__('os').system('echo unsafe')"}
         with self.assertRaisesRegex(SchemaError, "unsupported expression syntax"):
             case_from_dict(payload)
 
@@ -140,6 +198,18 @@ class JsonSchemaTests(unittest.TestCase):
         invalid = VerificationCase(self.case.problem, (y,))
         with self.assertRaisesRegex(SchemaError, "unknown symbol: y"):
             case_to_dict(invalid)
+
+    def test_serializer_rejects_a_constraint_source_that_does_not_match_its_residual(self):
+        problem = self.case.problem
+        inconsistent = type(problem)(
+            name=problem.name,
+            variables=problem.variables,
+            domains=problem.domains,
+            pde_residuals=(Constraint("mismatch", sp.Integer(1), "0"),),
+        )
+        case = VerificationCase(inconsistent, self.case.candidate_expressions, ("u",))
+        with self.assertRaisesRegex(SchemaError, "constraint source does not match residual"):
+            case_to_dict(case)
 
     def test_invalid_json_is_reported_without_a_traceback_from_decoder(self):
         with tempfile.TemporaryDirectory() as directory:

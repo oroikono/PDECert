@@ -18,13 +18,13 @@ Available:
 - off-grid numerical counterexamples and singularity witnesses;
 - per-check symbolic deadlines with explicit incomplete reasons;
 - explicit parameter roles, assumptions, and domain-aware sampling;
+- named candidate fields and coupled residual systems;
 - a versioned JSON case format with restricted expression parsing;
 - a command-line verifier with machine-readable reports.
 
 Release criteria:
 
 - operation and memory budgets for symbolic checks;
-- multiple fields and coupled residual equations;
 - stable error messages, documentation, and tests on supported Python versions.
 
 ## v0.2: natural-candidate benchmark

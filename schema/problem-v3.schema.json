@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/oroikono/PDECert/schema/problem-v3.schema.json",
+  "title": "PDECert verification case",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "name",
+    "variables",
+    "domains",
+    "parameters",
+    "fields",
+    "pde_residuals",
+    "conditions"
+  ],
+  "properties": {
+    "schema_version": { "const": 3 },
+    "name": { "type": "string", "minLength": 1 },
+    "variables": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" }
+    },
+    "domains": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "prefixItems": [{ "type": "number" }, { "type": "number" }],
+        "minItems": 2,
+        "maxItems": 2
+      }
+    },
+    "parameters": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "enum": [
+            "integer",
+            "negative",
+            "nonnegative",
+            "nonpositive",
+            "nonzero",
+            "positive"
+          ]
+        }
+      }
+    },
+    "fields": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" },
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    },
+    "pde_residuals": { "$ref": "#/$defs/constraints" },
+    "conditions": { "$ref": "#/$defs/constraints" }
+  },
+  "$defs": {
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "expression"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "expression": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}
