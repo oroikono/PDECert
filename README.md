@@ -180,14 +180,23 @@ by itself prove who generated the output. That claim remains grounded in the
 recorded provenance and reproducible collection procedure.
 
 [`corpus/pilot.json`](corpus/pilot.json) is the canonical pilot document. It is
-initially empty so records are added only by a collection run with real outputs,
-not invented to fill a target count.
+paired with the exact collection method and summary in
+[`corpus/README.md`](corpus/README.md). The current pilot contains 20 real runs:
+10 SymPy solver outputs and 10 local generations from a pinned 4-bit Qwen3-0.6B
+model. All labels remain pending until the manual protocol is applied.
 
 ```python
 from pdecert import load_corpus
 
 corpus = load_corpus("corpus/pilot.json")
 print(len(corpus["records"]))
+```
+
+To reproduce collection on Apple silicon:
+
+```bash
+pip install -e ".[dev,collection]"
+python -m experiments.collect_pilot
 ```
 
 ## Current limits

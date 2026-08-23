@@ -1,0 +1,1 @@
+{"responses": ["u_t = u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u", "FINAL: exp(-t)*sin(pi*x)"]}

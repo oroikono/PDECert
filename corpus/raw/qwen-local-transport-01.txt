@@ -1,0 +1,1 @@
+{"responses": ["u(x, t) = sin(pi*x)"]}

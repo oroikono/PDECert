@@ -1,0 +1,1 @@
+{"responses": ["u = sin(pi*y) * sqrt(1 - y^2) + exp(pi) * sin(pi*y)"]}
