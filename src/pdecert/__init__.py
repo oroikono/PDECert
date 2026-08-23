@@ -22,6 +22,7 @@ from .corpus import (
     output_sha256,
     validate_corpus,
 )
+from .labeling import REVIEW_VERSION, ReviewError, apply_review
 from .schema import (
     SchemaError,
     VerificationCase,
@@ -40,7 +41,9 @@ __all__ = [
     "ORIGIN_KINDS",
     "PARAMETER_ASSUMPTIONS",
     "Problem",
+    "REVIEW_VERSION",
     "Report",
+    "ReviewError",
     "SchemaError",
     "Status",
     "VerificationCase",
@@ -48,6 +51,7 @@ __all__ = [
     "Witness",
     "case_from_dict",
     "case_to_dict",
+    "apply_review",
     "dump_case",
     "dump_corpus",
     "fixed_collocation_check",

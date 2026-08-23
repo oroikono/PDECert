@@ -37,11 +37,13 @@ Available:
 - a versioned candidate-corpus format with embedded cases, raw outputs, content
   digests, solver/model provenance, prompts or solver inputs, and annotation state;
 - a 20-record pilot with 10 reproducible SymPy outputs and 10 pinned local
-  open-model generations.
+  open-model generations;
+- a blind human-review protocol, blank review form, guarded annotation importer,
+  and clearly separated provisional comparison file.
 
 Next:
 
-- document a manual labeling and disagreement-resolution protocol;
+- complete independent human labels for all 20 pilot records;
 - grow the first public benchmark to at least 100 candidates;
 - compare fixed collocation, SymPy checks, and PDECert on false acceptance,
   false rejection, inconclusive rate, witness quality, and runtime;
