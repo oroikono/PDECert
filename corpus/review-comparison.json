@@ -1,0 +1,50 @@
+{
+  "amended_review_sha256": "434a5b728172744d751ff8d6a25259331efc2fe5aaefc2de1fa9806c367fd741",
+  "amendments": [
+    {
+      "after": "Candidate u(x,t) = sin(pi*(x-t)) satisfies u_t + u_x = -pi*cos(pi*(x-t)) + pi*cos(pi*(x-t)) = 0 identically and matches the initial and both boundary traces.",
+      "before": "The general solution to the linear advection equation u",
+      "evidence": "Direct differentiation gives u_t + u_x = 0, and all three represented traces simplify to zero.",
+      "id": "sympy-advection-01",
+      "kind": "truncated_rationale_repair"
+    },
+    {
+      "after": "Candidate u(x,t) = sin(pi*(x-2*t)) satisfies u_t + 2*u_x = -2*pi*cos(pi*(x-2*t)) + 2*pi*cos(pi*(x-2*t)) = 0 identically and matches the initial and both boundary traces.",
+      "before": "**Verdict:**",
+      "evidence": "Direct differentiation gives u_t + 2*u_x = 0, and all three represented traces simplify to zero.",
+      "id": "sympy-advection-03",
+      "kind": "truncated_rationale_repair"
+    },
+    {
+      "after": {
+        "failure_modes": [
+          "boundary_condition",
+          "pde_residual"
+        ],
+        "rationale": "Candidate u(x,y) = -2*pi^2*sin(pi*x*sin(pi*y)) fails the Poisson PDE residual and violates the x=1 boundary; specifically, u(1,1/6) = -2*pi^2 != 0."
+      },
+      "before": {
+        "failure_modes": [
+          "pde_residual"
+        ],
+        "rationale": "Nested sine candidate u = -2*pi^2*sin(pi*x*sin(pi*y)) fails the Poisson PDE residual u_xx + u_yy + 2*pi^2*sin(pi*x)*sin(pi*y) != 0."
+      },
+      "evidence": "The x=1 boundary residual is -2*pi^2*sin(pi*sin(pi*y)); at y=1/6 it equals -2*pi^2.",
+      "id": "qwen-local-poisson-01",
+      "kind": "failure_mode_addition"
+    }
+  ],
+  "blind_review_sha256": "0dd2c771ba5c6aa710715c39dcae99046c4bae4ca70bc53aecf376f8163722ff",
+  "comparison_version": 1,
+  "confirmed_by": "oroikono",
+  "confirmed_on": "2026-08-24",
+  "confirmation": "I independently verified and confirm these three amendments.",
+  "labeled_corpus_sha256": "4be9178edd30fcc561f21e83375713f4b38338484d75a0c8a7c8088e9c4369fb",
+  "pending_corpus_sha256": "8daa8bb7e128f7c42e06c8523fcd1d676fc39cff37e201855f87eb50ef961daa",
+  "provisional_comparison": {
+    "failure_mode_disagreements": 1,
+    "rationale_repairs": 2,
+    "verdict_disagreements": 0
+  },
+  "record_count": 20
+}

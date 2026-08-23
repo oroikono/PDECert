@@ -10,24 +10,21 @@ from pdecert import (
     build_release_bundle,
     evaluate_corpus,
     load_corpus,
-    validate_corpus,
     validate_release_inputs,
 )
 
 
-def _synthetic_labeled_fixture(corpus):
-    labeled = copy.deepcopy(corpus)
-    for record in labeled["records"]:
-        valid = record["origin"]["kind"] == "symbolic_solver"
+def _pending_fixture(corpus):
+    pending = copy.deepcopy(corpus)
+    for record in pending["records"]:
         record["annotation"] = {
-            "annotators": ["synthetic-test-fixture"],
-            "failure_modes": [] if valid else ["pde_residual"],
-            "rationale": "Synthetic label used only to exercise release calculations.",
-            "status": "labeled",
-            "verdict": "valid" if valid else "invalid",
+            "annotators": [],
+            "failure_modes": [],
+            "rationale": None,
+            "status": "pending",
+            "verdict": None,
         }
-    validate_corpus(labeled)
-    return labeled
+    return pending
 
 
 def _tree_contents(directory):
@@ -41,8 +38,8 @@ def _tree_contents(directory):
 class ReleaseTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.pending = load_corpus("corpus/pilot.json")
-        cls.labeled = _synthetic_labeled_fixture(cls.pending)
+        cls.labeled = load_corpus("corpus/pilot.json")
+        cls.pending = _pending_fixture(cls.labeled)
         cls.benchmark = evaluate_corpus(cls.labeled, symbolic_timeout=1.0)
 
     def test_pending_corpus_is_refused_before_release(self):

@@ -5,11 +5,13 @@
   "records": [
     {
       "annotation": {
-        "annotators": [],
+        "annotators": [
+          "oroikono"
+        ],
         "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "rationale": "Candidate u(x,t) = sin(pi*(x-t)) satisfies u_t + u_x = -pi*cos(pi*(x-t)) + pi*cos(pi*(x-t)) = 0 identically and matches the initial and both boundary traces.",
+        "status": "labeled",
+        "verdict": "valid"
       },
       "case": {
         "conditions": [
@@ -70,11 +72,13 @@
     },
     {
       "annotation": {
-        "annotators": [],
+        "annotators": [
+          "oroikono"
+        ],
         "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "rationale": "Exact traveling-wave solution u(x,t) = sin(2*pi*(x-t)) satisfies u_t + u_x = 0 along with all initial and boundary conditions identically.",
+        "status": "labeled",
+        "verdict": "valid"
       },
       "case": {
         "conditions": [
@@ -135,11 +139,13 @@
     },
     {
       "annotation": {
-        "annotators": [],
+        "annotators": [
+          "oroikono"
+        ],
         "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "rationale": "Candidate u(x,t) = sin(pi*(x-2*t)) satisfies u_t + 2*u_x = -2*pi*cos(pi*(x-2*t)) + 2*pi*cos(pi*(x-2*t)) = 0 identically and matches the initial and both boundary traces.",
+        "status": "labeled",
+        "verdict": "valid"
       },
       "case": {
         "conditions": [
@@ -200,11 +206,13 @@
     },
     {
       "annotation": {
-        "annotators": [],
+        "annotators": [
+          "oroikono"
+        ],
         "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "rationale": "Candidate u(x,t) = sin(3*pi*(x-2*t)) satisfies u_t + 2*u_x = 0 identically and matches initial and boundary traces.",
+        "status": "labeled",
+        "verdict": "valid"
       },
       "case": {
         "conditions": [
@@ -265,11 +273,13 @@
     },
     {
       "annotation": {
-        "annotators": [],
+        "annotators": [
+          "oroikono"
+        ],
         "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "rationale": "Candidate u(x,t) = sin(pi*(x-3*t)) satisfies u_t + 3*u_x = 0 identically and matches initial and boundary traces.",
+        "status": "labeled",
+        "verdict": "valid"
       },
       "case": {
         "conditions": [
@@ -330,11 +340,13 @@
     },
     {
       "annotation": {
-        "annotators": [],
+        "annotators": [
+          "oroikono"
+        ],
         "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "rationale": "Candidate u(x,t) = sin(2*pi*(x-3*t)) satisfies u_t + 3*u_x = 0 identically and matches initial and boundary traces.",
+        "status": "labeled",
+        "verdict": "valid"
       },
       "case": {
         "conditions": [
@@ -395,11 +407,13 @@
     },
     {
       "annotation": {
-        "annotators": [],
+        "annotators": [
+          "oroikono"
+        ],
         "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "rationale": "Candidate u(x,t) = sin(pi*(x+t)) satisfies u_t - u_x = 0 identically and matches initial and boundary traces.",
+        "status": "labeled",
+        "verdict": "valid"
       },
       "case": {
         "conditions": [
@@ -460,11 +474,13 @@
     },
     {
       "annotation": {
-        "annotators": [],
+        "annotators": [
+          "oroikono"
+        ],
         "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "rationale": "Candidate u(x,t) = sin(2*pi*(x+2*t)) satisfies u_t - 2*u_x = 0 identically and matches initial and boundary traces.",
+        "status": "labeled",
+        "verdict": "valid"
       },
       "case": {
         "conditions": [
@@ -525,11 +541,13 @@
     },
     {
       "annotation": {
-        "annotators": [],
+        "annotators": [
+          "oroikono"
+        ],
         "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "rationale": "Candidate u(x,t) = sin(3*pi*(x+3*t)) satisfies u_t - 3*u_x = 0 identically and matches initial and boundary traces.",
+        "status": "labeled",
+        "verdict": "valid"
       },
       "case": {
         "conditions": [
@@ -590,11 +608,13 @@
     },
     {
       "annotation": {
-        "annotators": [],
+        "annotators": [
+          "oroikono"
+        ],
         "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "rationale": "Candidate u(x,t) = sin(2*pi*(x-4*t)) satisfies u_t + 4*u_x = 0 identically and matches initial and boundary traces.",
+        "status": "labeled",
+        "verdict": "valid"
       },
       "case": {
         "conditions": [
@@ -655,11 +675,17 @@
     },
     {
       "annotation": {
-        "annotators": [],
-        "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "annotators": [
+          "oroikono"
+        ],
+        "failure_modes": [
+          "boundary_condition",
+          "initial_condition",
+          "pde_residual"
+        ],
+        "rationale": "Candidate has no time dependence and violates heat PDE (u_t - u_xx != 0), initial condition, and boundary conditions.",
+        "status": "labeled",
+        "verdict": "invalid"
       },
       "case": {
         "conditions": [
@@ -720,11 +746,16 @@
     },
     {
       "annotation": {
-        "annotators": [],
-        "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "annotators": [
+          "oroikono"
+        ],
+        "failure_modes": [
+          "initial_condition",
+          "pde_residual"
+        ],
+        "rationale": "Candidate violates PDE residual since u_t - u_xx = (-1 + pi^2)*exp(-t)*sin(pi*x) != 0 and initial condition is sin(pi*x) instead of sin(2*pi*x).",
+        "status": "labeled",
+        "verdict": "invalid"
       },
       "case": {
         "conditions": [
@@ -785,11 +816,15 @@
     },
     {
       "annotation": {
-        "annotators": [],
-        "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "annotators": [
+          "oroikono"
+        ],
+        "failure_modes": [
+          "pde_residual"
+        ],
+        "rationale": "Static field u(x,t) = sin(pi*x) yields u_t + u_x = pi*cos(pi*x) != 0, violating the transport PDE residual.",
+        "status": "labeled",
+        "verdict": "invalid"
       },
       "case": {
         "conditions": [
@@ -842,11 +877,15 @@
     },
     {
       "annotation": {
-        "annotators": [],
-        "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "annotators": [
+          "oroikono"
+        ],
+        "failure_modes": [
+          "pde_residual"
+        ],
+        "rationale": "Static field u(x,t) = cos(pi*x) yields u_t + 2*u_x = -2*pi*sin(pi*x) != 0, violating the transport PDE residual.",
+        "status": "labeled",
+        "verdict": "invalid"
       },
       "case": {
         "conditions": [
@@ -899,11 +938,16 @@
     },
     {
       "annotation": {
-        "annotators": [],
-        "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "annotators": [
+          "oroikono"
+        ],
+        "failure_modes": [
+          "initial_condition",
+          "pde_residual"
+        ],
+        "rationale": "Candidate u_t + u = -pi*exp(-pi*t) + sin(pi*x) + exp(-pi*t) != 0 and initial state at t=0 has extra +1 offset.",
+        "status": "labeled",
+        "verdict": "invalid"
       },
       "case": {
         "conditions": [
@@ -956,11 +1000,17 @@
     },
     {
       "annotation": {
-        "annotators": [],
-        "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "annotators": [
+          "oroikono"
+        ],
+        "failure_modes": [
+          "boundary_condition",
+          "initial_condition",
+          "pde_residual"
+        ],
+        "rationale": "Candidate violates wave PDE (u_tt - u_xx != 0), initial conditions, and Dirichlet boundary conditions.",
+        "status": "labeled",
+        "verdict": "invalid"
       },
       "case": {
         "conditions": [
@@ -1025,11 +1075,16 @@
     },
     {
       "annotation": {
-        "annotators": [],
-        "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "annotators": [
+          "oroikono"
+        ],
+        "failure_modes": [
+          "boundary_condition",
+          "pde_residual"
+        ],
+        "rationale": "Candidate has no x-dependence, failing Laplace PDE residual (u_xx + u_yy != 0) and left/right boundary conditions.",
+        "status": "labeled",
+        "verdict": "invalid"
       },
       "case": {
         "conditions": [
@@ -1094,11 +1149,16 @@
     },
     {
       "annotation": {
-        "annotators": [],
-        "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "annotators": [
+          "oroikono"
+        ],
+        "failure_modes": [
+          "boundary_condition",
+          "pde_residual"
+        ],
+        "rationale": "Candidate u(x,y) = -2*pi^2*sin(pi*x*sin(pi*y)) fails the Poisson PDE residual and violates the x=1 boundary; specifically, u(1,1/6) = -2*pi^2 != 0.",
+        "status": "labeled",
+        "verdict": "invalid"
       },
       "case": {
         "conditions": [
@@ -1163,11 +1223,15 @@
     },
     {
       "annotation": {
-        "annotators": [],
-        "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "annotators": [
+          "oroikono"
+        ],
+        "failure_modes": [
+          "pde_residual"
+        ],
+        "rationale": "Static field lacks time dependence, yielding u_t + u_x + u_y = pi*cos(pi*x)*sin(pi*y) + pi*sin(pi*x)*cos(pi*y) != 0.",
+        "status": "labeled",
+        "verdict": "invalid"
       },
       "case": {
         "conditions": [
@@ -1225,11 +1289,16 @@
     },
     {
       "annotation": {
-        "annotators": [],
-        "failure_modes": [],
-        "rationale": null,
-        "status": "pending",
-        "verdict": null
+        "annotators": [
+          "oroikono"
+        ],
+        "failure_modes": [
+          "initial_condition",
+          "pde_residual"
+        ],
+        "rationale": "Candidate violates PDE residual (u_tt - u_xx + u = (2*pi^2 + 1)*exp(-pi*t)*sin(pi*x) != 0) and non-zero initial velocity.",
+        "status": "labeled",
+        "verdict": "invalid"
       },
       "case": {
         "conditions": [

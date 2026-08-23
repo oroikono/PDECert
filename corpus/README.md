@@ -9,8 +9,11 @@
   [`mlx-community/Qwen3-0.6B-4bit`](https://huggingface.co/mlx-community/Qwen3-0.6B-4bit)
   at revision `73e3e38d981303bc594367cd910ea6eb48349da8`, using MLX LM 0.31.3.
 
-All 20 annotations are intentionally `pending`. Automated verification is not a
-substitute for the manual label and disagreement-resolution protocol.
+All 20 records were independently reviewed under the public identifier
+`oroikono`: 10 are labeled valid and 10 invalid. The blind-review digest,
+comparison summary, confirmed rationale repairs, and the one added failure mode
+are retained in `review-comparison.json`. Automated verification remains
+separate evidence rather than a substitute for those labels.
 
 ## Collection procedure
 
@@ -50,6 +53,17 @@ corresponding record's `raw_output` exactly.
   and `REFUTED` for the 10 open-model outputs.
 
 These machine results describe the current verifier, not the corpus labels.
+
+## Annotation summary
+
+- 20 completed labels by `oroikono`;
+- 10 valid specialized solver candidates;
+- 10 invalid open-model candidates;
+- every invalid candidate has a demonstrated PDE-residual failure;
+- 5 also fail initial conditions and 4 also fail boundary conditions;
+- zero verdict disagreements in the post-review comparison;
+- one boundary-condition failure mode added after an independently confirmed
+  comparison-stage recomputation.
 
 ## Licensing and provenance
 
