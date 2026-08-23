@@ -38,8 +38,8 @@ Available:
   digests, solver/model provenance, prompts or solver inputs, and annotation state;
 - a 20-record pilot with 10 reproducible SymPy outputs and 10 pinned local
   open-model generations;
-- a blind human-review protocol, blank review form, guarded annotation importer,
-  and clearly separated provisional comparison file;
+- a blind human-review protocol, resumable card runner, blank review form,
+  guarded annotation importer, and clearly separated provisional comparison file;
 - a label-gated report pipeline comparing fixed collocation, direct SymPy
   residual checks, and PDECert with error, abstention, witness, and runtime metrics.
 
