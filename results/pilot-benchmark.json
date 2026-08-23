@@ -1,0 +1,1032 @@
+{
+  "benchmark_version": 1,
+  "configuration": {
+    "method_order": [
+      "fixed_collocation",
+      "pdecert",
+      "sympy_residual"
+    ],
+    "points_per_axis": 5,
+    "symbolic_timeout_seconds": 2.0,
+    "timing_note": "Single-process wall-clock timings are descriptive; method order and symbolic caches can affect them.",
+    "tolerance": 1e-09
+  },
+  "corpus": {
+    "excluded_unclear": 0,
+    "name": "PDECert natural-candidate pilot",
+    "scored_records": 20,
+    "sha256": "4be9178edd30fcc561f21e83375713f4b38338484d75a0c8a7c8088e9c4369fb",
+    "total_records": 20
+  },
+  "environment": {
+    "pdecert": "0.1.0",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "python": "3.12.13",
+    "sympy": "1.14.0"
+  },
+  "method_definitions": {
+    "fixed_collocation": "All PDE residuals and represented conditions on a uniform grid including domain endpoints; finite passing is treated as acceptance.",
+    "pdecert": "Domain diagnostics, exact residual checks, and off-grid counterexample search; sampling can reject but cannot prove.",
+    "sympy_residual": "Independent direct SymPy simplification of every represented residual and condition, with an inconclusive outcome when zero or nonzero cannot be decided."
+  },
+  "methods": {
+    "fixed_collocation": {
+      "metrics": {
+        "accuracy": 1.0,
+        "correct_count": 20,
+        "decisive_accuracy": 1.0,
+        "decisive_count": 20,
+        "false_acceptance_count": 0,
+        "false_acceptance_rate": 0.0,
+        "false_rejection_count": 0,
+        "false_rejection_rate": 0.0,
+        "inconclusive_count": 0,
+        "inconclusive_rate": 0.0,
+        "invalid_count": 10,
+        "invalid_witness_count": 0,
+        "invalid_witness_rate": 0.0,
+        "scored_count": 20,
+        "valid_count": 10
+      },
+      "records": [
+        {
+          "id": "sympy-advection-01",
+          "max_residual": 0.0,
+          "outcome": "accept",
+          "runtime_seconds": 0.009833208001509774,
+          "truth": "valid"
+        },
+        {
+          "id": "sympy-advection-02",
+          "max_residual": 0.0,
+          "outcome": "accept",
+          "runtime_seconds": 0.007438500004354864,
+          "truth": "valid"
+        },
+        {
+          "id": "sympy-advection-03",
+          "max_residual": 0.0,
+          "outcome": "accept",
+          "runtime_seconds": 0.006468708997999784,
+          "truth": "valid"
+        },
+        {
+          "id": "sympy-advection-04",
+          "max_residual": 0.0,
+          "outcome": "accept",
+          "runtime_seconds": 0.006955791999644134,
+          "truth": "valid"
+        },
+        {
+          "id": "sympy-advection-05",
+          "max_residual": 0.0,
+          "outcome": "accept",
+          "runtime_seconds": 0.00633899999957066,
+          "truth": "valid"
+        },
+        {
+          "id": "sympy-advection-06",
+          "max_residual": 0.0,
+          "outcome": "accept",
+          "runtime_seconds": 0.006471959000919014,
+          "truth": "valid"
+        },
+        {
+          "id": "sympy-advection-07",
+          "max_residual": 0.0,
+          "outcome": "accept",
+          "runtime_seconds": 0.006999459001235664,
+          "truth": "valid"
+        },
+        {
+          "id": "sympy-advection-08",
+          "max_residual": 0.0,
+          "outcome": "accept",
+          "runtime_seconds": 0.006411916998331435,
+          "truth": "valid"
+        },
+        {
+          "id": "sympy-advection-09",
+          "max_residual": 0.0,
+          "outcome": "accept",
+          "runtime_seconds": 0.006666249995760154,
+          "truth": "valid"
+        },
+        {
+          "id": "sympy-advection-10",
+          "max_residual": 0.0,
+          "outcome": "accept",
+          "runtime_seconds": 0.006182791003084276,
+          "truth": "valid"
+        },
+        {
+          "id": "qwen-local-heat-mode-01",
+          "max_residual": 39.47841760435743,
+          "outcome": "reject",
+          "runtime_seconds": 0.017650166002567858,
+          "truth": "invalid"
+        },
+        {
+          "id": "qwen-local-heat-mode-02",
+          "max_residual": 8.869604401089358,
+          "outcome": "reject",
+          "runtime_seconds": 0.021483958000317216,
+          "truth": "invalid"
+        },
+        {
+          "id": "qwen-local-transport-01",
+          "max_residual": 3.141592653589793,
+          "outcome": "reject",
+          "runtime_seconds": 0.00554254199960269,
+          "truth": "invalid"
+        },
+        {
+          "id": "qwen-local-transport-02",
+          "max_residual": 6.283185307179586,
+          "outcome": "reject",
+          "runtime_seconds": 0.005556290998356417,
+          "truth": "invalid"
+        },
+        {
+          "id": "qwen-local-reaction-01",
+          "max_residual": 2.141592653589793,
+          "outcome": "reject",
+          "runtime_seconds": 0.010913915997662116,
+          "truth": "invalid"
+        },
+        {
+          "id": "qwen-local-wave-01",
+          "max_residual": 19.739208802178716,
+          "outcome": "reject",
+          "runtime_seconds": 0.019025583998882212,
+          "truth": "invalid"
+        },
+        {
+          "id": "qwen-local-laplace-01",
+          "max_residual": "Infinity",
+          "outcome": "reject",
+          "runtime_seconds": 0.0447473330059438,
+          "truth": "invalid"
+        },
+        {
+          "id": "qwen-local-poisson-01",
+          "max_residual": 614.2841530623546,
+          "outcome": "reject",
+          "runtime_seconds": 0.03650900000502588,
+          "truth": "invalid"
+        },
+        {
+          "id": "qwen-local-transport-2d-01",
+          "max_residual": 3.1415926535897936,
+          "outcome": "reject",
+          "runtime_seconds": 0.06386579100217205,
+          "truth": "invalid"
+        },
+        {
+          "id": "qwen-local-klein-gordon-01",
+          "max_residual": 20.739208802178716,
+          "outcome": "reject",
+          "runtime_seconds": 0.019730416999664158,
+          "truth": "invalid"
+        }
+      ],
+      "runtime_seconds": 0.3266175410026335
+    },
+    "pdecert": {
+      "metrics": {
+        "accuracy": 1.0,
+        "correct_count": 20,
+        "decisive_accuracy": 1.0,
+        "decisive_count": 20,
+        "false_acceptance_count": 0,
+        "false_acceptance_rate": 0.0,
+        "false_rejection_count": 0,
+        "false_rejection_rate": 0.0,
+        "inconclusive_count": 0,
+        "inconclusive_rate": 0.0,
+        "invalid_count": 10,
+        "invalid_witness_count": 10,
+        "invalid_witness_rate": 1.0,
+        "scored_count": 20,
+        "valid_count": 10
+      },
+      "records": [
+        {
+          "id": "sympy-advection-01",
+          "outcome": "accept",
+          "report": {
+            "exact_checks": {
+              "advection PDE": "identity",
+              "initial condition": "identity",
+              "left boundary": "identity",
+              "right boundary": "identity"
+            },
+            "incomplete_reasons": {},
+            "max_sampled_residual": 0.0,
+            "status": "PROVED",
+            "witness": null
+          },
+          "runtime_seconds": 0.00017300000035902485,
+          "truth": "valid",
+          "witness": null
+        },
+        {
+          "id": "sympy-advection-02",
+          "outcome": "accept",
+          "report": {
+            "exact_checks": {
+              "advection PDE": "identity",
+              "initial condition": "identity",
+              "left boundary": "identity",
+              "right boundary": "identity"
+            },
+            "incomplete_reasons": {},
+            "max_sampled_residual": 0.0,
+            "status": "PROVED",
+            "witness": null
+          },
+          "runtime_seconds": 0.00010866699449252337,
+          "truth": "valid",
+          "witness": null
+        },
+        {
+          "id": "sympy-advection-03",
+          "outcome": "accept",
+          "report": {
+            "exact_checks": {
+              "advection PDE": "identity",
+              "initial condition": "identity",
+              "left boundary": "identity",
+              "right boundary": "identity"
+            },
+            "incomplete_reasons": {},
+            "max_sampled_residual": 0.0,
+            "status": "PROVED",
+            "witness": null
+          },
+          "runtime_seconds": 0.00011408299906179309,
+          "truth": "valid",
+          "witness": null
+        },
+        {
+          "id": "sympy-advection-04",
+          "outcome": "accept",
+          "report": {
+            "exact_checks": {
+              "advection PDE": "identity",
+              "initial condition": "identity",
+              "left boundary": "identity",
+              "right boundary": "identity"
+            },
+            "incomplete_reasons": {},
+            "max_sampled_residual": 0.0,
+            "status": "PROVED",
+            "witness": null
+          },
+          "runtime_seconds": 9.249999857274815e-05,
+          "truth": "valid",
+          "witness": null
+        },
+        {
+          "id": "sympy-advection-05",
+          "outcome": "accept",
+          "report": {
+            "exact_checks": {
+              "advection PDE": "identity",
+              "initial condition": "identity",
+              "left boundary": "identity",
+              "right boundary": "identity"
+            },
+            "incomplete_reasons": {},
+            "max_sampled_residual": 0.0,
+            "status": "PROVED",
+            "witness": null
+          },
+          "runtime_seconds": 8.866700227372348e-05,
+          "truth": "valid",
+          "witness": null
+        },
+        {
+          "id": "sympy-advection-06",
+          "outcome": "accept",
+          "report": {
+            "exact_checks": {
+              "advection PDE": "identity",
+              "initial condition": "identity",
+              "left boundary": "identity",
+              "right boundary": "identity"
+            },
+            "incomplete_reasons": {},
+            "max_sampled_residual": 0.0,
+            "status": "PROVED",
+            "witness": null
+          },
+          "runtime_seconds": 0.00013233299978310242,
+          "truth": "valid",
+          "witness": null
+        },
+        {
+          "id": "sympy-advection-07",
+          "outcome": "accept",
+          "report": {
+            "exact_checks": {
+              "advection PDE": "identity",
+              "initial condition": "identity",
+              "left boundary": "identity",
+              "right boundary": "identity"
+            },
+            "incomplete_reasons": {},
+            "max_sampled_residual": 0.0,
+            "status": "PROVED",
+            "witness": null
+          },
+          "runtime_seconds": 0.0001046250035869889,
+          "truth": "valid",
+          "witness": null
+        },
+        {
+          "id": "sympy-advection-08",
+          "outcome": "accept",
+          "report": {
+            "exact_checks": {
+              "advection PDE": "identity",
+              "initial condition": "identity",
+              "left boundary": "identity",
+              "right boundary": "identity"
+            },
+            "incomplete_reasons": {},
+            "max_sampled_residual": 0.0,
+            "status": "PROVED",
+            "witness": null
+          },
+          "runtime_seconds": 0.00011212500248802826,
+          "truth": "valid",
+          "witness": null
+        },
+        {
+          "id": "sympy-advection-09",
+          "outcome": "accept",
+          "report": {
+            "exact_checks": {
+              "advection PDE": "identity",
+              "initial condition": "identity",
+              "left boundary": "identity",
+              "right boundary": "identity"
+            },
+            "incomplete_reasons": {},
+            "max_sampled_residual": 0.0,
+            "status": "PROVED",
+            "witness": null
+          },
+          "runtime_seconds": 0.00010087500413646922,
+          "truth": "valid",
+          "witness": null
+        },
+        {
+          "id": "sympy-advection-10",
+          "outcome": "accept",
+          "report": {
+            "exact_checks": {
+              "advection PDE": "identity",
+              "initial condition": "identity",
+              "left boundary": "identity",
+              "right boundary": "identity"
+            },
+            "incomplete_reasons": {},
+            "max_sampled_residual": 0.0,
+            "status": "PROVED",
+            "witness": null
+          },
+          "runtime_seconds": 0.00010683299478841946,
+          "truth": "valid",
+          "witness": null
+        },
+        {
+          "id": "qwen-local-heat-mode-01",
+          "outcome": "reject",
+          "report": {
+            "exact_checks": {
+              "heat PDE": "unknown",
+              "initial": "unknown",
+              "left": "nonzero",
+              "right": "nonzero"
+            },
+            "incomplete_reasons": {
+              "heat PDE": "symbolic simplification did not decide",
+              "initial": "symbolic simplification did not decide"
+            },
+            "max_sampled_residual": 15.978756990741404,
+            "status": "REFUTED",
+            "witness": {
+              "constraint": "heat PDE",
+              "point": {
+                "x": 0.113
+              },
+              "reason": "off-grid evaluation found a violated obligation",
+              "residual": 15.978756990741404
+            }
+          },
+          "runtime_seconds": 0.08877266600029543,
+          "truth": "invalid",
+          "witness": {
+            "constraint": "heat PDE",
+            "point": {
+              "x": 0.113
+            },
+            "reason": "off-grid evaluation found a violated obligation",
+            "residual": 15.978756990741404
+          }
+        },
+        {
+          "id": "qwen-local-heat-mode-02",
+          "outcome": "reject",
+          "report": {
+            "exact_checks": {
+              "heat PDE": "unknown",
+              "initial": "unknown",
+              "left": "identity",
+              "right": "identity"
+            },
+            "incomplete_reasons": {
+              "heat PDE": "symbolic simplification did not decide",
+              "initial": "symbolic simplification did not decide"
+            },
+            "max_sampled_residual": 2.7535734662866345,
+            "status": "REFUTED",
+            "witness": {
+              "constraint": "heat PDE",
+              "point": {
+                "t": 0.113,
+                "x": 0.113
+              },
+              "reason": "off-grid evaluation found a violated obligation",
+              "residual": 2.7535734662866345
+            }
+          },
+          "runtime_seconds": 0.036203832998580765,
+          "truth": "invalid",
+          "witness": {
+            "constraint": "heat PDE",
+            "point": {
+              "t": 0.113,
+              "x": 0.113
+            },
+            "reason": "off-grid evaluation found a violated obligation",
+            "residual": 2.7535734662866345
+          }
+        },
+        {
+          "id": "qwen-local-transport-01",
+          "outcome": "reject",
+          "report": {
+            "exact_checks": {
+              "initial": "identity",
+              "transport PDE": "unknown"
+            },
+            "incomplete_reasons": {
+              "transport PDE": "symbolic simplification did not decide"
+            },
+            "max_sampled_residual": 2.945703353856383,
+            "status": "REFUTED",
+            "witness": {
+              "constraint": "transport PDE",
+              "point": {
+                "x": 0.113
+              },
+              "reason": "off-grid evaluation found a violated obligation",
+              "residual": 2.945703353856383
+            }
+          },
+          "runtime_seconds": 0.005071791005320847,
+          "truth": "invalid",
+          "witness": {
+            "constraint": "transport PDE",
+            "point": {
+              "x": 0.113
+            },
+            "reason": "off-grid evaluation found a violated obligation",
+            "residual": 2.945703353856383
+          }
+        },
+        {
+          "id": "qwen-local-transport-02",
+          "outcome": "reject",
+          "report": {
+            "exact_checks": {
+              "initial": "identity",
+              "transport PDE": "unknown"
+            },
+            "incomplete_reasons": {
+              "transport PDE": "symbolic simplification did not decide"
+            },
+            "max_sampled_residual": 2.1839744981740212,
+            "status": "REFUTED",
+            "witness": {
+              "constraint": "transport PDE",
+              "point": {
+                "x": 0.113
+              },
+              "reason": "off-grid evaluation found a violated obligation",
+              "residual": 2.1839744981740212
+            }
+          },
+          "runtime_seconds": 0.005358250004064757,
+          "truth": "invalid",
+          "witness": {
+            "constraint": "transport PDE",
+            "point": {
+              "x": 0.113
+            },
+            "reason": "off-grid evaluation found a violated obligation",
+            "residual": 2.1839744981740212
+          }
+        },
+        {
+          "id": "qwen-local-reaction-01",
+          "outcome": "reject",
+          "report": {
+            "exact_checks": {
+              "initial": "nonzero",
+              "reaction PDE": "unknown"
+            },
+            "incomplete_reasons": {
+              "reaction PDE": "symbolic simplification did not decide"
+            },
+            "max_sampled_residual": 1.154037603162304,
+            "status": "REFUTED",
+            "witness": {
+              "constraint": "reaction PDE",
+              "point": {
+                "t": 0.113,
+                "x": 0.113
+              },
+              "reason": "off-grid evaluation found a violated obligation",
+              "residual": 1.154037603162304
+            }
+          },
+          "runtime_seconds": 0.038190957995539065,
+          "truth": "invalid",
+          "witness": {
+            "constraint": "reaction PDE",
+            "point": {
+              "t": 0.113,
+              "x": 0.113
+            },
+            "reason": "off-grid evaluation found a violated obligation",
+            "residual": 1.154037603162304
+          }
+        },
+        {
+          "id": "qwen-local-wave-01",
+          "outcome": "reject",
+          "report": {
+            "exact_checks": {
+              "left": "unknown",
+              "position": "nonzero",
+              "right": "unknown",
+              "velocity": "nonzero",
+              "wave PDE": "unknown"
+            },
+            "incomplete_reasons": {
+              "left": "symbolic simplification did not decide",
+              "right": "symbolic simplification did not decide",
+              "wave PDE": "symbolic simplification did not decide"
+            },
+            "max_sampled_residual": 10.350883829171892,
+            "status": "REFUTED",
+            "witness": {
+              "constraint": "wave PDE",
+              "point": {
+                "t": 0.113,
+                "x": 0.113
+              },
+              "reason": "off-grid evaluation found a violated obligation",
+              "residual": 10.350883829171892
+            }
+          },
+          "runtime_seconds": 0.03249316700384952,
+          "truth": "invalid",
+          "witness": {
+            "constraint": "wave PDE",
+            "point": {
+              "t": 0.113,
+              "x": 0.113
+            },
+            "reason": "off-grid evaluation found a violated obligation",
+            "residual": 10.350883829171892
+          }
+        },
+        {
+          "id": "qwen-local-laplace-01",
+          "outcome": "reject",
+          "report": {
+            "exact_checks": {
+              "Laplace PDE": "unknown",
+              "bottom": "identity",
+              "left": "unknown",
+              "right": "unknown",
+              "top": "identity"
+            },
+            "incomplete_reasons": {
+              "Laplace PDE": "symbolic simplification did not decide",
+              "left": "symbolic simplification did not decide",
+              "right": "symbolic simplification did not decide"
+            },
+            "max_sampled_residual": 83.81895940141494,
+            "status": "REFUTED",
+            "witness": {
+              "constraint": "Laplace PDE",
+              "point": {
+                "y": 0.113
+              },
+              "reason": "off-grid evaluation found a violated obligation",
+              "residual": 83.81895940141494
+            }
+          },
+          "runtime_seconds": 0.2699947919973056,
+          "truth": "invalid",
+          "witness": {
+            "constraint": "Laplace PDE",
+            "point": {
+              "y": 0.113
+            },
+            "reason": "off-grid evaluation found a violated obligation",
+            "residual": 83.81895940141494
+          }
+        },
+        {
+          "id": "qwen-local-poisson-01",
+          "outcome": "reject",
+          "report": {
+            "exact_checks": {
+              "Poisson PDE": "unknown",
+              "x one": "unknown",
+              "x zero": "identity",
+              "y one": "identity",
+              "y zero": "identity"
+            },
+            "incomplete_reasons": {
+              "Poisson PDE": "symbolic simplification did not decide",
+              "x one": "symbolic simplification did not decide"
+            },
+            "max_sampled_residual": 31.795450672607796,
+            "status": "REFUTED",
+            "witness": {
+              "constraint": "Poisson PDE",
+              "point": {
+                "x": 0.113,
+                "y": 0.113
+              },
+              "reason": "off-grid evaluation found a violated obligation",
+              "residual": 31.795450672607796
+            }
+          },
+          "runtime_seconds": 0.21581700000388082,
+          "truth": "invalid",
+          "witness": {
+            "constraint": "Poisson PDE",
+            "point": {
+              "x": 0.113,
+              "y": 0.113
+            },
+            "reason": "off-grid evaluation found a violated obligation",
+            "residual": 31.795450672607796
+          }
+        },
+        {
+          "id": "qwen-local-transport-2d-01",
+          "outcome": "reject",
+          "report": {
+            "exact_checks": {
+              "initial": "identity",
+              "transport PDE": "unknown"
+            },
+            "incomplete_reasons": {
+              "transport PDE": "symbolic simplification did not decide"
+            },
+            "max_sampled_residual": 2.047796042767308,
+            "status": "REFUTED",
+            "witness": {
+              "constraint": "transport PDE",
+              "point": {
+                "x": 0.113,
+                "y": 0.113
+              },
+              "reason": "off-grid evaluation found a violated obligation",
+              "residual": 2.047796042767308
+            }
+          },
+          "runtime_seconds": 0.026676041998143774,
+          "truth": "invalid",
+          "witness": {
+            "constraint": "transport PDE",
+            "point": {
+              "x": 0.113,
+              "y": 0.113
+            },
+            "reason": "off-grid evaluation found a violated obligation",
+            "residual": 2.047796042767308
+          }
+        },
+        {
+          "id": "qwen-local-klein-gordon-01",
+          "outcome": "reject",
+          "report": {
+            "exact_checks": {
+              "Klein-Gordon PDE": "unknown",
+              "left": "identity",
+              "position": "identity",
+              "right": "identity",
+              "velocity": "unknown"
+            },
+            "incomplete_reasons": {
+              "Klein-Gordon PDE": "symbolic simplification did not decide",
+              "velocity": "symbolic simplification did not decide"
+            },
+            "max_sampled_residual": 5.054583212669424,
+            "status": "REFUTED",
+            "witness": {
+              "constraint": "Klein-Gordon PDE",
+              "point": {
+                "t": 0.113,
+                "x": 0.113
+              },
+              "reason": "off-grid evaluation found a violated obligation",
+              "residual": 5.054583212669424
+            }
+          },
+          "runtime_seconds": 0.02164529199944809,
+          "truth": "invalid",
+          "witness": {
+            "constraint": "Klein-Gordon PDE",
+            "point": {
+              "t": 0.113,
+              "x": 0.113
+            },
+            "reason": "off-grid evaluation found a violated obligation",
+            "residual": 5.054583212669424
+          }
+        }
+      ],
+      "runtime_seconds": 0.7541328330044053
+    },
+    "sympy_residual": {
+      "metrics": {
+        "accuracy": 0.65,
+        "correct_count": 13,
+        "decisive_accuracy": 1.0,
+        "decisive_count": 13,
+        "false_acceptance_count": 0,
+        "false_acceptance_rate": 0.0,
+        "false_rejection_count": 0,
+        "false_rejection_rate": 0.0,
+        "inconclusive_count": 7,
+        "inconclusive_rate": 0.35,
+        "invalid_count": 10,
+        "invalid_witness_count": 0,
+        "invalid_witness_rate": 0.0,
+        "scored_count": 20,
+        "valid_count": 10
+      },
+      "records": [
+        {
+          "checks": {
+            "advection PDE": "zero",
+            "initial condition": "zero",
+            "left boundary": "zero",
+            "right boundary": "zero"
+          },
+          "id": "sympy-advection-01",
+          "outcome": "accept",
+          "runtime_seconds": 3.295799979241565e-05,
+          "truth": "valid"
+        },
+        {
+          "checks": {
+            "advection PDE": "zero",
+            "initial condition": "zero",
+            "left boundary": "zero",
+            "right boundary": "zero"
+          },
+          "id": "sympy-advection-02",
+          "outcome": "accept",
+          "runtime_seconds": 2.662499900907278e-05,
+          "truth": "valid"
+        },
+        {
+          "checks": {
+            "advection PDE": "zero",
+            "initial condition": "zero",
+            "left boundary": "zero",
+            "right boundary": "zero"
+          },
+          "id": "sympy-advection-03",
+          "outcome": "accept",
+          "runtime_seconds": 2.4708999262657017e-05,
+          "truth": "valid"
+        },
+        {
+          "checks": {
+            "advection PDE": "zero",
+            "initial condition": "zero",
+            "left boundary": "zero",
+            "right boundary": "zero"
+          },
+          "id": "sympy-advection-04",
+          "outcome": "accept",
+          "runtime_seconds": 3.8791004044469446e-05,
+          "truth": "valid"
+        },
+        {
+          "checks": {
+            "advection PDE": "zero",
+            "initial condition": "zero",
+            "left boundary": "zero",
+            "right boundary": "zero"
+          },
+          "id": "sympy-advection-05",
+          "outcome": "accept",
+          "runtime_seconds": 3.2125004508998245e-05,
+          "truth": "valid"
+        },
+        {
+          "checks": {
+            "advection PDE": "zero",
+            "initial condition": "zero",
+            "left boundary": "zero",
+            "right boundary": "zero"
+          },
+          "id": "sympy-advection-06",
+          "outcome": "accept",
+          "runtime_seconds": 2.562500594649464e-05,
+          "truth": "valid"
+        },
+        {
+          "checks": {
+            "advection PDE": "zero",
+            "initial condition": "zero",
+            "left boundary": "zero",
+            "right boundary": "zero"
+          },
+          "id": "sympy-advection-07",
+          "outcome": "accept",
+          "runtime_seconds": 2.7374997443985194e-05,
+          "truth": "valid"
+        },
+        {
+          "checks": {
+            "advection PDE": "zero",
+            "initial condition": "zero",
+            "left boundary": "zero",
+            "right boundary": "zero"
+          },
+          "id": "sympy-advection-08",
+          "outcome": "accept",
+          "runtime_seconds": 2.445800055284053e-05,
+          "truth": "valid"
+        },
+        {
+          "checks": {
+            "advection PDE": "zero",
+            "initial condition": "zero",
+            "left boundary": "zero",
+            "right boundary": "zero"
+          },
+          "id": "sympy-advection-09",
+          "outcome": "accept",
+          "runtime_seconds": 2.404100087005645e-05,
+          "truth": "valid"
+        },
+        {
+          "checks": {
+            "advection PDE": "zero",
+            "initial condition": "zero",
+            "left boundary": "zero",
+            "right boundary": "zero"
+          },
+          "id": "sympy-advection-10",
+          "outcome": "accept",
+          "runtime_seconds": 2.5374996766913682e-05,
+          "truth": "valid"
+        },
+        {
+          "checks": {
+            "heat PDE": "inconclusive",
+            "initial": "inconclusive",
+            "left": "nonzero",
+            "right": "nonzero"
+          },
+          "id": "qwen-local-heat-mode-01",
+          "outcome": "reject",
+          "runtime_seconds": 0.03295566599990707,
+          "truth": "invalid"
+        },
+        {
+          "checks": {
+            "heat PDE": "inconclusive",
+            "initial": "inconclusive",
+            "left": "zero",
+            "right": "zero"
+          },
+          "id": "qwen-local-heat-mode-02",
+          "outcome": "inconclusive",
+          "runtime_seconds": 0.027857333996507805,
+          "truth": "invalid"
+        },
+        {
+          "checks": {
+            "initial": "zero",
+            "transport PDE": "inconclusive"
+          },
+          "id": "qwen-local-transport-01",
+          "outcome": "inconclusive",
+          "runtime_seconds": 0.004547374999674503,
+          "truth": "invalid"
+        },
+        {
+          "checks": {
+            "initial": "zero",
+            "transport PDE": "inconclusive"
+          },
+          "id": "qwen-local-transport-02",
+          "outcome": "inconclusive",
+          "runtime_seconds": 0.004435750000993721,
+          "truth": "invalid"
+        },
+        {
+          "checks": {
+            "initial": "nonzero",
+            "reaction PDE": "inconclusive"
+          },
+          "id": "qwen-local-reaction-01",
+          "outcome": "reject",
+          "runtime_seconds": 0.03239283399307169,
+          "truth": "invalid"
+        },
+        {
+          "checks": {
+            "left": "inconclusive",
+            "position": "nonzero",
+            "right": "inconclusive",
+            "velocity": "nonzero",
+            "wave PDE": "inconclusive"
+          },
+          "id": "qwen-local-wave-01",
+          "outcome": "reject",
+          "runtime_seconds": 0.029535833004047163,
+          "truth": "invalid"
+        },
+        {
+          "checks": {
+            "Laplace PDE": "inconclusive",
+            "bottom": "zero",
+            "left": "inconclusive",
+            "right": "inconclusive",
+            "top": "zero"
+          },
+          "id": "qwen-local-laplace-01",
+          "outcome": "inconclusive",
+          "runtime_seconds": 0.23152070899959654,
+          "truth": "invalid"
+        },
+        {
+          "checks": {
+            "Poisson PDE": "inconclusive",
+            "x one": "inconclusive",
+            "x zero": "zero",
+            "y one": "zero",
+            "y zero": "zero"
+          },
+          "id": "qwen-local-poisson-01",
+          "outcome": "inconclusive",
+          "runtime_seconds": 0.18976137499703327,
+          "truth": "invalid"
+        },
+        {
+          "checks": {
+            "initial": "zero",
+            "transport PDE": "inconclusive"
+          },
+          "id": "qwen-local-transport-2d-01",
+          "outcome": "inconclusive",
+          "runtime_seconds": 0.02418458399915835,
+          "truth": "invalid"
+        },
+        {
+          "checks": {
+            "Klein-Gordon PDE": "inconclusive",
+            "left": "zero",
+            "position": "zero",
+            "right": "zero",
+            "velocity": "inconclusive"
+          },
+          "id": "qwen-local-klein-gordon-01",
+          "outcome": "inconclusive",
+          "runtime_seconds": 0.02014495799812721,
+          "truth": "invalid"
+        }
+      ],
+      "runtime_seconds": 0.6139008339960128
+    }
+  }
+}

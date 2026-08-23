@@ -227,6 +227,20 @@ inconclusive rate, witness coverage, per-record outcomes, and runtime. The
 report binds those results to a corpus digest and records the runtime
 environment. The command refuses to run while any annotation is pending.
 
+The committed pilot report is
+[`results/pilot-benchmark.json`](results/pilot-benchmark.json):
+
+| Method | Accuracy | False accept | False reject | Inconclusive | Invalid witness |
+|---|---:|---:|---:|---:|---:|
+| Fixed collocation | 100% | 0% | 0% | 0% | 0% |
+| Direct SymPy residual | 65% | 0% | 0% | 35% | 0% |
+| PDECert | 100% | 0% | 0% | 0% | 100% |
+
+These are descriptive results on 20 designed pilot records, not estimates of
+performance on a broader solver or model population. Accuracy counts an
+inconclusive outcome as incorrect; witness rate uses the 10 invalid records as
+its denominator.
+
 Build the Hugging Face-ready release only after that report exists:
 
 ```bash

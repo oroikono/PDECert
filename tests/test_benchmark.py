@@ -7,7 +7,13 @@ from contextlib import redirect_stderr
 from pathlib import Path
 
 from experiments.run_benchmark import main as benchmark_main
-from pdecert import BenchmarkError, dump_corpus, evaluate_corpus, load_corpus
+from pdecert import (
+    BenchmarkError,
+    dump_corpus,
+    evaluate_corpus,
+    load_corpus,
+    validate_release_inputs,
+)
 
 
 def _pending_fixture(corpus):
@@ -55,6 +61,20 @@ class BenchmarkTests(unittest.TestCase):
         json.dumps(report, allow_nan=False)
         self.assertEqual(report["methods"]["pdecert"]["metrics"]["correct_count"], 20)
         self.assertEqual(report["methods"]["pdecert"]["metrics"]["invalid_witness_count"], 10)
+
+    def test_committed_report_is_bound_to_the_labeled_corpus(self):
+        report = json.loads(Path("results/pilot-benchmark.json").read_text())
+        validate_release_inputs(self.labeled, report)
+        self.assertEqual(report["methods"]["fixed_collocation"]["metrics"]["accuracy"], 1.0)
+        self.assertEqual(report["methods"]["pdecert"]["metrics"]["accuracy"], 1.0)
+        self.assertEqual(
+            report["methods"]["pdecert"]["metrics"]["invalid_witness_rate"],
+            1.0,
+        )
+        self.assertEqual(
+            report["methods"]["sympy_residual"]["metrics"]["inconclusive_rate"],
+            0.35,
+        )
 
     def test_unclear_records_are_reported_and_excluded(self):
         corpus = copy.deepcopy(self.labeled)
