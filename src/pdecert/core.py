@@ -6,10 +6,10 @@ sampling may refute a candidate by producing a witness, but it never proves one.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from itertools import product
-from typing import Iterable
 
 import mpmath
 import sympy as sp

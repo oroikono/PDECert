@@ -9,7 +9,12 @@ from pathlib import Path
 import sympy as sp
 from sympy.solvers.pde import checkpdesol
 
-from pdecert import Constraint, Problem, fixed_collocation_check, verify
+from pdecert import (
+    Constraint,
+    Problem,
+    fixed_collocation_check,
+    verify,
+)
 
 
 x, t, k = sp.symbols("x t k", real=True)
