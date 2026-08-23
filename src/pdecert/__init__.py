@@ -10,6 +10,18 @@ from .core import (
     fixed_collocation_check,
     verify,
 )
+from .corpus import (
+    ANNOTATION_STATUSES,
+    CORPUS_VERSION,
+    FAILURE_MODES,
+    ORIGIN_KINDS,
+    VERDICTS,
+    CorpusError,
+    dump_corpus,
+    load_corpus,
+    output_sha256,
+    validate_corpus,
+)
 from .schema import (
     SchemaError,
     VerificationCase,
@@ -20,19 +32,29 @@ from .schema import (
 )
 
 __all__ = [
+    "ANNOTATION_STATUSES",
+    "CORPUS_VERSION",
     "Constraint",
+    "CorpusError",
+    "FAILURE_MODES",
+    "ORIGIN_KINDS",
     "PARAMETER_ASSUMPTIONS",
     "Problem",
     "Report",
     "SchemaError",
     "Status",
     "VerificationCase",
+    "VERDICTS",
     "Witness",
     "case_from_dict",
     "case_to_dict",
     "dump_case",
+    "dump_corpus",
     "fixed_collocation_check",
     "load_case",
+    "load_corpus",
+    "output_sha256",
+    "validate_corpus",
     "verify",
 ]
 

@@ -162,6 +162,34 @@ unknown names, and keyword arguments are rejected before parsing. Version 1 and
 2 residuals remain fully instantiated for backward compatibility; version 3
 can bind operators and conditions directly to named fields.
 
+## Candidate corpus
+
+The natural-candidate benchmark uses a separate versioned format defined in
+[`schema/corpus-v1.schema.json`](schema/corpus-v1.schema.json). Each record
+contains:
+
+- a complete schema-v3 verification case;
+- the unedited raw solver or open-model output and its SHA-256 digest;
+- producer, version, model or solver identifier, revision, source URL, license,
+  generation timestamp, and the exact prompt or solver input;
+- a structured annotation state with verdict, failure modes, rationale, and
+  annotator identifiers.
+
+The digest detects accidental or later changes to the stored output; it does not
+by itself prove who generated the output. That claim remains grounded in the
+recorded provenance and reproducible collection procedure.
+
+[`corpus/pilot.json`](corpus/pilot.json) is the canonical pilot document. It is
+initially empty so records are added only by a collection run with real outputs,
+not invented to fill a target count.
+
+```python
+from pdecert import load_corpus
+
+corpus = load_corpus("corpus/pilot.json")
+print(len(corpus["records"]))
+```
+
 ## Current limits
 
 The prototype does not yet define weak or viscosity solution semantics. It also

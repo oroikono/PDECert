@@ -1,0 +1,228 @@
+"""Versioned, provenance-bearing corpus records for generated PDE candidates."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+from collections.abc import Mapping
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+from urllib.parse import urlparse
+
+from .schema import SCHEMA_VERSION, case_from_dict
+
+
+CORPUS_VERSION = 1
+ORIGIN_KINDS = frozenset({"open_model", "symbolic_solver"})
+FAILURE_MODES = frozenset(
+    {
+        "boundary_condition",
+        "domain_singularity",
+        "extraction_error",
+        "initial_condition",
+        "other",
+        "parameter_scope",
+        "pde_residual",
+        "unsupported_semantics",
+    }
+)
+ANNOTATION_STATUSES = frozenset({"adjudicated", "labeled", "pending"})
+VERDICTS = frozenset({"invalid", "unclear", "valid"})
+_RECORD_ID = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
+
+
+class CorpusError(ValueError):
+    """Raised when a candidate corpus does not follow the corpus schema."""
+
+
+def output_sha256(raw_output: str) -> str:
+    """Return the content digest stored with one raw generator output."""
+
+    return hashlib.sha256(raw_output.encode()).hexdigest()
+
+
+def _error(path: str, message: str) -> CorpusError:
+    return CorpusError(f"{path}: {message}")
+
+
+def _object(value: object, path: str) -> Mapping[str, object]:
+    if not isinstance(value, Mapping):
+        raise _error(path, "expected an object")
+    return value
+
+
+def _exact_keys(value: Mapping[str, object], required: set[str], path: str) -> None:
+    missing = sorted(required - set(value))
+    unknown = sorted(set(value) - required)
+    if missing:
+        raise _error(path, f"missing field(s): {', '.join(missing)}")
+    if unknown:
+        raise _error(path, f"unknown field(s): {', '.join(unknown)}")
+
+
+def _text(value: object, path: str, *, nullable: bool = False) -> str | None:
+    if nullable and value is None:
+        return None
+    if not isinstance(value, str) or not value.strip():
+        raise _error(path, "expected a non-empty string")
+    return value
+
+
+def _validate_timestamp(value: object, path: str) -> None:
+    source = _text(value, path)
+    try:
+        parsed = datetime.fromisoformat(source.replace("Z", "+00:00"))
+    except ValueError as error:
+        raise _error(path, "expected an ISO 8601 timestamp") from error
+    if parsed.tzinfo is None:
+        raise _error(path, "timestamp must include a UTC offset")
+
+
+def _validate_url(value: object, path: str) -> None:
+    source = _text(value, path)
+    parsed = urlparse(source)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        raise _error(path, "expected an absolute HTTP(S) URL")
+
+
+def _validate_origin(value: object, path: str) -> None:
+    origin = _object(value, path)
+    fields = {
+        "generated_at",
+        "identifier",
+        "input",
+        "kind",
+        "license",
+        "producer",
+        "revision",
+        "source_url",
+        "version",
+    }
+    _exact_keys(origin, fields, path)
+    kind = _text(origin["kind"], f"{path}.kind")
+    if kind not in ORIGIN_KINDS:
+        raise _error(f"{path}.kind", f"expected one of: {', '.join(sorted(ORIGIN_KINDS))}")
+    for name in ("identifier", "input", "producer"):
+        _text(origin[name], f"{path}.{name}")
+    for name in ("license", "revision", "version"):
+        _text(origin[name], f"{path}.{name}", nullable=True)
+    _validate_url(origin["source_url"], f"{path}.source_url")
+    _validate_timestamp(origin["generated_at"], f"{path}.generated_at")
+
+
+def _validate_annotation(value: object, path: str) -> None:
+    annotation = _object(value, path)
+    fields = {"annotators", "failure_modes", "rationale", "status", "verdict"}
+    _exact_keys(annotation, fields, path)
+    status = _text(annotation["status"], f"{path}.status")
+    if status not in ANNOTATION_STATUSES:
+        raise _error(
+            f"{path}.status",
+            f"expected one of: {', '.join(sorted(ANNOTATION_STATUSES))}",
+        )
+    verdict = _text(annotation["verdict"], f"{path}.verdict", nullable=True)
+    if verdict is not None and verdict not in VERDICTS:
+        raise _error(f"{path}.verdict", f"expected one of: {', '.join(sorted(VERDICTS))}")
+    rationale = _text(annotation["rationale"], f"{path}.rationale", nullable=True)
+
+    annotators = annotation["annotators"]
+    if not isinstance(annotators, list) or any(
+        not isinstance(item, str) or not item.strip() for item in annotators
+    ):
+        raise _error(f"{path}.annotators", "expected a list of non-empty strings")
+    if len(set(annotators)) != len(annotators):
+        raise _error(f"{path}.annotators", "annotators must be unique")
+
+    failure_modes = annotation["failure_modes"]
+    if not isinstance(failure_modes, list):
+        raise _error(f"{path}.failure_modes", "expected a list")
+    unknown_modes = (
+        set(failure_modes) - FAILURE_MODES
+        if all(isinstance(item, str) for item in failure_modes)
+        else {"non-string value"}
+    )
+    if unknown_modes:
+        raise _error(
+            f"{path}.failure_modes",
+            f"unsupported failure mode(s): {', '.join(sorted(unknown_modes))}",
+        )
+    if len(set(failure_modes)) != len(failure_modes):
+        raise _error(f"{path}.failure_modes", "failure modes must be unique")
+
+    if status == "pending":
+        if verdict is not None or rationale is not None or annotators or failure_modes:
+            raise _error(path, "pending annotations must not contain a label")
+        return
+    if verdict is None or rationale is None or not annotators:
+        raise _error(path, "completed annotations require verdict, rationale, and annotator")
+    if status == "adjudicated" and len(annotators) < 2:
+        raise _error(path, "adjudicated annotations require at least two annotators")
+    if verdict == "invalid" and not failure_modes:
+        raise _error(path, "invalid verdicts require at least one failure mode")
+    if verdict != "invalid" and failure_modes:
+        raise _error(path, "failure modes are only valid for an invalid verdict")
+
+
+def _validate_record(value: object, path: str) -> None:
+    record = _object(value, path)
+    fields = {"annotation", "case", "id", "origin", "output_sha256", "raw_output"}
+    _exact_keys(record, fields, path)
+    record_id = _text(record["id"], f"{path}.id")
+    if not _RECORD_ID.fullmatch(record_id):
+        raise _error(f"{path}.id", "expected a lowercase corpus identifier")
+    raw_output = _text(record["raw_output"], f"{path}.raw_output")
+    digest = _text(record["output_sha256"], f"{path}.output_sha256")
+    if digest != output_sha256(raw_output):
+        raise _error(f"{path}.output_sha256", "does not match raw_output")
+    case = _object(record["case"], f"{path}.case")
+    if case.get("schema_version") != SCHEMA_VERSION:
+        raise _error(f"{path}.case.schema_version", f"expected {SCHEMA_VERSION}")
+    try:
+        case_from_dict(case)
+    except ValueError as error:
+        raise _error(f"{path}.case", str(error)) from error
+    _validate_origin(record["origin"], f"{path}.origin")
+    _validate_annotation(record["annotation"], f"{path}.annotation")
+
+
+def validate_corpus(value: object) -> None:
+    """Validate a complete corpus document or raise :class:`CorpusError`."""
+
+    corpus = _object(value, "$")
+    _exact_keys(corpus, {"corpus_version", "description", "name", "records"}, "$")
+    if isinstance(corpus["corpus_version"], bool) or corpus["corpus_version"] != CORPUS_VERSION:
+        raise _error("$.corpus_version", f"expected {CORPUS_VERSION}")
+    _text(corpus["name"], "$.name")
+    _text(corpus["description"], "$.description")
+    records = corpus["records"]
+    if not isinstance(records, list):
+        raise _error("$.records", "expected a list")
+    identifiers: set[str] = set()
+    for index, record in enumerate(records):
+        path = f"$.records[{index}]"
+        _validate_record(record, path)
+        record_id = record["id"]
+        if record_id in identifiers:
+            raise _error(path, f"duplicate record id: {record_id}")
+        identifiers.add(record_id)
+
+
+def load_corpus(path: str | Path) -> dict[str, Any]:
+    """Load and validate one corpus JSON document."""
+
+    source = Path(path)
+    try:
+        payload = json.loads(source.read_text())
+    except json.JSONDecodeError as error:
+        raise CorpusError(f"{source}: invalid JSON: {error.msg}") from error
+    validate_corpus(payload)
+    return payload
+
+
+def dump_corpus(value: object, path: str | Path) -> None:
+    """Validate and write deterministic corpus JSON."""
+
+    validate_corpus(value)
+    Path(path).write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")

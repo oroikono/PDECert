@@ -32,8 +32,13 @@ Release criteria:
 The second release will test whether the verifier is useful beyond constructed
 examples.
 
-- define a candidate-corpus format with problem, solver, model, prompt, and
-  provenance fields;
+Available:
+
+- a versioned candidate-corpus format with embedded cases, raw outputs, content
+  digests, solver/model provenance, prompts or solver inputs, and annotation state.
+
+Next:
+
 - publish a pilot set of 20 natural outputs from symbolic solvers and open models;
 - document a manual labeling and disagreement-resolution protocol;
 - grow the first public benchmark to at least 100 candidates;
