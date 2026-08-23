@@ -50,3 +50,14 @@ corresponding record's `raw_output` exactly.
   and `REFUTED` for the 10 open-model outputs.
 
 These machine results describe the current verifier, not the corpus labels.
+
+## Licensing and provenance
+
+PDECert's original metadata and completed annotations are distributed under the
+repository's MIT license. Every record separately names the source producer,
+source URL, version or revision, and the license recorded for that source
+software or model. A source license does not by itself settle every right in a
+generated output, so downstream users must also inspect the applicable source
+and provider terms. The eventual Hub dataset card uses a mixed-provenance
+license marker instead of presenting every component as if it shared one
+license.

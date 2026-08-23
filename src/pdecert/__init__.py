@@ -1,6 +1,6 @@
 """Public interface for PDECert."""
 
-from .benchmark import BENCHMARK_VERSION, BenchmarkError, evaluate_corpus
+from .benchmark import BENCHMARK_VERSION, BenchmarkError, corpus_sha256, evaluate_corpus
 from .core import (
     PARAMETER_ASSUMPTIONS,
     Constraint,
@@ -24,6 +24,7 @@ from .corpus import (
     validate_corpus,
 )
 from .labeling import REVIEW_VERSION, ReviewError, apply_review
+from .release import RELEASE_VERSION, ReleaseError, build_release_bundle, validate_release_inputs
 from .schema import (
     SchemaError,
     VerificationCase,
@@ -45,8 +46,10 @@ __all__ = [
     "PARAMETER_ASSUMPTIONS",
     "Problem",
     "REVIEW_VERSION",
+    "RELEASE_VERSION",
     "Report",
     "ReviewError",
+    "ReleaseError",
     "SchemaError",
     "Status",
     "VerificationCase",
@@ -54,7 +57,9 @@ __all__ = [
     "Witness",
     "case_from_dict",
     "case_to_dict",
+    "corpus_sha256",
     "apply_review",
+    "build_release_bundle",
     "dump_case",
     "dump_corpus",
     "evaluate_corpus",
@@ -63,6 +68,7 @@ __all__ = [
     "load_corpus",
     "output_sha256",
     "validate_corpus",
+    "validate_release_inputs",
     "verify",
 ]
 

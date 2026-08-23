@@ -224,6 +224,20 @@ inconclusive rate, witness coverage, per-record outcomes, and runtime. The
 report binds those results to a corpus digest and records the runtime
 environment. The command refuses to run while any annotation is pending.
 
+Build the Hugging Face-ready release only after that report exists:
+
+```bash
+python -m experiments.build_release corpus/pilot.json \
+  --benchmark results/pilot-benchmark.json \
+  --output dist/pdecert-pilot
+```
+
+The release builder independently checks the corpus digest, row IDs, truth
+labels, and aggregate metrics. It emits deterministic JSONL, a dataset card,
+the full report, and a checksum manifest, and refuses pending labels or a
+nonempty destination. Follow [RELEASE.md](RELEASE.md) for the final review,
+Hub upload, viewer check, and immutable-link checklist.
+
 ## Current limits
 
 The prototype does not yet define weak or viscosity solution semantics. It also
