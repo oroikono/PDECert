@@ -51,6 +51,18 @@ python -m experiments.adversarial_heat
 python -m experiments.sigs_poisson_gauss
 ```
 
+The installed command accepts one versioned JSON case and prints a stable JSON
+report:
+
+```bash
+pdecert verify examples/exact_heat.json
+pdecert verify examples/exact_heat.json --output report.json
+```
+
+Exit code `0` means `PROVED`, `1` means `REFUTED`, `2` means `INCONCLUSIVE`,
+and `64` reports an unreadable or invalid input file. A non-zero result is not
+automatically a software failure; consumers should also read `report.status`.
+
 ## Small example
 
 ```python

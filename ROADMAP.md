@@ -7,7 +7,7 @@ The days below are work sessions, not promises of artificial daily activity.
 
 - [x] Day 1: publish the three-state verifier, adversarial heat experiment, and tests.
 - [x] Day 2: define a JSON problem schema and reject malformed problems with clear errors.
-- [ ] Day 3: add a command-line interface that verifies one problem and writes a JSON report.
+- [x] Day 3: add a command-line interface that verifies one problem and writes a JSON report.
 - [ ] Day 4: add per-check time limits and record incomplete symbolic checks.
 - [ ] Day 5: add explicit parameter assumptions and parameter-domain counterexamples.
 - [ ] Day 6: support systems with multiple fields and coupled residual equations.

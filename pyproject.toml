@@ -25,6 +25,9 @@ dependencies = [
   "sympy>=1.13,<2",
 ]
 
+[project.scripts]
+pdecert = "pdecert.cli:main"
+
 [project.optional-dependencies]
 dev = [
   "pytest>=8",
