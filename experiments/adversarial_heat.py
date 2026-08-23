@@ -74,6 +74,7 @@ def parametric_heat_problem(name: str, candidate: sp.Expr) -> Problem:
             Constraint("left boundary", candidate.subs(x, 0)),
             Constraint("right boundary", candidate.subs(x, 1)),
         ),
+        parameter_assumptions={k: frozenset({"positive"})},
     )
 
 

@@ -1,6 +1,15 @@
 """Public interface for PDECert."""
 
-from .core import Constraint, Problem, Report, Status, Witness, fixed_collocation_check, verify
+from .core import (
+    PARAMETER_ASSUMPTIONS,
+    Constraint,
+    Problem,
+    Report,
+    Status,
+    Witness,
+    fixed_collocation_check,
+    verify,
+)
 from .schema import (
     SchemaError,
     VerificationCase,
@@ -12,6 +21,7 @@ from .schema import (
 
 __all__ = [
     "Constraint",
+    "PARAMETER_ASSUMPTIONS",
     "Problem",
     "Report",
     "SchemaError",

@@ -20,6 +20,9 @@ import sympy as sp
 
 
 _Result = TypeVar("_Result")
+PARAMETER_ASSUMPTIONS = frozenset(
+    {"integer", "negative", "nonnegative", "nonpositive", "nonzero", "positive"}
+)
 
 
 class _DeadlineExceeded(Exception):
@@ -55,6 +58,7 @@ class Problem:
     domains: dict[sp.Symbol, tuple[float, float]]
     pde_residuals: tuple[Constraint, ...]
     conditions: tuple[Constraint, ...] = ()
+    parameter_assumptions: dict[sp.Symbol, frozenset[str]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         missing = set(self.variables) - set(self.domains)
@@ -63,9 +67,38 @@ class Problem:
             raise ValueError("domains must contain exactly the declared variables")
         if not self.pde_residuals and not self.conditions:
             raise ValueError("a problem must contain at least one verification constraint")
+        unknown_parameters = set(self.parameter_assumptions) - set(self.variables)
+        if unknown_parameters:
+            names = ", ".join(sorted(str(item) for item in unknown_parameters))
+            raise ValueError(f"parameter assumptions reference undeclared variables: {names}")
         for variable, (lower, upper) in self.domains.items():
-            if lower >= upper:
-                raise ValueError(f"invalid domain for {variable}: lower bound must be smaller")
+            if not math.isfinite(lower) or not math.isfinite(upper) or lower >= upper:
+                raise ValueError(
+                    f"invalid domain for {variable}: bounds must be finite and increasing"
+                )
+
+        for parameter, assumptions in self.parameter_assumptions.items():
+            unknown = set(assumptions) - PARAMETER_ASSUMPTIONS
+            if unknown:
+                names = ", ".join(sorted(unknown))
+                raise ValueError(f"unsupported assumptions for {parameter}: {names}")
+            signs = set(assumptions) & {"negative", "nonnegative", "nonpositive", "positive"}
+            if len(signs) > 1:
+                raise ValueError(f"conflicting sign assumptions for {parameter}")
+
+            lower, upper = self.domains[parameter]
+            if "positive" in assumptions and lower <= 0:
+                raise ValueError(f"domain for positive parameter {parameter} must be above zero")
+            if "nonnegative" in assumptions and lower < 0:
+                raise ValueError(f"domain for nonnegative parameter {parameter} cannot be negative")
+            if "negative" in assumptions and upper >= 0:
+                raise ValueError(f"domain for negative parameter {parameter} must be below zero")
+            if "nonpositive" in assumptions and upper > 0:
+                raise ValueError(f"domain for nonpositive parameter {parameter} cannot be positive")
+            if "nonzero" in assumptions and lower <= 0 <= upper:
+                raise ValueError(f"domain for nonzero parameter {parameter} cannot include zero")
+            if "integer" in assumptions and math.ceil(lower) > math.floor(upper):
+                raise ValueError(f"domain for integer parameter {parameter} contains no integers")
 
 
 @dataclass(frozen=True)
@@ -160,6 +193,34 @@ def _run_bounded(
 def _interior_points(lower: float, upper: float, count: int) -> list[float]:
     fractions = (0.113, 0.271, 0.419, 0.613, 0.787, 0.937)
     return [lower + (upper - lower) * fractions[index % len(fractions)] for index in range(count)]
+
+
+def _parameter_points(problem: Problem, variable: sp.Symbol, count: int) -> list[float]:
+    lower, upper = problem.domains[variable]
+    assumptions = problem.parameter_assumptions[variable]
+    if "integer" in assumptions:
+        values = list(range(math.ceil(lower), math.floor(upper) + 1))
+        if len(values) <= count:
+            return [float(value) for value in values]
+        if count == 1:
+            return [float(values[len(values) // 2])]
+        indices = [round(index * (len(values) - 1) / (count - 1)) for index in range(count)]
+        return [float(values[index]) for index in dict.fromkeys(indices)]
+
+    if count == 1:
+        return [(lower + upper) / 2]
+    fractions = [0.0, 1.0, 0.113, 0.419, 0.787]
+    if count > len(fractions):
+        fractions.extend(
+            fraction for index in range(1, count) if (fraction := index / count) not in fractions
+        )
+    return [lower + (upper - lower) * fraction for fraction in fractions[:count]]
+
+
+def _sample_points(problem: Problem, variable: sp.Symbol, count: int) -> list[float]:
+    if variable in problem.parameter_assumptions:
+        return _parameter_points(problem, variable, count)
+    return _interior_points(*problem.domains[variable], count)
 
 
 def _numeric_value(
@@ -300,10 +361,7 @@ def verify(
         report.status = Status.PROVED
         return report
 
-    axes = [
-        _interior_points(*problem.domains[variable], samples_per_axis)
-        for variable in problem.variables
-    ]
+    axes = [_sample_points(problem, variable, samples_per_axis) for variable in problem.variables]
     max_residual = 0.0
     for constraint in constraints:
         for values in product(*axes):

@@ -148,17 +148,17 @@
       "incomplete_reasons": {
         "parametric heat PDE": "symbolic simplification did not decide"
       },
-      "max_sampled_residual": 0.6709607639052284,
+      "max_sampled_residual": 0.8997127239761694,
       "status": "REFUTED",
       "witness": {
         "constraint": "parametric heat PDE",
         "point": {
-          "k": 0.4034,
+          "k": 0.2,
           "t": 0.113,
           "x": 0.113
         },
         "reason": "off-grid evaluation found a violated obligation",
-        "residual": 0.6709607639052284
+        "residual": 0.8997127239761694
       }
     },
     "sympy_pde_accepts": false

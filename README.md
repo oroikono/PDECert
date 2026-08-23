@@ -98,11 +98,28 @@ print(report.status)  # Status.PROVED
 
 ## JSON cases
 
-Version 1 of the case format stores a fully instantiated problem: declared real
+Version 2 of the case format stores a fully instantiated problem: declared real
 variables, rectangular domains, residual expressions, conditions, and the
-candidate expressions used for domain checks. The canonical shape is defined in
-[`schema/problem-v1.schema.json`](schema/problem-v1.schema.json), with a complete
+candidate expressions used for domain checks. It also distinguishes parameter
+symbols from coordinates and records sign, nonzero, or integer assumptions. The
+canonical shape is defined in
+[`schema/problem-v2.schema.json`](schema/problem-v2.schema.json), with a complete
 example in [`examples/exact_heat.json`](examples/exact_heat.json).
+
+Version 1 inputs remain readable. New files are written as version 2.
+
+Parameters are declared by name with a list of assumptions:
+
+```json
+"parameters": {
+  "k": ["positive", "nonzero"],
+  "n": ["integer", "positive"]
+}
+```
+
+Every parameter must also appear in `variables` and have a compatible finite
+interval in `domains`. Variables omitted from `parameters` are treated as
+coordinates. Integer parameters are sampled only at integer values.
 
 ```python
 from pdecert import load_case, verify
