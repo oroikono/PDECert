@@ -1,16 +1,61 @@
 import copy
+import hashlib
 import json
 import unittest
 from pathlib import Path
 
-from pdecert import ReviewError, apply_review, load_corpus, validate_corpus
+from pdecert import ReviewError, apply_review, corpus_sha256, load_corpus, validate_corpus
 
 
 class LabelingTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.corpus = load_corpus("corpus/pilot.json")
+        cls.committed_corpus = load_corpus("corpus/pilot.json")
+        cls.corpus = copy.deepcopy(cls.committed_corpus)
+        for record in cls.corpus["records"]:
+            record["annotation"] = {
+                "annotators": [],
+                "failure_modes": [],
+                "rationale": None,
+                "status": "pending",
+                "verdict": None,
+            }
         cls.provisional = json.loads(Path("results/provisional-review.json").read_text())
+
+    def test_committed_corpus_is_fully_human_labeled(self):
+        self.assertTrue(
+            all(
+                record["annotation"]["status"] == "labeled"
+                and record["annotation"]["annotators"] == ["oroikono"]
+                for record in self.committed_corpus["records"]
+            )
+        )
+
+    def test_comparison_note_matches_committed_annotations(self):
+        comparison = json.loads(Path("corpus/review-comparison.json").read_text())
+        review = {
+            "review_version": 1,
+            "records": [
+                {
+                    "failure_modes": record["annotation"]["failure_modes"],
+                    "id": record["id"],
+                    "rationale": record["annotation"]["rationale"],
+                    "verdict": record["annotation"]["verdict"],
+                }
+                for record in self.committed_corpus["records"]
+            ],
+        }
+        encoded = json.dumps(review, sort_keys=True, separators=(",", ":")).encode()
+        self.assertEqual(
+            hashlib.sha256(encoded).hexdigest(),
+            comparison["amended_review_sha256"],
+        )
+        self.assertEqual(
+            corpus_sha256(self.committed_corpus),
+            comparison["labeled_corpus_sha256"],
+        )
+        self.assertEqual(comparison["confirmed_by"], "oroikono")
+        self.assertEqual(comparison["provisional_comparison"]["verdict_disagreements"], 0)
 
     def test_independent_review_confirmation_is_required(self):
         with self.assertRaisesRegex(ReviewError, "independent human review"):

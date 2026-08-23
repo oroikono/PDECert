@@ -54,7 +54,7 @@ class PilotCollectionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "does not contain one extractable"):
             _extract_expression("Here is the answer:\nsin(pi*x)")
 
-    def test_committed_pilot_contains_twenty_pending_real_outputs(self):
+    def test_committed_pilot_contains_twenty_labeled_real_outputs(self):
         corpus = load_corpus("corpus/pilot.json")
         self.assertEqual(len(corpus["records"]), 20)
         solver_records = [
@@ -66,8 +66,15 @@ class PilotCollectionTests(unittest.TestCase):
         self.assertEqual(len(solver_records), 10)
         self.assertEqual(len(model_records), 10)
         self.assertTrue(
-            all(record["annotation"]["status"] == "pending" for record in corpus["records"])
+            all(
+                record["annotation"]["status"] == "labeled"
+                and record["annotation"]["annotators"] == ["oroikono"]
+                for record in corpus["records"]
+            )
         )
+        verdicts = [record["annotation"]["verdict"] for record in corpus["records"]]
+        self.assertEqual(verdicts.count("valid"), 10)
+        self.assertEqual(verdicts.count("invalid"), 10)
         self.assertGreaterEqual(len({record["case"]["fields"]["u"] for record in model_records}), 8)
 
         raw_directory = Path("corpus/raw")

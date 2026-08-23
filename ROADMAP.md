@@ -40,6 +40,8 @@ Available:
   open-model generations;
 - a blind human-review protocol, resumable card runner, blank review form,
   guarded annotation importer, and clearly separated provisional comparison file;
+- 20 independently reviewed pilot labels with retained comparison-stage
+  amendments and public reviewer identifier;
 - a label-gated report pipeline comparing fixed collocation, direct SymPy
   residual checks, and PDECert with error, abstention, witness, and runtime metrics;
 - a deterministic, digest-checked Hugging Face release builder with JSONL,
@@ -47,7 +49,6 @@ Available:
 
 Next:
 
-- complete independent human labels for all 20 pilot records;
 - grow the first public benchmark to at least 100 candidates;
 - publish the pilot comparison after the independent labels are complete;
 - publish the benchmark and data card on Hugging Face.

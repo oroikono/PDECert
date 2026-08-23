@@ -183,7 +183,10 @@ recorded provenance and reproducible collection procedure.
 paired with the exact collection method and summary in
 [`corpus/README.md`](corpus/README.md). The current pilot contains 20 real runs:
 10 SymPy solver outputs and 10 local generations from a pinned 4-bit Qwen3-0.6B
-model. All labels remain pending until the manual protocol is applied.
+model. The completed blind review labels 10 records valid and 10 invalid under
+the public reviewer identifier `oroikono`; the post-review amendments and exact
+counterexample are retained in
+[`corpus/review-comparison.json`](corpus/review-comparison.json).
 
 ```python
 from pdecert import load_corpus

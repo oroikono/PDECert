@@ -7,29 +7,27 @@ from contextlib import redirect_stderr
 from pathlib import Path
 
 from experiments.run_benchmark import main as benchmark_main
-from pdecert import BenchmarkError, evaluate_corpus, load_corpus, validate_corpus
+from pdecert import BenchmarkError, dump_corpus, evaluate_corpus, load_corpus
 
 
-def _synthetic_labeled_fixture(corpus):
-    labeled = copy.deepcopy(corpus)
-    for record in labeled["records"]:
-        valid = record["origin"]["kind"] == "symbolic_solver"
+def _pending_fixture(corpus):
+    pending = copy.deepcopy(corpus)
+    for record in pending["records"]:
         record["annotation"] = {
-            "annotators": ["synthetic-test-fixture"],
-            "failure_modes": [] if valid else ["pde_residual"],
-            "rationale": "Synthetic label used only to exercise benchmark calculations.",
-            "status": "labeled",
-            "verdict": "valid" if valid else "invalid",
+            "annotators": [],
+            "failure_modes": [],
+            "rationale": None,
+            "status": "pending",
+            "verdict": None,
         }
-    validate_corpus(labeled)
-    return labeled
+    return pending
 
 
 class BenchmarkTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.pending = load_corpus("corpus/pilot.json")
-        cls.labeled = _synthetic_labeled_fixture(cls.pending)
+        cls.labeled = load_corpus("corpus/pilot.json")
+        cls.pending = _pending_fixture(cls.labeled)
 
     def test_pending_labels_are_refused(self):
         with self.assertRaisesRegex(BenchmarkError, "completed human labels"):
@@ -61,7 +59,7 @@ class BenchmarkTests(unittest.TestCase):
     def test_unclear_records_are_reported_and_excluded(self):
         corpus = copy.deepcopy(self.labeled)
         corpus["records"][0]["annotation"] = {
-            "annotators": ["synthetic-test-fixture"],
+            "annotators": ["oroikono"],
             "failure_modes": [],
             "rationale": "The problem statement is insufficient for a decision.",
             "status": "labeled",
@@ -81,10 +79,12 @@ class BenchmarkTests(unittest.TestCase):
 
     def test_command_refuses_pending_corpus_without_writing_output(self):
         with tempfile.TemporaryDirectory() as directory:
+            corpus_path = Path(directory) / "pending.json"
+            dump_corpus(self.pending, corpus_path)
             output = Path(directory) / "report.json"
             errors = io.StringIO()
             with redirect_stderr(errors):
-                exit_code = benchmark_main(["corpus/pilot.json", "--output", str(output)])
+                exit_code = benchmark_main([str(corpus_path), "--output", str(output)])
             self.assertEqual(exit_code, 2)
             self.assertIn("completed human labels", errors.getvalue())
             self.assertNotIn("Traceback", errors.getvalue())
