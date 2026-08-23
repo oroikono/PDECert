@@ -1,6 +1,1296 @@
 {
   "corpus_version": 1,
-  "description": "Pilot corpus of unedited candidate outputs from symbolic solvers and open models.",
+  "description": "Unedited outputs from ten SymPy pdsolve runs and ten local open-model generations.",
   "name": "PDECert natural-candidate pilot",
-  "records": []
+  "records": [
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, t, 0) - sin((1)*pi*x)",
+            "name": "initial condition"
+          },
+          {
+            "expression": "At(u, x, 0) - sin((1)*pi*(-(1)*t))",
+            "name": "left boundary"
+          },
+          {
+            "expression": "At(u, x, 1) - sin((1)*pi*(1-(1)*t))",
+            "name": "right boundary"
+          }
+        ],
+        "domains": {
+          "t": [
+            0.0,
+            1.0
+          ],
+          "x": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "sin(pi*(-t + x))"
+        },
+        "name": "advection speed 1, Fourier mode 1",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, t) + (1)*D(u, x)",
+            "name": "advection PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "t"
+        ]
+      },
+      "id": "sympy-advection-01",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:03.853432+00:00",
+        "identifier": "sympy.solvers.pde.pdsolve",
+        "input": "pdsolve(Eq(Derivative(u(x, t), t) + Derivative(u(x, t), x), 0), u(x, t)); returned Eq(u(x, t), F(-t + x)); specialize its arbitrary F using u(x,0)=sin(1*pi*x), yielding sin(pi*(-t + x))",
+        "kind": "symbolic_solver",
+        "license": "BSD-3-Clause",
+        "producer": "SymPy",
+        "revision": null,
+        "source_url": "https://docs.sympy.org/latest/modules/solvers/pde.html",
+        "version": "1.14.0"
+      },
+      "output_sha256": "3f6991b3282eb6fde155b596921380b64145ef763fbc200a8952a3dd7cfc1fb7",
+      "raw_output": "Eq(u(x, t), F(-t + x))"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, t, 0) - sin((2)*pi*x)",
+            "name": "initial condition"
+          },
+          {
+            "expression": "At(u, x, 0) - sin((2)*pi*(-(1)*t))",
+            "name": "left boundary"
+          },
+          {
+            "expression": "At(u, x, 1) - sin((2)*pi*(1-(1)*t))",
+            "name": "right boundary"
+          }
+        ],
+        "domains": {
+          "t": [
+            0.0,
+            1.0
+          ],
+          "x": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "sin(pi*(-2*t + 2*x))"
+        },
+        "name": "advection speed 1, Fourier mode 2",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, t) + (1)*D(u, x)",
+            "name": "advection PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "t"
+        ]
+      },
+      "id": "sympy-advection-02",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:03.859081+00:00",
+        "identifier": "sympy.solvers.pde.pdsolve",
+        "input": "pdsolve(Eq(Derivative(u(x, t), t) + Derivative(u(x, t), x), 0), u(x, t)); returned Eq(u(x, t), F(-t + x)); specialize its arbitrary F using u(x,0)=sin(2*pi*x), yielding sin(pi*(-2*t + 2*x))",
+        "kind": "symbolic_solver",
+        "license": "BSD-3-Clause",
+        "producer": "SymPy",
+        "revision": null,
+        "source_url": "https://docs.sympy.org/latest/modules/solvers/pde.html",
+        "version": "1.14.0"
+      },
+      "output_sha256": "3f6991b3282eb6fde155b596921380b64145ef763fbc200a8952a3dd7cfc1fb7",
+      "raw_output": "Eq(u(x, t), F(-t + x))"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, t, 0) - sin((1)*pi*x)",
+            "name": "initial condition"
+          },
+          {
+            "expression": "At(u, x, 0) - sin((1)*pi*(-(2)*t))",
+            "name": "left boundary"
+          },
+          {
+            "expression": "At(u, x, 1) - sin((1)*pi*(1-(2)*t))",
+            "name": "right boundary"
+          }
+        ],
+        "domains": {
+          "t": [
+            0.0,
+            1.0
+          ],
+          "x": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "sin(pi*(-2*t + x))"
+        },
+        "name": "advection speed 2, Fourier mode 1",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, t) + (2)*D(u, x)",
+            "name": "advection PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "t"
+        ]
+      },
+      "id": "sympy-advection-03",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:03.865731+00:00",
+        "identifier": "sympy.solvers.pde.pdsolve",
+        "input": "pdsolve(Eq(Derivative(u(x, t), t) + 2*Derivative(u(x, t), x), 0), u(x, t)); returned Eq(u(x, t), F(-2*t + x)); specialize its arbitrary F using u(x,0)=sin(1*pi*x), yielding sin(pi*(-2*t + x))",
+        "kind": "symbolic_solver",
+        "license": "BSD-3-Clause",
+        "producer": "SymPy",
+        "revision": null,
+        "source_url": "https://docs.sympy.org/latest/modules/solvers/pde.html",
+        "version": "1.14.0"
+      },
+      "output_sha256": "adf201643dde5d061d4933464c554367913fc4edd787392ea62c43213b08f783",
+      "raw_output": "Eq(u(x, t), F(-2*t + x))"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, t, 0) - sin((3)*pi*x)",
+            "name": "initial condition"
+          },
+          {
+            "expression": "At(u, x, 0) - sin((3)*pi*(-(2)*t))",
+            "name": "left boundary"
+          },
+          {
+            "expression": "At(u, x, 1) - sin((3)*pi*(1-(2)*t))",
+            "name": "right boundary"
+          }
+        ],
+        "domains": {
+          "t": [
+            0.0,
+            1.0
+          ],
+          "x": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "sin(pi*(-6*t + 3*x))"
+        },
+        "name": "advection speed 2, Fourier mode 3",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, t) + (2)*D(u, x)",
+            "name": "advection PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "t"
+        ]
+      },
+      "id": "sympy-advection-04",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:03.871987+00:00",
+        "identifier": "sympy.solvers.pde.pdsolve",
+        "input": "pdsolve(Eq(Derivative(u(x, t), t) + 2*Derivative(u(x, t), x), 0), u(x, t)); returned Eq(u(x, t), F(-2*t + x)); specialize its arbitrary F using u(x,0)=sin(3*pi*x), yielding sin(pi*(-6*t + 3*x))",
+        "kind": "symbolic_solver",
+        "license": "BSD-3-Clause",
+        "producer": "SymPy",
+        "revision": null,
+        "source_url": "https://docs.sympy.org/latest/modules/solvers/pde.html",
+        "version": "1.14.0"
+      },
+      "output_sha256": "adf201643dde5d061d4933464c554367913fc4edd787392ea62c43213b08f783",
+      "raw_output": "Eq(u(x, t), F(-2*t + x))"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, t, 0) - sin((1)*pi*x)",
+            "name": "initial condition"
+          },
+          {
+            "expression": "At(u, x, 0) - sin((1)*pi*(-(3)*t))",
+            "name": "left boundary"
+          },
+          {
+            "expression": "At(u, x, 1) - sin((1)*pi*(1-(3)*t))",
+            "name": "right boundary"
+          }
+        ],
+        "domains": {
+          "t": [
+            0.0,
+            1.0
+          ],
+          "x": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "sin(pi*(-3*t + x))"
+        },
+        "name": "advection speed 3, Fourier mode 1",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, t) + (3)*D(u, x)",
+            "name": "advection PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "t"
+        ]
+      },
+      "id": "sympy-advection-05",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:03.878757+00:00",
+        "identifier": "sympy.solvers.pde.pdsolve",
+        "input": "pdsolve(Eq(Derivative(u(x, t), t) + 3*Derivative(u(x, t), x), 0), u(x, t)); returned Eq(u(x, t), F(-3*t + x)); specialize its arbitrary F using u(x,0)=sin(1*pi*x), yielding sin(pi*(-3*t + x))",
+        "kind": "symbolic_solver",
+        "license": "BSD-3-Clause",
+        "producer": "SymPy",
+        "revision": null,
+        "source_url": "https://docs.sympy.org/latest/modules/solvers/pde.html",
+        "version": "1.14.0"
+      },
+      "output_sha256": "420f70dfde7379fa3eb44842dd5c8103c245b167dc95e35351ad05553256178d",
+      "raw_output": "Eq(u(x, t), F(-3*t + x))"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, t, 0) - sin((2)*pi*x)",
+            "name": "initial condition"
+          },
+          {
+            "expression": "At(u, x, 0) - sin((2)*pi*(-(3)*t))",
+            "name": "left boundary"
+          },
+          {
+            "expression": "At(u, x, 1) - sin((2)*pi*(1-(3)*t))",
+            "name": "right boundary"
+          }
+        ],
+        "domains": {
+          "t": [
+            0.0,
+            1.0
+          ],
+          "x": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "sin(pi*(-6*t + 2*x))"
+        },
+        "name": "advection speed 3, Fourier mode 2",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, t) + (3)*D(u, x)",
+            "name": "advection PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "t"
+        ]
+      },
+      "id": "sympy-advection-06",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:03.883347+00:00",
+        "identifier": "sympy.solvers.pde.pdsolve",
+        "input": "pdsolve(Eq(Derivative(u(x, t), t) + 3*Derivative(u(x, t), x), 0), u(x, t)); returned Eq(u(x, t), F(-3*t + x)); specialize its arbitrary F using u(x,0)=sin(2*pi*x), yielding sin(pi*(-6*t + 2*x))",
+        "kind": "symbolic_solver",
+        "license": "BSD-3-Clause",
+        "producer": "SymPy",
+        "revision": null,
+        "source_url": "https://docs.sympy.org/latest/modules/solvers/pde.html",
+        "version": "1.14.0"
+      },
+      "output_sha256": "420f70dfde7379fa3eb44842dd5c8103c245b167dc95e35351ad05553256178d",
+      "raw_output": "Eq(u(x, t), F(-3*t + x))"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, t, 0) - sin((1)*pi*x)",
+            "name": "initial condition"
+          },
+          {
+            "expression": "At(u, x, 0) - sin((1)*pi*(-(-1)*t))",
+            "name": "left boundary"
+          },
+          {
+            "expression": "At(u, x, 1) - sin((1)*pi*(1-(-1)*t))",
+            "name": "right boundary"
+          }
+        ],
+        "domains": {
+          "t": [
+            0.0,
+            1.0
+          ],
+          "x": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "sin(pi*(t + x))"
+        },
+        "name": "advection speed -1, Fourier mode 1",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, t) + (-1)*D(u, x)",
+            "name": "advection PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "t"
+        ]
+      },
+      "id": "sympy-advection-07",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:03.888838+00:00",
+        "identifier": "sympy.solvers.pde.pdsolve",
+        "input": "pdsolve(Eq(Derivative(u(x, t), t) - Derivative(u(x, t), x), 0), u(x, t)); returned Eq(u(x, t), F(t + x)); specialize its arbitrary F using u(x,0)=sin(1*pi*x), yielding sin(pi*(t + x))",
+        "kind": "symbolic_solver",
+        "license": "BSD-3-Clause",
+        "producer": "SymPy",
+        "revision": null,
+        "source_url": "https://docs.sympy.org/latest/modules/solvers/pde.html",
+        "version": "1.14.0"
+      },
+      "output_sha256": "394232c1c48fae30a0df3bcdd5eb69a17692f97e1804294f94f4598b5fa32a05",
+      "raw_output": "Eq(u(x, t), F(t + x))"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, t, 0) - sin((2)*pi*x)",
+            "name": "initial condition"
+          },
+          {
+            "expression": "At(u, x, 0) - sin((2)*pi*(-(-2)*t))",
+            "name": "left boundary"
+          },
+          {
+            "expression": "At(u, x, 1) - sin((2)*pi*(1-(-2)*t))",
+            "name": "right boundary"
+          }
+        ],
+        "domains": {
+          "t": [
+            0.0,
+            1.0
+          ],
+          "x": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "sin(pi*(4*t + 2*x))"
+        },
+        "name": "advection speed -2, Fourier mode 2",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, t) + (-2)*D(u, x)",
+            "name": "advection PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "t"
+        ]
+      },
+      "id": "sympy-advection-08",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:03.896341+00:00",
+        "identifier": "sympy.solvers.pde.pdsolve",
+        "input": "pdsolve(Eq(Derivative(u(x, t), t) - 2*Derivative(u(x, t), x), 0), u(x, t)); returned Eq(u(x, t), F(2*t + x)); specialize its arbitrary F using u(x,0)=sin(2*pi*x), yielding sin(pi*(4*t + 2*x))",
+        "kind": "symbolic_solver",
+        "license": "BSD-3-Clause",
+        "producer": "SymPy",
+        "revision": null,
+        "source_url": "https://docs.sympy.org/latest/modules/solvers/pde.html",
+        "version": "1.14.0"
+      },
+      "output_sha256": "42120c3647ff06b71cb230a39129266699c78de8bd0ea171802fc88ec0022376",
+      "raw_output": "Eq(u(x, t), F(2*t + x))"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, t, 0) - sin((3)*pi*x)",
+            "name": "initial condition"
+          },
+          {
+            "expression": "At(u, x, 0) - sin((3)*pi*(-(-3)*t))",
+            "name": "left boundary"
+          },
+          {
+            "expression": "At(u, x, 1) - sin((3)*pi*(1-(-3)*t))",
+            "name": "right boundary"
+          }
+        ],
+        "domains": {
+          "t": [
+            0.0,
+            1.0
+          ],
+          "x": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "sin(pi*(9*t + 3*x))"
+        },
+        "name": "advection speed -3, Fourier mode 3",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, t) + (-3)*D(u, x)",
+            "name": "advection PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "t"
+        ]
+      },
+      "id": "sympy-advection-09",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:03.903390+00:00",
+        "identifier": "sympy.solvers.pde.pdsolve",
+        "input": "pdsolve(Eq(Derivative(u(x, t), t) - 3*Derivative(u(x, t), x), 0), u(x, t)); returned Eq(u(x, t), F(3*t + x)); specialize its arbitrary F using u(x,0)=sin(3*pi*x), yielding sin(pi*(9*t + 3*x))",
+        "kind": "symbolic_solver",
+        "license": "BSD-3-Clause",
+        "producer": "SymPy",
+        "revision": null,
+        "source_url": "https://docs.sympy.org/latest/modules/solvers/pde.html",
+        "version": "1.14.0"
+      },
+      "output_sha256": "879b576a8d5e22c53d8c192016006b5b0c44950a310af71dcdb7e4d269950297",
+      "raw_output": "Eq(u(x, t), F(3*t + x))"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, t, 0) - sin((2)*pi*x)",
+            "name": "initial condition"
+          },
+          {
+            "expression": "At(u, x, 0) - sin((2)*pi*(-(4)*t))",
+            "name": "left boundary"
+          },
+          {
+            "expression": "At(u, x, 1) - sin((2)*pi*(1-(4)*t))",
+            "name": "right boundary"
+          }
+        ],
+        "domains": {
+          "t": [
+            0.0,
+            1.0
+          ],
+          "x": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "sin(pi*(-8*t + 2*x))"
+        },
+        "name": "advection speed 4, Fourier mode 2",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, t) + (4)*D(u, x)",
+            "name": "advection PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "t"
+        ]
+      },
+      "id": "sympy-advection-10",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:03.910515+00:00",
+        "identifier": "sympy.solvers.pde.pdsolve",
+        "input": "pdsolve(Eq(Derivative(u(x, t), t) + 4*Derivative(u(x, t), x), 0), u(x, t)); returned Eq(u(x, t), F(-4*t + x)); specialize its arbitrary F using u(x,0)=sin(2*pi*x), yielding sin(pi*(-8*t + 2*x))",
+        "kind": "symbolic_solver",
+        "license": "BSD-3-Clause",
+        "producer": "SymPy",
+        "revision": null,
+        "source_url": "https://docs.sympy.org/latest/modules/solvers/pde.html",
+        "version": "1.14.0"
+      },
+      "output_sha256": "a2db3629a0084254dc4e86c95f2b3aabcebe4ca6c8570dae3a5571039db8c347",
+      "raw_output": "Eq(u(x, t), F(-4*t + x))"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, t, 0) - sin(pi*x)",
+            "name": "initial"
+          },
+          {
+            "expression": "At(u, x, 0)",
+            "name": "left"
+          },
+          {
+            "expression": "At(u, x, 1)",
+            "name": "right"
+          }
+        ],
+        "domains": {
+          "t": [
+            0.0,
+            1.0
+          ],
+          "x": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "sin(pi*x) + exp(-2*pi*x)"
+        },
+        "name": "heat equation, first mode",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, t) - D(u, x, 2)",
+            "name": "heat PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "t"
+        ]
+      },
+      "id": "qwen-local-heat-mode-01",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:01.046293+00:00",
+        "identifier": "mlx-community/Qwen3-0.6B-4bit",
+        "input": "{\"initial_prompt\": \"Solve u_t = u_xx with u(x,0)=sin(pi*x), u(0,t)=u(1,t)=0.\\nReturn one explicit candidate expression for u in Python/SymPy syntax. Allowed names are the stated variables, pi, E, sin, cos, exp, sqrt, +, -, *, /, **, and parentheses. Answer with one line beginning FINAL: and no prose.\", \"maximum_attempts\": 3, \"repair_prompt\": \"That is not a parseable explicit expression for u. Do not write a differential equation and do not use u on the right. Return one concrete formula, not a placeholder. Example format: FINAL: exp(-t)*sin(pi*x).\"}",
+        "kind": "open_model",
+        "license": "Apache-2.0",
+        "producer": "Qwen via MLX LM",
+        "revision": "73e3e38d981303bc594367cd910ea6eb48349da8",
+        "source_url": "https://huggingface.co/mlx-community/Qwen3-0.6B-4bit",
+        "version": "0.31.3"
+      },
+      "output_sha256": "a7cf8db0707ae5ce1a934ae19374f5cdaefdb380d06193bd509d03cec77a5463",
+      "raw_output": "{\"responses\": [\"u = sin(pi*x) + exp(-pi*x)**2\"]}"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, t, 0) - sin(2*pi*x)",
+            "name": "initial"
+          },
+          {
+            "expression": "At(u, x, 0)",
+            "name": "left"
+          },
+          {
+            "expression": "At(u, x, 1)",
+            "name": "right"
+          }
+        ],
+        "domains": {
+          "t": [
+            0.0,
+            1.0
+          ],
+          "x": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "exp(-t)*sin(pi*x)"
+        },
+        "name": "heat equation, second mode",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, t) - D(u, x, 2)",
+            "name": "heat PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "t"
+        ]
+      },
+      "id": "qwen-local-heat-mode-02",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:01.780906+00:00",
+        "identifier": "mlx-community/Qwen3-0.6B-4bit",
+        "input": "{\"initial_prompt\": \"Solve u_t = u_xx with u(x,0)=sin(2*pi*x), u(0,t)=u(1,t)=0.\\nReturn one explicit candidate expression for u in Python/SymPy syntax. Allowed names are the stated variables, pi, E, sin, cos, exp, sqrt, +, -, *, /, **, and parentheses. Answer with one line beginning FINAL: and no prose.\", \"maximum_attempts\": 3, \"repair_prompt\": \"That is not a parseable explicit expression for u. Do not write a differential equation and do not use u on the right. Return one concrete formula, not a placeholder. Example format: FINAL: exp(-t)*sin(pi*x).\"}",
+        "kind": "open_model",
+        "license": "Apache-2.0",
+        "producer": "Qwen via MLX LM",
+        "revision": "73e3e38d981303bc594367cd910ea6eb48349da8",
+        "source_url": "https://huggingface.co/mlx-community/Qwen3-0.6B-4bit",
+        "version": "0.31.3"
+      },
+      "output_sha256": "0096c7a2398fc50f977ba46e9bf9b2d3293194a663a39e92ddf7d83f01952b44",
+      "raw_output": "{\"responses\": [\"u_t = u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u_xx + u\", \"FINAL: exp(-t)*sin(pi*x)\"]}"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, t, 0) - sin(pi*x)",
+            "name": "initial"
+          }
+        ],
+        "domains": {
+          "t": [
+            0.0,
+            1.0
+          ],
+          "x": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "sin(pi*x)"
+        },
+        "name": "unit-speed transport",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, t) + D(u, x)",
+            "name": "transport PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "t"
+        ]
+      },
+      "id": "qwen-local-transport-01",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:01.968936+00:00",
+        "identifier": "mlx-community/Qwen3-0.6B-4bit",
+        "input": "{\"initial_prompt\": \"Solve u_t + u_x = 0 with u(x,0)=sin(pi*x).\\nReturn one explicit candidate expression for u in Python/SymPy syntax. Allowed names are the stated variables, pi, E, sin, cos, exp, sqrt, +, -, *, /, **, and parentheses. Answer with one line beginning FINAL: and no prose.\", \"maximum_attempts\": 3, \"repair_prompt\": \"That is not a parseable explicit expression for u. Do not write a differential equation and do not use u on the right. Return one concrete formula, not a placeholder. Example format: FINAL: exp(-t)*sin(pi*x).\"}",
+        "kind": "open_model",
+        "license": "Apache-2.0",
+        "producer": "Qwen via MLX LM",
+        "revision": "73e3e38d981303bc594367cd910ea6eb48349da8",
+        "source_url": "https://huggingface.co/mlx-community/Qwen3-0.6B-4bit",
+        "version": "0.31.3"
+      },
+      "output_sha256": "23976d36bc390bde619d499cb999566cb44a79873bd76edb525da1ea77fb1050",
+      "raw_output": "{\"responses\": [\"u(x, t) = sin(pi*x)\"]}"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, t, 0) - cos(pi*x)",
+            "name": "initial"
+          }
+        ],
+        "domains": {
+          "t": [
+            0.0,
+            1.0
+          ],
+          "x": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "cos(pi*x)"
+        },
+        "name": "speed-two transport",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, t) + 2*D(u, x)",
+            "name": "transport PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "t"
+        ]
+      },
+      "id": "qwen-local-transport-02",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:02.151376+00:00",
+        "identifier": "mlx-community/Qwen3-0.6B-4bit",
+        "input": "{\"initial_prompt\": \"Solve u_t + 2*u_x = 0 with u(x,0)=cos(pi*x).\\nReturn one explicit candidate expression for u in Python/SymPy syntax. Allowed names are the stated variables, pi, E, sin, cos, exp, sqrt, +, -, *, /, **, and parentheses. Answer with one line beginning FINAL: and no prose.\", \"maximum_attempts\": 3, \"repair_prompt\": \"That is not a parseable explicit expression for u. Do not write a differential equation and do not use u on the right. Return one concrete formula, not a placeholder. Example format: FINAL: exp(-t)*sin(pi*x).\"}",
+        "kind": "open_model",
+        "license": "Apache-2.0",
+        "producer": "Qwen via MLX LM",
+        "revision": "73e3e38d981303bc594367cd910ea6eb48349da8",
+        "source_url": "https://huggingface.co/mlx-community/Qwen3-0.6B-4bit",
+        "version": "0.31.3"
+      },
+      "output_sha256": "cdb61f3b704a3d77fd7cbb187889315706613d29df8877b561e7a7c9730a5c42",
+      "raw_output": "{\"responses\": [\"u(x, t) = cos(pi*x)\"]}"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, t, 0) - sin(pi*x)",
+            "name": "initial"
+          }
+        ],
+        "domains": {
+          "t": [
+            0.0,
+            1.0
+          ],
+          "x": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "sin(pi*x) + exp(-pi*t)"
+        },
+        "name": "linear reaction equation",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, t) + u",
+            "name": "reaction PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "t"
+        ]
+      },
+      "id": "qwen-local-reaction-01",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:02.368838+00:00",
+        "identifier": "mlx-community/Qwen3-0.6B-4bit",
+        "input": "{\"initial_prompt\": \"Solve u_t + u = 0 with u(x,0)=sin(pi*x).\\nReturn one explicit candidate expression for u in Python/SymPy syntax. Allowed names are the stated variables, pi, E, sin, cos, exp, sqrt, +, -, *, /, **, and parentheses. Answer with one line beginning FINAL: and no prose.\", \"maximum_attempts\": 3, \"repair_prompt\": \"That is not a parseable explicit expression for u. Do not write a differential equation and do not use u on the right. Return one concrete formula, not a placeholder. Example format: FINAL: exp(-t)*sin(pi*x).\"}",
+        "kind": "open_model",
+        "license": "Apache-2.0",
+        "producer": "Qwen via MLX LM",
+        "revision": "73e3e38d981303bc594367cd910ea6eb48349da8",
+        "source_url": "https://huggingface.co/mlx-community/Qwen3-0.6B-4bit",
+        "version": "0.31.3"
+      },
+      "output_sha256": "f2a8d6d6a14af36f2f28b5f5e0afef8660900b4bfa4805a633c05020d93762bd",
+      "raw_output": "{\"responses\": [\"u(x, t) = sin(pi*x) + exp(-pi*t)\"]}"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, t, 0) - sin(pi*x)",
+            "name": "position"
+          },
+          {
+            "expression": "At(D(u, t), t, 0)",
+            "name": "velocity"
+          },
+          {
+            "expression": "At(u, x, 0)",
+            "name": "left"
+          },
+          {
+            "expression": "At(u, x, 1)",
+            "name": "right"
+          }
+        ],
+        "domains": {
+          "t": [
+            0.0,
+            1.0
+          ],
+          "x": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "sin(pi*x) + exp(-pi*t)"
+        },
+        "name": "wave equation, first mode",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, t, 2) - D(u, x, 2)",
+            "name": "wave PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "t"
+        ]
+      },
+      "id": "qwen-local-wave-01",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:02.590110+00:00",
+        "identifier": "mlx-community/Qwen3-0.6B-4bit",
+        "input": "{\"initial_prompt\": \"Solve u_tt = u_xx with u(x,0)=sin(pi*x), u_t(x,0)=0, u(0,t)=u(1,t)=0.\\nReturn one explicit candidate expression for u in Python/SymPy syntax. Allowed names are the stated variables, pi, E, sin, cos, exp, sqrt, +, -, *, /, **, and parentheses. Answer with one line beginning FINAL: and no prose.\", \"maximum_attempts\": 3, \"repair_prompt\": \"That is not a parseable explicit expression for u. Do not write a differential equation and do not use u on the right. Return one concrete formula, not a placeholder. Example format: FINAL: exp(-t)*sin(pi*x).\"}",
+        "kind": "open_model",
+        "license": "Apache-2.0",
+        "producer": "Qwen via MLX LM",
+        "revision": "73e3e38d981303bc594367cd910ea6eb48349da8",
+        "source_url": "https://huggingface.co/mlx-community/Qwen3-0.6B-4bit",
+        "version": "0.31.3"
+      },
+      "output_sha256": "f2a8d6d6a14af36f2f28b5f5e0afef8660900b4bfa4805a633c05020d93762bd",
+      "raw_output": "{\"responses\": [\"u(x, t) = sin(pi*x) + exp(-pi*t)\"]}"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, y, 0)",
+            "name": "bottom"
+          },
+          {
+            "expression": "At(u, y, 1)",
+            "name": "top"
+          },
+          {
+            "expression": "At(u, x, 0) - sin(pi*y)",
+            "name": "left"
+          },
+          {
+            "expression": "At(u, x, 1) - exp(pi)*sin(pi*y)",
+            "name": "right"
+          }
+        ],
+        "domains": {
+          "x": [
+            0.0,
+            1.0
+          ],
+          "y": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "sqrt(1 - y**2)*sin(pi*y) + exp(pi)*sin(pi*y)"
+        },
+        "name": "Laplace equation with exponential trace",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, x, 2) + D(u, y, 2)",
+            "name": "Laplace PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "y"
+        ]
+      },
+      "id": "qwen-local-laplace-01",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:02.883853+00:00",
+        "identifier": "mlx-community/Qwen3-0.6B-4bit",
+        "input": "{\"initial_prompt\": \"Solve u_xx + u_yy = 0 on [0,1]^2 with u(x,0)=u(x,1)=0, u(0,y)=sin(pi*y), u(1,y)=exp(pi)*sin(pi*y).\\nReturn one explicit candidate expression for u in Python/SymPy syntax. Allowed names are the stated variables, pi, E, sin, cos, exp, sqrt, +, -, *, /, **, and parentheses. Answer with one line beginning FINAL: and no prose.\", \"maximum_attempts\": 3, \"repair_prompt\": \"That is not a parseable explicit expression for u. Do not write a differential equation and do not use u on the right. Return one concrete formula, not a placeholder. Example format: FINAL: exp(-t)*sin(pi*x).\"}",
+        "kind": "open_model",
+        "license": "Apache-2.0",
+        "producer": "Qwen via MLX LM",
+        "revision": "73e3e38d981303bc594367cd910ea6eb48349da8",
+        "source_url": "https://huggingface.co/mlx-community/Qwen3-0.6B-4bit",
+        "version": "0.31.3"
+      },
+      "output_sha256": "a2496237ac2518b0abe136ffa374827c4da3aa10948dc080cc23039edd2ef5d1",
+      "raw_output": "{\"responses\": [\"u = sin(pi*y) * sqrt(1 - y^2) + exp(pi) * sin(pi*y)\"]}"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, x, 0)",
+            "name": "x zero"
+          },
+          {
+            "expression": "At(u, x, 1)",
+            "name": "x one"
+          },
+          {
+            "expression": "At(u, y, 0)",
+            "name": "y zero"
+          },
+          {
+            "expression": "At(u, y, 1)",
+            "name": "y one"
+          }
+        ],
+        "domains": {
+          "x": [
+            0.0,
+            1.0
+          ],
+          "y": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "-2*pi**2*sin(pi*x*sin(pi*y))"
+        },
+        "name": "Poisson equation, sine forcing",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, x, 2) + D(u, y, 2) + 2*pi**2*sin(pi*x)*sin(pi*y)",
+            "name": "Poisson PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "y"
+        ]
+      },
+      "id": "qwen-local-poisson-01",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:03.143034+00:00",
+        "identifier": "mlx-community/Qwen3-0.6B-4bit",
+        "input": "{\"initial_prompt\": \"Solve u_xx + u_yy = -2*pi^2*sin(pi*x)*sin(pi*y) on [0,1]^2 with zero boundary values.\\nReturn one explicit candidate expression for u in Python/SymPy syntax. Allowed names are the stated variables, pi, E, sin, cos, exp, sqrt, +, -, *, /, **, and parentheses. Answer with one line beginning FINAL: and no prose.\", \"maximum_attempts\": 3, \"repair_prompt\": \"That is not a parseable explicit expression for u. Do not write a differential equation and do not use u on the right. Return one concrete formula, not a placeholder. Example format: FINAL: exp(-t)*sin(pi*x).\"}",
+        "kind": "open_model",
+        "license": "Apache-2.0",
+        "producer": "Qwen via MLX LM",
+        "revision": "73e3e38d981303bc594367cd910ea6eb48349da8",
+        "source_url": "https://huggingface.co/mlx-community/Qwen3-0.6B-4bit",
+        "version": "0.31.3"
+      },
+      "output_sha256": "37c2287fa7694dbe2b0ca6af382f8b9bf58bd4a5e310cc04fc5b72424f5ce38d",
+      "raw_output": "{\"responses\": [\"FINAL: u(x, y) = -2*pi**2*sin(pi*x*sin(pi*y))\"]}"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, t, 0) - sin(pi*x)*sin(pi*y)",
+            "name": "initial"
+          }
+        ],
+        "domains": {
+          "t": [
+            0.0,
+            1.0
+          ],
+          "x": [
+            0.0,
+            1.0
+          ],
+          "y": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "sin(pi*x)*sin(pi*y)"
+        },
+        "name": "two-dimensional transport",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, t) + D(u, x) + D(u, y)",
+            "name": "transport PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "y",
+          "t"
+        ]
+      },
+      "id": "qwen-local-transport-2d-01",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:03.332119+00:00",
+        "identifier": "mlx-community/Qwen3-0.6B-4bit",
+        "input": "{\"initial_prompt\": \"Solve u_t + u_x + u_y = 0 with u(x,y,0)=sin(pi*x)*sin(pi*y).\\nReturn one explicit candidate expression for u in Python/SymPy syntax. Allowed names are the stated variables, pi, E, sin, cos, exp, sqrt, +, -, *, /, **, and parentheses. Answer with one line beginning FINAL: and no prose.\", \"maximum_attempts\": 3, \"repair_prompt\": \"That is not a parseable explicit expression for u. Do not write a differential equation and do not use u on the right. Return one concrete formula, not a placeholder. Example format: FINAL: exp(-t)*sin(pi*x).\"}",
+        "kind": "open_model",
+        "license": "Apache-2.0",
+        "producer": "Qwen via MLX LM",
+        "revision": "73e3e38d981303bc594367cd910ea6eb48349da8",
+        "source_url": "https://huggingface.co/mlx-community/Qwen3-0.6B-4bit",
+        "version": "0.31.3"
+      },
+      "output_sha256": "92c1d278176181fa661264f6c824507ec97cc2821ed410bfe977b725847eb795",
+      "raw_output": "{\"responses\": [\"u = sin(pi*x)*sin(pi*y)\"]}"
+    },
+    {
+      "annotation": {
+        "annotators": [],
+        "failure_modes": [],
+        "rationale": null,
+        "status": "pending",
+        "verdict": null
+      },
+      "case": {
+        "conditions": [
+          {
+            "expression": "At(u, t, 0) - sin(pi*x)",
+            "name": "position"
+          },
+          {
+            "expression": "At(D(u, t), t, 0)",
+            "name": "velocity"
+          },
+          {
+            "expression": "At(u, x, 0)",
+            "name": "left"
+          },
+          {
+            "expression": "At(u, x, 1)",
+            "name": "right"
+          }
+        ],
+        "domains": {
+          "t": [
+            0.0,
+            1.0
+          ],
+          "x": [
+            0.0,
+            1.0
+          ]
+        },
+        "fields": {
+          "u": "exp(-pi*t)*sin(pi*x)"
+        },
+        "name": "linear Klein-Gordon equation",
+        "parameters": {},
+        "pde_residuals": [
+          {
+            "expression": "D(u, t, 2) - D(u, x, 2) + u",
+            "name": "Klein-Gordon PDE"
+          }
+        ],
+        "schema_version": 3,
+        "variables": [
+          "x",
+          "t"
+        ]
+      },
+      "id": "qwen-local-klein-gordon-01",
+      "origin": {
+        "generated_at": "2026-08-23T22:00:03.834434+00:00",
+        "identifier": "mlx-community/Qwen3-0.6B-4bit",
+        "input": "{\"initial_prompt\": \"Solve u_tt - u_xx + u = 0 with u(x,0)=sin(pi*x), u_t(x,0)=0, u(0,t)=u(1,t)=0.\\nReturn one explicit candidate expression for u in Python/SymPy syntax. Allowed names are the stated variables, pi, E, sin, cos, exp, sqrt, +, -, *, /, **, and parentheses. Answer with one line beginning FINAL: and no prose.\", \"maximum_attempts\": 3, \"repair_prompt\": \"That is not a parseable explicit expression for u. Do not write a differential equation and do not use u on the right. Return one concrete formula, not a placeholder. Example format: FINAL: exp(-t)*sin(pi*x).\"}",
+        "kind": "open_model",
+        "license": "Apache-2.0",
+        "producer": "Qwen via MLX LM",
+        "revision": "73e3e38d981303bc594367cd910ea6eb48349da8",
+        "source_url": "https://huggingface.co/mlx-community/Qwen3-0.6B-4bit",
+        "version": "0.31.3"
+      },
+      "output_sha256": "cdf87ab45ddc5aeb8497380373570d44147c6d0c03ce788ee828fc719c2064af",
+      "raw_output": "{\"responses\": [\"u(x, t) = sin(pi*x) + exp(-pi*t) + sqrt(1 - sin^2(pi*x))\", \"FINAL: exp(-pi*t)*sin(pi*x)\"]}"
+    }
+  ]
 }
