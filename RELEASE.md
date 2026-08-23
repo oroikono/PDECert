@@ -51,16 +51,32 @@ recomputed-metric mismatches, non-standard JSON, and nonempty destinations.
 Inspect `README.md`, `data/pilot.jsonl`, `results/pilot-benchmark.json`, and
 `manifest.json` in the output directory.
 
-## 5. Publish only the inspected bundle
+## 5. Stage only the inspected bundle
 
 ```bash
 hf auth whoami
-hf repos create oroikono/pdecert-pilot --repo-type dataset --public --exist-ok
+hf repos create oroikono/pdecert-pilot --repo-type dataset --private --exist-ok
 hf upload oroikono/pdecert-pilot dist/pdecert-pilot . \
   --repo-type dataset \
   --commit-message "Publish the labeled PDECert pilot"
 ```
 
-After upload, verify that the Hub renders the dataset card, exposes exactly 20
-rows in the `test` split, and shows the same corpus digest as the local manifest.
-Then link the immutable Hub commit from the GitHub release notes.
+Download every staged file from its immutable Hub revision and compare its hash
+with the local bundle. Confirm that no private review file, credential, or local
+path is present.
+
+## 6. Make the verified revision public
+
+Before changing visibility, explicitly approve the public payload and its
+destination. The public release contains 20 labeled candidate records, raw
+model or solver outputs and provenance, the public reviewer identifier, the
+dataset card, the benchmark report, and the checksum manifest.
+
+```bash
+hf repos settings oroikono/pdecert-pilot --repo-type dataset --public
+```
+
+After the visibility change, verify that the Hub renders the dataset card,
+exposes exactly 20 rows in the `test` split, and shows the same corpus digest as
+the local manifest. Then link the immutable Hub commit from the GitHub release
+notes.

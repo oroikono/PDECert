@@ -267,6 +267,13 @@ provide interval timers. When a check is incomplete, the intended behavior is
 The next milestones are tracked in [ROADMAP.md](ROADMAP.md). Contributions that
 add one focused capability together with tests are welcome.
 
+## Citation
+
+If PDECert or the pilot benchmark supports your work, cite the software using
+[`CITATION.cff`](CITATION.cff). GitHub can render that file as APA or BibTeX.
+
+Release history is recorded in [CHANGELOG.md](CHANGELOG.md).
+
 ## License
 
 MIT
