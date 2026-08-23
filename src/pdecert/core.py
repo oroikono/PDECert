@@ -9,7 +9,7 @@ from __future__ import annotations
 import math
 import signal
 import threading
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from itertools import product
@@ -47,6 +47,7 @@ class Constraint:
 
     name: str
     residual: sp.Expr
+    source: str | None = None
 
 
 @dataclass(frozen=True)
@@ -268,17 +269,17 @@ def _domain_singularity(
 
 def _find_singularity(
     problem: Problem,
-    expressions: Iterable[sp.Expr],
+    expressions: Iterable[tuple[str, sp.Expr]],
     timeout_seconds: float | None,
 ) -> tuple[Witness | None, bool, dict[str, str]]:
     """Search for domain singularities and report whether the search was complete."""
 
     complete = True
     incomplete_reasons: dict[str, str] = {}
-    for expression_index, expr in enumerate(expressions):
+    for field_name, expr in expressions:
         for variable in problem.variables:
             lower, upper = problem.domains[variable]
-            check_name = f"candidate[{expression_index}] domain in {variable}"
+            check_name = f"{field_name} domain in {variable}"
             location, error = _run_bounded(
                 lambda: _domain_singularity(expr, variable, lower, upper),
                 timeout_seconds,
@@ -291,10 +292,10 @@ def _find_singularity(
                 point, numeric = location
                 return (
                     Witness(
-                        constraint="candidate domain",
+                        constraint=f"{field_name} domain",
                         point={str(variable): numeric},
                         residual="undefined",
-                        reason=f"candidate has a singularity at {variable}={sp.sstr(point)}",
+                        reason=f"{field_name} has a singularity at {variable}={sp.sstr(point)}",
                     ),
                     complete,
                     incomplete_reasons,
@@ -304,7 +305,7 @@ def _find_singularity(
 
 def verify(
     problem: Problem,
-    candidate_expressions: Iterable[sp.Expr],
+    candidate_expressions: Iterable[sp.Expr] | Mapping[str, sp.Expr],
     *,
     tolerance: float = 1e-9,
     samples_per_axis: int = 5,
@@ -314,8 +315,10 @@ def verify(
 
     Exact symbolic identities can prove the current obligations. Off-grid
     numerical evaluation is used only to find counterexamples when symbolic
-    checking is inconclusive. ``symbolic_timeout`` applies separately to each
-    domain and identity check; ``None`` leaves those operations unbounded.
+    checking is inconclusive. Candidate expressions may be passed as a mapping
+    to attach field names to domain diagnostics. ``symbolic_timeout`` applies
+    separately to each domain and identity check; ``None`` leaves those
+    operations unbounded.
     """
 
     if not math.isfinite(tolerance) or tolerance <= 0:
@@ -327,7 +330,19 @@ def verify(
     ):
         raise ValueError("symbolic_timeout must be finite and positive")
 
-    expressions = tuple(candidate_expressions)
+    if isinstance(candidate_expressions, Mapping):
+        expressions = tuple(candidate_expressions.items())
+        if any(not isinstance(name, str) or not name for name, _ in expressions):
+            raise ValueError("candidate field names must be non-empty strings")
+    else:
+        expressions = tuple(
+            (f"candidate[{index}]", expression)
+            for index, expression in enumerate(candidate_expressions)
+        )
+    if not expressions:
+        raise ValueError("at least one candidate expression is required")
+    if any(not isinstance(expression, sp.Expr) for _, expression in expressions):
+        raise TypeError("candidate expressions must be SymPy expressions")
     constraints = problem.pde_residuals + problem.conditions
     report = Report(status=Status.INCONCLUSIVE)
 

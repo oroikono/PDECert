@@ -18,11 +18,33 @@ from sympy.parsing.sympy_parser import parse_expr, standard_transformations
 from .core import PARAMETER_ASSUMPTIONS, Constraint, Problem
 
 
-SCHEMA_VERSION = 2
-_SUPPORTED_SCHEMA_VERSIONS = frozenset({1, SCHEMA_VERSION})
+SCHEMA_VERSION = 3
+_SUPPORTED_SCHEMA_VERSIONS = frozenset({1, 2, SCHEMA_VERSION})
+_MAX_DERIVATIVE_ORDER = 8
+
+
+def _differentiate(
+    expression: sp.Expr, variable: sp.Expr, order: sp.Expr = sp.Integer(1)
+) -> sp.Expr:
+    if not isinstance(variable, sp.Symbol):
+        raise ValueError("D variable must be a declared symbol")
+    if order.is_Integer is not True or order.is_positive is not True:
+        raise ValueError("D order must be a positive integer")
+    if int(order) > _MAX_DERIVATIVE_ORDER:
+        raise ValueError(f"D order cannot exceed {_MAX_DERIVATIVE_ORDER}")
+    return sp.diff(expression, variable, int(order))
+
+
+def _evaluate_at(expression: sp.Expr, variable: sp.Expr, value: sp.Expr) -> sp.Expr:
+    if not isinstance(variable, sp.Symbol):
+        raise ValueError("At variable must be a declared symbol")
+    return expression.subs(variable, value)
+
 
 _FUNCTIONS: dict[str, Any] = {
     "Abs": sp.Abs,
+    "At": _evaluate_at,
+    "D": _differentiate,
     "Ei": sp.Ei,
     "Float": sp.Float,
     "Integer": sp.Integer,
@@ -55,10 +77,35 @@ class VerificationCase:
 
     problem: Problem
     candidate_expressions: tuple[sp.Expr, ...]
+    field_names: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
-        if not self.candidate_expressions:
+        expressions = tuple(self.candidate_expressions)
+        if not expressions:
             raise ValueError("candidate_expressions must not be empty")
+        names = tuple(self.field_names) or tuple(
+            f"candidate_{index}" for index in range(len(expressions))
+        )
+        if len(names) != len(expressions):
+            raise ValueError("field_names must match candidate_expressions")
+        if len(set(names)) != len(names):
+            raise ValueError("field_names must be unique")
+        for name in names:
+            if (
+                not isinstance(name, str)
+                or not name.isascii()
+                or not name.isidentifier()
+                or keyword.iskeyword(name)
+            ):
+                raise ValueError("field names must be ASCII identifiers")
+        object.__setattr__(self, "candidate_expressions", expressions)
+        object.__setattr__(self, "field_names", names)
+
+    @property
+    def candidate_fields(self) -> dict[str, sp.Expr]:
+        """Return candidate expressions keyed by their declared field names."""
+
+        return dict(zip(self.field_names, self.candidate_expressions))
 
 
 def _error(path: str, message: str) -> SchemaError:
@@ -129,7 +176,7 @@ def _validate_expression_node(node: ast.AST, names: set[str], path: str) -> None
 def _parse_expression(
     value: object,
     *,
-    symbols: Mapping[str, sp.Symbol],
+    symbols: Mapping[str, sp.Expr],
     path: str,
 ) -> sp.Expr:
     source = _text(value, path)
@@ -158,7 +205,7 @@ def _parse_expression(
 def _parse_constraints(
     value: object,
     *,
-    symbols: Mapping[str, sp.Symbol],
+    symbols: Mapping[str, sp.Expr],
     path: str,
 ) -> tuple[Constraint, ...]:
     if not isinstance(value, list):
@@ -168,14 +215,16 @@ def _parse_constraints(
         item_path = f"{path}[{index}]"
         payload = _object(item, item_path)
         _exact_keys(payload, required={"name", "expression"}, path=item_path)
+        source = _text(payload["expression"], f"{item_path}.expression")
         constraints.append(
             Constraint(
                 _text(payload["name"], f"{item_path}.name"),
                 _parse_expression(
-                    payload["expression"],
+                    source,
                     symbols=symbols,
                     path=f"{item_path}.expression",
                 ),
+                source,
             )
         )
     return tuple(constraints)
@@ -203,10 +252,13 @@ def case_from_dict(value: object) -> VerificationCase:
         "domains",
         "pde_residuals",
         "conditions",
-        "candidate_expressions",
     }
-    if version == 2:
+    if version >= 2:
         fields.add("parameters")
+    if version == 3:
+        fields.add("fields")
+    else:
+        fields.add("candidate_expressions")
     _exact_keys(payload, required=fields, path="$")
 
     raw_variables = payload["variables"]
@@ -223,7 +275,7 @@ def case_from_dict(value: object) -> VerificationCase:
             raise _error(f"$.variables[{index}]", f"duplicate variable: {name}")
         variable_names.append(name)
     parameter_assumptions: dict[str, frozenset[str]] = {}
-    if version == 2:
+    if version >= 2:
         raw_parameters = _object(payload["parameters"], "$.parameters")
         unknown_parameters = set(raw_parameters) - set(variable_names)
         if unknown_parameters:
@@ -278,14 +330,52 @@ def case_from_dict(value: object) -> VerificationCase:
             raise _error(f"$.domains.{name}", "bounds must be finite and increasing")
         domains[symbols[name]] = (lower, upper)
 
+    if version == 3:
+        raw_fields = _object(payload["fields"], "$.fields")
+        if not raw_fields:
+            raise _error("$.fields", "expected at least one candidate field")
+        field_names: list[str] = []
+        candidates_list: list[sp.Expr] = []
+        for raw_name, raw_expression in raw_fields.items():
+            if (
+                not isinstance(raw_name, str)
+                or not raw_name.isascii()
+                or not raw_name.isidentifier()
+                or keyword.iskeyword(raw_name)
+            ):
+                raise _error("$.fields", "field names must be ASCII identifiers")
+            if raw_name in symbols or raw_name in _RESERVED_NAMES:
+                raise _error("$.fields", f"field name conflicts with a declared name: {raw_name}")
+            field_names.append(raw_name)
+            candidates_list.append(
+                _parse_expression(
+                    raw_expression,
+                    symbols=symbols,
+                    path=f"$.fields.{raw_name}",
+                )
+            )
+        candidates = tuple(candidates_list)
+    else:
+        raw_candidates = payload["candidate_expressions"]
+        if not isinstance(raw_candidates, list) or not raw_candidates:
+            raise _error("$.candidate_expressions", "expected a non-empty list")
+        candidates = tuple(
+            _parse_expression(item, symbols=symbols, path=f"$.candidate_expressions[{index}]")
+            for index, item in enumerate(raw_candidates)
+        )
+        field_names = [f"candidate_{index}" for index in range(len(candidates))]
+
+    constraint_symbols: dict[str, sp.Expr] = dict(symbols)
+    if version == 3:
+        constraint_symbols.update(dict(zip(field_names, candidates)))
     pde_residuals = _parse_constraints(
         payload["pde_residuals"],
-        symbols=symbols,
+        symbols=constraint_symbols,
         path="$.pde_residuals",
     )
     conditions = _parse_constraints(
         payload["conditions"],
-        symbols=symbols,
+        symbols=constraint_symbols,
         path="$.conditions",
     )
     if not pde_residuals and not conditions:
@@ -295,14 +385,6 @@ def case_from_dict(value: object) -> VerificationCase:
         if constraint.name in seen_constraints:
             raise _error("$", f"duplicate constraint name: {constraint.name}")
         seen_constraints.add(constraint.name)
-
-    raw_candidates = payload["candidate_expressions"]
-    if not isinstance(raw_candidates, list) or not raw_candidates:
-        raise _error("$.candidate_expressions", "expected a non-empty list")
-    candidates = tuple(
-        _parse_expression(item, symbols=symbols, path=f"$.candidate_expressions[{index}]")
-        for index, item in enumerate(raw_candidates)
-    )
 
     try:
         problem = Problem(
@@ -317,7 +399,7 @@ def case_from_dict(value: object) -> VerificationCase:
         )
     except ValueError as error:
         raise _error("$", str(error)) from error
-    return VerificationCase(problem, candidates)
+    return VerificationCase(problem, candidates, tuple(field_names))
 
 
 def case_to_dict(case: VerificationCase) -> dict[str, object]:
@@ -326,7 +408,10 @@ def case_to_dict(case: VerificationCase) -> dict[str, object]:
     variable_names = [str(variable) for variable in case.problem.variables]
 
     def constraints(items: tuple[Constraint, ...]) -> list[dict[str, str]]:
-        return [{"name": item.name, "expression": sp.sstr(item.residual)} for item in items]
+        return [
+            {"name": item.name, "expression": item.source or sp.sstr(item.residual)}
+            for item in items
+        ]
 
     payload: dict[str, object] = {
         "schema_version": SCHEMA_VERSION,
@@ -342,9 +427,21 @@ def case_to_dict(case: VerificationCase) -> dict[str, object]:
         },
         "pde_residuals": constraints(case.problem.pde_residuals),
         "conditions": constraints(case.problem.conditions),
-        "candidate_expressions": [sp.sstr(expression) for expression in case.candidate_expressions],
+        "fields": {
+            name: sp.sstr(expression)
+            for name, expression in zip(case.field_names, case.candidate_expressions)
+        },
     }
-    case_from_dict(payload)
+    validated = case_from_dict(payload)
+    symbol_map = dict(zip(validated.problem.variables, case.problem.variables))
+    original_constraints = case.problem.pde_residuals + case.problem.conditions
+    validated_constraints = validated.problem.pde_residuals + validated.problem.conditions
+    for original, rendered in zip(original_constraints, validated_constraints):
+        if original.source is None:
+            continue
+        rendered_residual = rendered.residual.xreplace(symbol_map)
+        if sp.simplify(rendered_residual - original.residual) != 0:
+            raise _error("$", f"constraint source does not match residual: {original.name}")
     return payload
 
 
