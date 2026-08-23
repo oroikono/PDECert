@@ -46,12 +46,14 @@ Available:
   residual checks, and PDECert with error, abstention, witness, and runtime metrics;
 - a committed pilot comparison bound to the exact labeled-corpus digest;
 - a deterministic, digest-checked Hugging Face release builder with JSONL,
-  dataset-card, benchmark-report, and manifest outputs.
+  dataset-card, benchmark-report, and manifest outputs;
+- a public, immutable first benchmark release at
+  [`oroikono/pdecert-pilot`](https://huggingface.co/datasets/oroikono/pdecert-pilot).
 
 Next:
 
 - grow the first public benchmark to at least 100 candidates;
-- publish the benchmark and data card on Hugging Face.
+- add harder cases where finite collocation and exact verification disagree.
 
 ## v0.3: integrations
 
