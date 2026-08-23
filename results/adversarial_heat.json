@@ -1,0 +1,175 @@
+[
+  {
+    "case": "exact_heat_solution",
+    "expected_valid": true,
+    "explanation": "Canonical analytical solution.",
+    "full_fixed_grid_accepts": true,
+    "full_fixed_max_residual": 0.0,
+    "pde_only_fixed_grid_accepts": true,
+    "pde_only_max_residual": 0.0,
+    "pdecert": {
+      "exact_checks": {
+        "heat PDE": "identity",
+        "initial condition": "identity",
+        "left boundary": "identity",
+        "right boundary": "identity"
+      },
+      "max_sampled_residual": 0.0,
+      "status": "PROVED",
+      "witness": null
+    },
+    "sympy_pde_accepts": true
+  },
+  {
+    "case": "equivalent_expression",
+    "expected_valid": true,
+    "explanation": "Equivalent through sin(pi*(x+2)) = sin(pi*x).",
+    "full_fixed_grid_accepts": true,
+    "full_fixed_max_residual": 7.771561172376096e-16,
+    "pde_only_fixed_grid_accepts": true,
+    "pde_only_max_residual": 0.0,
+    "pdecert": {
+      "exact_checks": {
+        "heat PDE": "identity",
+        "initial condition": "identity",
+        "left boundary": "identity",
+        "right boundary": "identity"
+      },
+      "max_sampled_residual": 0.0,
+      "status": "PROVED",
+      "witness": null
+    },
+    "sympy_pde_accepts": true
+  },
+  {
+    "case": "pde_only_boundary_trap",
+    "expected_valid": false,
+    "explanation": "The PDE residual is zero, but the initial and right boundary conditions fail.",
+    "full_fixed_grid_accepts": false,
+    "full_fixed_max_residual": 0.1,
+    "pde_only_fixed_grid_accepts": true,
+    "pde_only_max_residual": 0.0,
+    "pdecert": {
+      "exact_checks": {
+        "heat PDE": "identity",
+        "initial condition": "unknown",
+        "left boundary": "identity",
+        "right boundary": "nonzero"
+      },
+      "max_sampled_residual": 0.011300000000000001,
+      "status": "REFUTED",
+      "witness": {
+        "constraint": "initial condition",
+        "point": {
+          "x": 0.113
+        },
+        "reason": "off-grid evaluation found a violated obligation",
+        "residual": 0.011300000000000001
+      }
+    },
+    "sympy_pde_accepts": true
+  },
+  {
+    "case": "fixed_grid_alias",
+    "expected_valid": false,
+    "explanation": "A polynomial perturbation is invisible on every fixed collocation point.",
+    "full_fixed_grid_accepts": true,
+    "full_fixed_max_residual": 0.0,
+    "pde_only_fixed_grid_accepts": true,
+    "pde_only_max_residual": 0.0,
+    "pdecert": {
+      "exact_checks": {
+        "heat PDE": "unknown",
+        "initial condition": "identity",
+        "left boundary": "identity",
+        "right boundary": "identity"
+      },
+      "max_sampled_residual": 0.014570794765862793,
+      "status": "REFUTED",
+      "witness": {
+        "constraint": "heat PDE",
+        "point": {
+          "t": 0.113,
+          "x": 0.113
+        },
+        "reason": "off-grid evaluation found a violated obligation",
+        "residual": 0.014570794765862793
+      }
+    },
+    "sympy_pde_accepts": false
+  },
+  {
+    "case": "hidden_singularity",
+    "expected_valid": false,
+    "explanation": "A grid-alias perturbation hides an interior pole at x=1/3.",
+    "full_fixed_grid_accepts": true,
+    "full_fixed_max_residual": 0.0,
+    "pde_only_fixed_grid_accepts": true,
+    "pde_only_max_residual": 0.0,
+    "pdecert": {
+      "exact_checks": {},
+      "max_sampled_residual": 0.0,
+      "status": "REFUTED",
+      "witness": {
+        "constraint": "candidate domain",
+        "point": {
+          "x": 0.3333333333333333
+        },
+        "reason": "candidate has a singularity at x=1/3",
+        "residual": "undefined"
+      }
+    },
+    "sympy_pde_accepts": false
+  },
+  {
+    "case": "single_parameter_trap",
+    "expected_valid": false,
+    "explanation": "The candidate solves the equation only at k=1, not over the declared interval.",
+    "full_fixed_grid_accepts": true,
+    "full_fixed_max_residual": 0.0,
+    "pde_only_fixed_grid_accepts": true,
+    "pde_only_max_residual": 0.0,
+    "pdecert": {
+      "exact_checks": {
+        "initial condition": "identity",
+        "left boundary": "identity",
+        "parametric heat PDE": "unknown",
+        "right boundary": "identity"
+      },
+      "max_sampled_residual": 0.6709607639052284,
+      "status": "REFUTED",
+      "witness": {
+        "constraint": "parametric heat PDE",
+        "point": {
+          "k": 0.4034,
+          "t": 0.113,
+          "x": 0.113
+        },
+        "reason": "off-grid evaluation found a violated obligation",
+        "residual": 0.6709607639052284
+      }
+    },
+    "sympy_pde_accepts": false
+  },
+  {
+    "case": "below_numeric_tolerance",
+    "expected_valid": false,
+    "explanation": "A real error is below tolerance and must not be reported as proved.",
+    "full_fixed_grid_accepts": true,
+    "full_fixed_max_residual": 2.25e-14,
+    "pde_only_fixed_grid_accepts": true,
+    "pde_only_max_residual": 2.25e-14,
+    "pdecert": {
+      "exact_checks": {
+        "heat PDE": "unknown",
+        "initial condition": "identity",
+        "left boundary": "identity",
+        "right boundary": "identity"
+      },
+      "max_sampled_residual": 1.817439e-14,
+      "status": "INCONCLUSIVE",
+      "witness": null
+    },
+    "sympy_pde_accepts": false
+  }
+]
