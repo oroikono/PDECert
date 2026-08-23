@@ -23,6 +23,10 @@ First research release of the verifier and the version 1 pilot benchmark.
   simplification.
 - A deterministic Hugging Face bundle containing the labeled JSONL, dataset
   card, benchmark report, and checksum manifest.
+- Public release at
+  [`oroikono/pdecert-pilot`](https://huggingface.co/datasets/oroikono/pdecert-pilot),
+  with immutable revision
+  [`db690f9b`](https://huggingface.co/datasets/oroikono/pdecert-pilot/commit/db690f9b161762ea288dd5dfb4b6b2f999c48e03).
 
 The pilot is designed to exercise known failure modes. Its measurements are
 descriptive and are not population-level performance estimates.

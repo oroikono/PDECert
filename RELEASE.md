@@ -80,3 +80,13 @@ After the visibility change, verify that the Hub renders the dataset card,
 exposes exactly 20 rows in the `test` split, and shows the same corpus digest as
 the local manifest. Then link the immutable Hub commit from the GitHub release
 notes.
+
+## First public release
+
+- Dataset: <https://huggingface.co/datasets/oroikono/pdecert-pilot>
+- Immutable revision:
+  `db690f9b161762ea288dd5dfb4b6b2f999c48e03`
+- Corpus SHA-256:
+  `4be9178edd30fcc561f21e83375713f4b38338484d75a0c8a7c8088e9c4369fb`
+- Public audit: 20 labeled rows; all four release files byte-identical to the
+  privately reviewed bundle.

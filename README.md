@@ -241,6 +241,13 @@ performance on a broader solver or model population. Accuracy counts an
 inconclusive outcome as incorrect; witness rate uses the 10 invalid records as
 its denominator.
 
+The labeled data and report are public in the
+[`oroikono/pdecert-pilot`](https://huggingface.co/datasets/oroikono/pdecert-pilot)
+dataset. The first release is fixed at Hub revision
+[`db690f9b`](https://huggingface.co/datasets/oroikono/pdecert-pilot/commit/db690f9b161762ea288dd5dfb4b6b2f999c48e03)
+and corpus digest
+`4be9178edd30fcc561f21e83375713f4b38338484d75a0c8a7c8088e9c4369fb`.
+
 Build the Hugging Face-ready release only after that report exists:
 
 ```bash
