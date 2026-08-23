@@ -30,7 +30,9 @@ def _rate(numerator: int, denominator: int) -> float | None:
     return numerator / denominator if denominator else None
 
 
-def _corpus_digest(corpus: object) -> str:
+def corpus_sha256(corpus: object) -> str:
+    """Return the canonical digest used to bind reports to labeled corpora."""
+
     encoded = json.dumps(corpus, sort_keys=True, separators=(",", ":")).encode()
     return hashlib.sha256(encoded).hexdigest()
 
@@ -272,7 +274,7 @@ def evaluate_corpus(
         "corpus": {
             "excluded_unclear": len(records) - len(scored),
             "name": corpus["name"],
-            "sha256": _corpus_digest(corpus),
+            "sha256": corpus_sha256(corpus),
             "scored_records": len(scored),
             "total_records": len(records),
         },

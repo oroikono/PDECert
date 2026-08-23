@@ -41,7 +41,9 @@ Available:
 - a blind human-review protocol, resumable card runner, blank review form,
   guarded annotation importer, and clearly separated provisional comparison file;
 - a label-gated report pipeline comparing fixed collocation, direct SymPy
-  residual checks, and PDECert with error, abstention, witness, and runtime metrics.
+  residual checks, and PDECert with error, abstention, witness, and runtime metrics;
+- a deterministic, digest-checked Hugging Face release builder with JSONL,
+  dataset-card, benchmark-report, and manifest outputs.
 
 Next:
 
