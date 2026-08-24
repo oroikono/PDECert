@@ -239,6 +239,61 @@ class VerificationTests(unittest.TestCase):
         payload = verify(case.problem, (case.candidate,)).to_dict()
         self.assertEqual(payload["status"], "PROVED")
 
+    def test_expression_budget_makes_large_identity_inconclusive(self):
+        x = sp.symbols("x", real=True)
+        residual = sp.Add(*([x] * 12), -12 * x, evaluate=False)
+        problem = Problem(
+            "large structural identity",
+            (x,),
+            {x: (0.0, 1.0)},
+            (Constraint("expanded identity", residual),),
+        )
+        report = verify(problem, (x,), max_expression_ops=5)
+        self.assertEqual(report.status, Status.INCONCLUSIVE)
+        self.assertEqual(report.exact_checks["expanded identity"], "unknown")
+        self.assertIn("13 operations", report.incomplete_reasons["expanded identity"])
+        self.assertLess(report.max_sampled_residual, 1e-12)
+
+    def test_expression_budget_applies_to_candidate_domain_analysis(self):
+        x = sp.symbols("x", real=True)
+        candidate = sp.Add(*([x] * 12), evaluate=False)
+        problem = Problem(
+            "large candidate field",
+            (x,),
+            {x: (0.0, 1.0)},
+            (Constraint("zero residual", sp.Integer(0)),),
+        )
+        report = verify(problem, (candidate,), max_expression_ops=5)
+        self.assertEqual(report.status, Status.INCONCLUSIVE)
+        reason = report.incomplete_reasons["candidate[0] domain in x"]
+        self.assertIn("11 operations", reason)
+
+    def test_expression_budget_does_not_hide_a_numeric_counterexample(self):
+        x = sp.symbols("x", real=True)
+        residual = sp.Add(*([x] * 12), evaluate=False)
+        problem = Problem(
+            "large violated residual",
+            (x,),
+            {x: (0.0, 1.0)},
+            (Constraint("expanded residual", residual),),
+        )
+        report = verify(problem, (x,), max_expression_ops=5)
+        self.assertEqual(report.status, Status.REFUTED)
+        self.assertEqual(report.witness.constraint, "expanded residual")
+        self.assertGreater(report.witness.residual, 0)
+
+    def test_expression_at_budget_limit_is_still_checked(self):
+        x = sp.symbols("x", real=True)
+        residual = sp.Add(*([x] * 12), -12 * x, evaluate=False)
+        problem = Problem(
+            "identity at budget",
+            (x,),
+            {x: (0.0, 1.0)},
+            (Constraint("expanded identity", residual),),
+        )
+        report = verify(problem, (x,), max_expression_ops=13)
+        self.assertEqual(report.status, Status.PROVED)
+
     def test_invalid_verification_controls_are_rejected(self):
         case = self.cases["exact_heat_solution"]
         for invalid in (0, -1, math.inf, math.nan):
@@ -249,6 +304,9 @@ class VerificationTests(unittest.TestCase):
         for invalid in (0, -1, math.inf, math.nan):
             with self.assertRaises(ValueError):
                 verify(case.problem, (case.candidate,), symbolic_timeout=invalid)
+        for invalid in (0, -1, 1.5, True):
+            with self.assertRaises(ValueError):
+                verify(case.problem, (case.candidate,), max_expression_ops=invalid)
 
 
 if __name__ == "__main__":

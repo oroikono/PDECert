@@ -49,6 +49,10 @@ For soundness-sensitive changes, a new check must not turn finite numerical
 sampling into a `PROVED` result. If the reasoning is incomplete, return
 `INCONCLUSIVE` and record why.
 
+Symbolic complexity limits must preserve counterexample search where practical.
+Skipping an over-budget exact check is an incomplete proof attempt, not evidence
+that a candidate is valid or invalid.
+
 ## Checker extensions
 
 New verification techniques should implement the public `Checker` protocol

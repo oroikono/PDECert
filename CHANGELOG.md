@@ -6,6 +6,8 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- A configurable structural operation budget for symbolic domain and identity
+  checks, with a finite CLI default and explicit inconclusive reasons.
 - A contributor-facing PDE Failure Atlas protocol, structured issue intake,
   modular record bundles, and `pdecert corpus validate` coverage summary.
 - A general `SolutionArtifact` protocol with concrete symbolic and differentiable
