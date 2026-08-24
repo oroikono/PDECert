@@ -1,0 +1,99 @@
+name: Submit a PDE failure case
+description: Propose a reproducible candidate for the PDE Failure Atlas
+title: "[Atlas] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for contributing a failure case. Preserve the original artifact and provide enough mathematics for another person to check it independently. Opening an issue does not require you to prepare corpus JSON.
+
+  - type: dropdown
+    id: artifact-kind
+    attributes:
+      label: Artifact kind
+      options:
+        - Symbolic expression
+        - PyTorch callable or PINN
+        - Neural operator or surrogate
+        - Numerical field or trajectory
+        - Generated solver program
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: PDE problem
+      description: State the equations, variables, domains, parameters, and intended solution semantics.
+      placeholder: |
+        Equation:
+        Domain:
+        Parameters and assumptions:
+        Solution semantics:
+    validations:
+      required: true
+
+  - type: textarea
+    id: conditions
+    attributes:
+      label: Initial and boundary conditions
+      description: Include every condition the candidate is claimed to satisfy, or explain why none apply.
+    validations:
+      required: true
+
+  - type: textarea
+    id: candidate
+    attributes:
+      label: Candidate artifact
+      description: Paste the unedited expression or output. For large artifacts, provide a stable public link and digest.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: origin
+    attributes:
+      label: Origin and reproduction
+      description: Name the solver or model, exact version or revision, prompt or input, seed, dependencies, and reproduction command when available.
+    validations:
+      required: true
+
+  - type: textarea
+    id: failure
+    attributes:
+      label: Why this case is interesting
+      description: Describe the suspected failure, disagreement, or missing capability. A concrete residual or point is especially useful.
+    validations:
+      required: true
+
+  - type: textarea
+    id: baseline
+    attributes:
+      label: Existing checks
+      description: Which solver, residual grid, benchmark, or verifier accepted, rejected, or could not decide this candidate?
+
+  - type: input
+    id: source-url
+    attributes:
+      label: Public source
+      description: Link to the model, solver, run, paper, or artifact when one exists.
+      placeholder: https://...
+
+  - type: textarea
+    id: license
+    attributes:
+      label: License or redistribution terms
+      description: State the applicable license or terms, and identify any uncertainty.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      options:
+        - label: I preserved the original candidate output and clearly marked any later analysis or reduction.
+          required: true
+        - label: I understand that PDECert output is not a substitute for independent human labeling.
+          required: true

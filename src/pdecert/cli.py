@@ -6,9 +6,11 @@ import argparse
 import json
 import math
 import sys
+from collections import Counter
 from collections.abc import Sequence
 from pathlib import Path
 
+from .corpus import CorpusError, load_corpus
 from .core import Status, verify
 from .schema import SCHEMA_VERSION, SchemaError, load_case
 
@@ -62,6 +64,17 @@ def _build_parser() -> argparse.ArgumentParser:
         default=2.0,
         help="seconds allowed for each symbolic check (default: 2)",
     )
+
+    corpus_parser = subcommands.add_parser(
+        "corpus", help="inspect versioned PDE candidate corpora"
+    )
+    corpus_commands = corpus_parser.add_subparsers(
+        dest="corpus_command", required=True
+    )
+    validate_parser = corpus_commands.add_parser(
+        "validate", help="validate a corpus and summarize its coverage"
+    )
+    validate_parser.add_argument("corpus", type=Path, help="path to a corpus JSON file")
     return parser
 
 
@@ -96,6 +109,43 @@ def _run_verify(arguments: argparse.Namespace) -> int:
     return EXIT_CODES[report.status]
 
 
+def _counts(values: Sequence[str]) -> dict[str, int]:
+    return dict(sorted(Counter(values).items()))
+
+
+def _run_corpus_validate(arguments: argparse.Namespace) -> int:
+    try:
+        corpus = load_corpus(arguments.corpus)
+    except (OSError, CorpusError) as error:
+        print(f"pdecert: {error}", file=sys.stderr)
+        return INPUT_ERROR
+
+    records = corpus["records"]
+    verdicts = [
+        record["annotation"]["verdict"]
+        for record in records
+        if record["annotation"]["verdict"] is not None
+    ]
+    failure_modes = [
+        mode
+        for record in records
+        for mode in record["annotation"]["failure_modes"]
+    ]
+    summary = {
+        "annotation_statuses": _counts(
+            [record["annotation"]["status"] for record in records]
+        ),
+        "corpus_version": corpus["corpus_version"],
+        "failure_modes": _counts(failure_modes),
+        "name": corpus["name"],
+        "origin_kinds": _counts([record["origin"]["kind"] for record in records]),
+        "records": len(records),
+        "verdicts": _counts(verdicts),
+    }
+    print(json.dumps(summary, indent=2, sort_keys=True))
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the command-line interface and return a process exit code."""
 
@@ -103,6 +153,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     arguments = parser.parse_args(argv)
     if arguments.command == "verify":
         return _run_verify(arguments)
+    if arguments.command == "corpus" and arguments.corpus_command == "validate":
+        return _run_corpus_validate(arguments)
     parser.error(f"unknown command: {arguments.command}")
     return INPUT_ERROR
 

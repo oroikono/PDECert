@@ -1,5 +1,9 @@
 # Pilot corpus
 
+This immutable pilot is the first release unit of the broader
+[PDE Failure Atlas](ATLAS.md). New community cases begin through the atlas intake
+workflow rather than by rewriting the pilot.
+
 `pilot.json` contains 20 unedited generation records collected on 24 August
 2026:
 
