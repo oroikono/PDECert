@@ -99,6 +99,17 @@ class CommandLineTests(unittest.TestCase):
         self.assertEqual(summary["origin_kinds"], {"open_model": 10, "symbolic_solver": 10})
         self.assertEqual(summary["verdicts"], {"invalid": 10, "valid": 10})
 
+    def test_corpus_validate_accepts_a_modular_atlas_directory(self):
+        output = io.StringIO()
+        with redirect_stdout(output):
+            exit_code = main(["corpus", "validate", "corpus/community"])
+
+        summary = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(summary["corpus_version"], 1)
+        self.assertEqual(summary["records"], 0)
+        self.assertEqual(summary["name"], "PDE Failure Atlas community intake")
+
     def test_corpus_validate_returns_input_error_for_invalid_json(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "invalid-corpus.json"

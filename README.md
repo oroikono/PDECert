@@ -46,6 +46,7 @@ Versioned corpus files can be checked locally before review:
 
 ```bash
 pdecert corpus validate corpus/pilot.json
+pdecert corpus validate corpus/community
 ```
 
 The current public pilot has 20 records. The next coverage milestone is a

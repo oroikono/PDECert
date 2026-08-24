@@ -6,10 +6,14 @@ from pathlib import Path
 
 from experiments.coupled_wave import build_case
 from pdecert import (
+    ATLAS_VERSION,
     CorpusError,
     case_to_dict,
     dump_corpus,
+    load_atlas,
     load_corpus,
+    load_corpus_source,
+    load_record_bundle,
     output_sha256,
     validate_corpus,
 )
@@ -50,6 +54,28 @@ class CorpusTests(unittest.TestCase):
             "records": [cls.record],
         }
 
+    def _write_bundle(self, root: Path, record: dict, directory_name: str | None = None) -> Path:
+        bundle = root / "records" / (directory_name or record["id"])
+        bundle.mkdir(parents=True)
+        metadata = {
+            "annotation": record["annotation"],
+            "id": record["id"],
+            "origin": record["origin"],
+            "output_sha256": record["output_sha256"],
+        }
+        (bundle / "record.json").write_text(json.dumps(metadata))
+        (bundle / "case.json").write_text(json.dumps(record["case"]))
+        (bundle / "raw-output.txt").write_text(record["raw_output"])
+        return bundle
+
+    def _write_manifest(self, root: Path) -> None:
+        manifest = {
+            "atlas_version": ATLAS_VERSION,
+            "name": "test atlas",
+            "description": "A modular atlas used by the unit tests.",
+        }
+        (root / "atlas.json").write_text(json.dumps(manifest))
+
     def test_valid_record_passes(self):
         validate_corpus(self.corpus)
 
@@ -60,6 +86,87 @@ class CorpusTests(unittest.TestCase):
             loaded = load_corpus(path)
             self.assertTrue(path.read_text().endswith("\n"))
         self.assertEqual(loaded, self.corpus)
+
+    def test_modular_record_reconstructs_the_corpus_record(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = self._write_bundle(Path(directory), self.record)
+            loaded = load_record_bundle(bundle)
+
+        self.assertEqual(loaded, self.record)
+
+    def test_modular_atlas_loads_records_in_directory_order(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self._write_manifest(root)
+            second = copy.deepcopy(self.record)
+            second["id"] = "sympy-wave-002"
+            self._write_bundle(root, second)
+            self._write_bundle(root, self.record)
+            loaded = load_atlas(root)
+
+        self.assertEqual(loaded["name"], "test atlas")
+        self.assertEqual(
+            [record["id"] for record in loaded["records"]],
+            ["sympy-wave-001", "sympy-wave-002"],
+        )
+
+    def test_modular_record_directory_must_match_its_id(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = self._write_bundle(Path(directory), self.record, "wrong-name")
+            with self.assertRaisesRegex(CorpusError, "directory name must match"):
+                load_record_bundle(bundle)
+
+    def test_modular_record_preserves_crlf_bytes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            record = copy.deepcopy(self.record)
+            record["raw_output"] += "\r\n"
+            record["output_sha256"] = output_sha256(record["raw_output"])
+            bundle = self._write_bundle(Path(directory), record)
+            loaded = load_record_bundle(bundle)
+
+        self.assertEqual(loaded["raw_output"], record["raw_output"])
+
+    def test_modular_record_rejects_unexpected_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = self._write_bundle(Path(directory), self.record)
+            (bundle / "notes.txt").write_text("not part of the record")
+            with self.assertRaisesRegex(CorpusError, "unexpected bundle file"):
+                load_record_bundle(bundle)
+
+    def test_modular_record_preserves_raw_output_digest(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = self._write_bundle(Path(directory), self.record)
+            (bundle / "raw-output.txt").write_text("modified")
+            with self.assertRaisesRegex(CorpusError, "does not match raw_output"):
+                load_record_bundle(bundle)
+
+    def test_modular_atlas_rejects_loose_files_in_records_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self._write_manifest(root)
+            records = root / "records"
+            records.mkdir()
+            (records / "notes.txt").write_text("not a record bundle")
+            with self.assertRaisesRegex(CorpusError, "only record directories"):
+                load_atlas(root)
+
+    def test_modular_atlas_rejects_an_unknown_version(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self._write_manifest(root)
+            manifest = json.loads((root / "atlas.json").read_text())
+            manifest["atlas_version"] = ATLAS_VERSION + 1
+            (root / "atlas.json").write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(CorpusError, "atlas_version: expected 1"):
+                load_atlas(root)
+
+    def test_corpus_source_accepts_an_empty_modular_atlas(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self._write_manifest(root)
+            loaded = load_corpus_source(root)
+
+        self.assertEqual(loaded["records"], [])
 
     def test_digest_must_match_raw_output(self):
         payload = copy.deepcopy(self.corpus)

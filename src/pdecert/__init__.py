@@ -33,13 +33,17 @@ from .core import (
 )
 from .corpus import (
     ANNOTATION_STATUSES,
+    ATLAS_VERSION,
     CORPUS_VERSION,
     FAILURE_MODES,
     ORIGIN_KINDS,
     VERDICTS,
     CorpusError,
     dump_corpus,
+    load_atlas,
     load_corpus,
+    load_corpus_source,
+    load_record_bundle,
     output_sha256,
     validate_corpus,
 )
@@ -56,6 +60,7 @@ from .schema import (
 
 __all__ = [
     "ANNOTATION_STATUSES",
+    "ATLAS_VERSION",
     "BENCHMARK_VERSION",
     "BenchmarkError",
     "CallableCandidate",
@@ -100,7 +105,10 @@ __all__ = [
     "default_autodiff_checker_registry",
     "fixed_collocation_check",
     "load_case",
+    "load_atlas",
     "load_corpus",
+    "load_corpus_source",
+    "load_record_bundle",
     "output_sha256",
     "run_checks",
     "validate_corpus",
