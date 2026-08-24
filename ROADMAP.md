@@ -1,9 +1,10 @@
 # Roadmap
 
-PDECert aims to become a practical verification layer between symbolic PDE
-candidate generators and the people who need to trust their output. The project
-is currently an early research prototype. This roadmap describes public project
-outcomes, not a private development schedule.
+PDECert aims to become a practical verification layer between PDE solution
+generators and the people who need to trust their output. Those artifacts can
+be symbolic expressions, differentiable models, numerical fields, or generated
+solver programs. The project is currently an early research prototype. This
+roadmap describes public project outcomes, not a private development schedule.
 
 ## v0.1: dependable verification interface
 
@@ -59,6 +60,10 @@ Next:
 
 - an explicit checker registry with immutable run configuration and validated
   obligation scope;
+- a general solution-artifact protocol with symbolic and PyTorch-callable
+  implementations;
+- automatic-differentiation residual, initial-condition, and boundary-condition
+  checks that conservatively abstain after sampled success;
 - adapters for common SymPy and symbolic-regression workflows;
 - a small agent tool that returns a certificate, counterexample, or inconclusive result;
 - a reproducible notebook or Space for exploring benchmark cases;
@@ -66,6 +71,8 @@ Next:
 
 ## Longer-term research
 
+- gridded numerical artifacts with refinement and convergence checks;
+- generated solver programs behind a documented process-isolation boundary;
 - interval-based counterexample search for supported expression classes;
 - explicit classical, weak, and other solution semantics;
 - a posteriori error bounds for supported numerical settings;

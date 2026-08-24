@@ -5,8 +5,8 @@ changes are easiest to review.
 
 ## Good ways to begin
 
-- Share a real symbolic PDE candidate that was accepted by a residual or
-  collocation check but fails the stated problem.
+- Share a real symbolic, neural, or numerical PDE candidate that was accepted by
+  a residual or collocation check but fails the stated problem.
 - Add one PDE example with its equation, domain, conditions, expected outcome,
   and a regression test.
 - Improve an `INCONCLUSIVE` diagnostic without turning numerical sampling into
@@ -53,6 +53,12 @@ mathematical assumptions under which proof evidence is sound. The architecture
 and trade-offs are recorded in
 [`docs/adr/0001-plugin-first-extension-architecture.md`](docs/adr/0001-plugin-first-extension-architecture.md).
 
+Callable candidates follow the representation boundary described in
+[`ADR-0002`](docs/adr/0002-general-solution-artifacts.md). PyTorch is optional:
+symbolic contributors should not need it. Autodiff checks must cover the PDE and
+represented initial or boundary surfaces, report non-finite outputs, and remain
+`INCONCLUSIVE` after finite sampled success.
+
 ## Local setup
 
 ```bash
@@ -61,4 +67,12 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 ruff check .
 python -m pytest
+```
+
+For callable and PINN-related changes, also run:
+
+```bash
+pip install -e ".[dev,autodiff]"
+python -m pytest tests/test_autodiff.py
+python -m examples.autodiff_heat
 ```

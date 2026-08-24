@@ -5,14 +5,14 @@ build-backend = "hatchling.build"
 [project]
 name = "pdecert"
 version = "0.1.0"
-description = "Conservative verification for symbolic PDE solution candidates"
+description = "Conservative verification for machine-generated PDE solution artifacts"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
 authors = [
   { name = "Orestis Oikonomou", email = "ooikonomou@ethz.ch" },
 ]
-keywords = ["partial-differential-equations", "symbolic-computation", "verification"]
+keywords = ["partial-differential-equations", "scientific-machine-learning", "verification"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
@@ -32,6 +32,9 @@ pdecert = "pdecert.cli:main"
 collection = [
   "huggingface_hub==1.27.0",
   "mlx-lm==0.31.3; sys_platform == 'darwin' and platform_machine == 'arm64'",
+]
+autodiff = [
+  "torch>=2.4",
 ]
 dev = [
   "pytest>=8",

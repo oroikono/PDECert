@@ -1,6 +1,16 @@
 """Public interface for PDECert."""
 
 from .benchmark import BENCHMARK_VERSION, BenchmarkError, corpus_sha256, evaluate_corpus
+from .artifacts import CallableCandidate, SolutionArtifact, SymbolicCandidate
+from .autodiff import (
+    AutodiffCheckContext,
+    AutodiffConstraint,
+    AutodiffEvaluation,
+    AutodiffProblem,
+    AutodiffResidualChecker,
+    default_autodiff_checker_registry,
+    verify_callable,
+)
 from .checks import (
     CheckContext,
     CheckerError,
@@ -19,6 +29,7 @@ from .core import (
     Witness,
     fixed_collocation_check,
     verify,
+    verify_artifact,
 )
 from .corpus import (
     ANNOTATION_STATUSES,
@@ -47,6 +58,7 @@ __all__ = [
     "ANNOTATION_STATUSES",
     "BENCHMARK_VERSION",
     "BenchmarkError",
+    "CallableCandidate",
     "CheckContext",
     "CheckResult",
     "Checker",
@@ -66,6 +78,13 @@ __all__ = [
     "ReleaseError",
     "SchemaError",
     "Status",
+    "SolutionArtifact",
+    "SymbolicCandidate",
+    "AutodiffCheckContext",
+    "AutodiffConstraint",
+    "AutodiffEvaluation",
+    "AutodiffProblem",
+    "AutodiffResidualChecker",
     "VerificationCase",
     "VERDICTS",
     "Witness",
@@ -78,6 +97,7 @@ __all__ = [
     "dump_corpus",
     "evaluate_corpus",
     "default_checker_registry",
+    "default_autodiff_checker_registry",
     "fixed_collocation_check",
     "load_case",
     "load_corpus",
@@ -86,6 +106,8 @@ __all__ = [
     "validate_corpus",
     "validate_release_inputs",
     "verify",
+    "verify_artifact",
+    "verify_callable",
 ]
 
 __version__ = "0.1.0"
