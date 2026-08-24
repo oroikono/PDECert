@@ -1,0 +1,42 @@
+{
+  "conditions": [
+    {
+      "expression": "At(u, t, 0) - sin(pi*x)",
+      "name": "initial condition"
+    },
+    {
+      "expression": "At(u, x, 0)",
+      "name": "left boundary"
+    },
+    {
+      "expression": "At(u, x, 1)",
+      "name": "right boundary"
+    }
+  ],
+  "domains": {
+    "t": [
+      0.0,
+      1.0
+    ],
+    "x": [
+      0.0,
+      1.0
+    ]
+  },
+  "fields": {
+    "u": "exp(-pi**2*t)*sin(pi*x)"
+  },
+  "name": "exact_heat_solution",
+  "parameters": {},
+  "pde_residuals": [
+    {
+      "expression": "D(u, t) - D(u, x, 2)",
+      "name": "heat PDE"
+    }
+  ],
+  "schema_version": 3,
+  "variables": [
+    "x",
+    "t"
+  ]
+}

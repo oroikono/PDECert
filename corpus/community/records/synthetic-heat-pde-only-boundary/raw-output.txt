@@ -1,0 +1,1 @@
+u(x, t) = x/10 + exp(-pi**2*t)*sin(pi*x)

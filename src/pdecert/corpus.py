@@ -15,7 +15,8 @@ from .schema import SCHEMA_VERSION, case_from_dict
 
 
 CORPUS_VERSION = 1
-ORIGIN_KINDS = frozenset({"open_model", "symbolic_solver"})
+ATLAS_VERSION = 1
+ORIGIN_KINDS = frozenset({"open_model", "symbolic_solver", "synthetic"})
 FAILURE_MODES = frozenset(
     {
         "boundary_condition",
@@ -31,6 +32,7 @@ FAILURE_MODES = frozenset(
 ANNOTATION_STATUSES = frozenset({"adjudicated", "labeled", "pending"})
 VERDICTS = frozenset({"invalid", "unclear", "valid"})
 _RECORD_ID = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
+_BUNDLE_FILES = frozenset({"case.json", "raw-output.txt", "record.json"})
 
 
 class CorpusError(ValueError):
@@ -209,16 +211,105 @@ def validate_corpus(value: object) -> None:
         identifiers.add(record_id)
 
 
-def load_corpus(path: str | Path) -> dict[str, Any]:
-    """Load and validate one corpus JSON document."""
-
-    source = Path(path)
+def _load_json(source: Path) -> object:
     try:
         payload = json.loads(source.read_text())
     except json.JSONDecodeError as error:
         raise CorpusError(f"{source}: invalid JSON: {error.msg}") from error
+    return payload
+
+
+def load_corpus(path: str | Path) -> dict[str, Any]:
+    """Load and validate one corpus JSON document."""
+
+    source = Path(path)
+    payload = _load_json(source)
     validate_corpus(payload)
     return payload
+
+
+def load_record_bundle(path: str | Path) -> dict[str, Any]:
+    """Load one modular atlas record and reconstruct its corpus representation."""
+
+    source = Path(path)
+    entries = {entry.name: entry for entry in source.iterdir()}
+    missing = sorted(_BUNDLE_FILES - set(entries))
+    unknown = sorted(set(entries) - _BUNDLE_FILES)
+    if missing:
+        raise CorpusError(f"{source}: missing bundle file(s): {', '.join(missing)}")
+    if unknown:
+        raise CorpusError(f"{source}: unexpected bundle file(s): {', '.join(unknown)}")
+    for entry in entries.values():
+        if entry.is_symlink() or not entry.is_file():
+            raise CorpusError(f"{entry}: bundle entries must be regular files")
+
+    metadata = _object(_load_json(source / "record.json"), "$")
+    _exact_keys(
+        metadata,
+        {"annotation", "id", "origin", "output_sha256"},
+        "$",
+    )
+    case = _object(_load_json(source / "case.json"), "$.case")
+    raw_path = source / "raw-output.txt"
+    try:
+        raw_output = raw_path.read_bytes().decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise CorpusError(f"{raw_path}: raw output must be valid UTF-8") from error
+    record = {
+        "annotation": metadata["annotation"],
+        "case": dict(case),
+        "id": metadata["id"],
+        "origin": metadata["origin"],
+        "output_sha256": metadata["output_sha256"],
+        "raw_output": raw_output,
+    }
+    _validate_record(record, "$")
+    if source.name != record["id"]:
+        raise CorpusError(f"{source}: directory name must match record id {record['id']!r}")
+    return record
+
+
+def load_atlas(path: str | Path) -> dict[str, Any]:
+    """Load a modular atlas directory as a validated corpus document."""
+
+    source = Path(path)
+    manifest = _object(_load_json(source / "atlas.json"), "$")
+    _exact_keys(manifest, {"atlas_version", "description", "name"}, "$")
+    version = manifest["atlas_version"]
+    if isinstance(version, bool) or version != ATLAS_VERSION:
+        raise _error("$.atlas_version", f"expected {ATLAS_VERSION}")
+    name = _text(manifest["name"], "$.name")
+    description = _text(manifest["description"], "$.description")
+
+    records_directory = source / "records"
+    records: list[dict[str, Any]] = []
+    if records_directory.exists():
+        if not records_directory.is_dir():
+            raise CorpusError(f"{records_directory}: expected a directory")
+        for entry in sorted(records_directory.iterdir(), key=lambda item: item.name):
+            if entry.is_symlink() or not entry.is_dir():
+                raise CorpusError(
+                    f"{entry}: atlas records directory may contain only record directories"
+                )
+            records.append(load_record_bundle(entry))
+
+    corpus = {
+        "corpus_version": CORPUS_VERSION,
+        "description": description,
+        "name": name,
+        "records": records,
+    }
+    validate_corpus(corpus)
+    return corpus
+
+
+def load_corpus_source(path: str | Path) -> dict[str, Any]:
+    """Load either a monolithic corpus file or a modular atlas directory."""
+
+    source = Path(path)
+    if source.is_dir():
+        return load_atlas(source)
+    return load_corpus(source)
 
 
 def dump_corpus(value: object, path: str | Path) -> None:

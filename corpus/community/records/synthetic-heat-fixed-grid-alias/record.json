@@ -1,0 +1,22 @@
+{
+  "annotation": {
+    "annotators": [],
+    "failure_modes": [],
+    "rationale": null,
+    "status": "pending",
+    "verdict": null
+  },
+  "id": "synthetic-heat-fixed-grid-alias",
+  "origin": {
+    "generated_at": "2026-08-24T14:30:00+00:00",
+    "identifier": "experiments.adversarial_heat.build_cases",
+    "input": "Constructed adversarial candidate for the fully stated heat problem. A polynomial perturbation is invisible on every fixed collocation point.",
+    "kind": "synthetic",
+    "license": "MIT",
+    "producer": "PDECert",
+    "revision": "f5a45d8f78e29608bee20e97b75fc9f29ced51f9",
+    "source_url": "https://github.com/oroikono/PDECert/blob/f5a45d8f78e29608bee20e97b75fc9f29ced51f9/experiments/adversarial_heat.py",
+    "version": "0.1.0"
+  },
+  "output_sha256": "6e3eaae71d0e4ad50e6549879b9c45f4b79a5ed1917782657cb5c8aac8abecf7"
+}

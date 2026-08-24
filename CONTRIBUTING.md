@@ -13,10 +13,12 @@ changes are easiest to review.
   proof.
 - Connect the JSON report to a symbolic solver or scientific-agent workflow.
 
-If you are unsure whether a case fits, open an issue first. Include the equation,
-domain, initial or boundary conditions, candidate expression, expected solution
-semantics, and how the candidate was produced. Small reproducible cases are the
-most useful.
+If you are unsure whether a case fits, use the
+[failure-case issue form](https://github.com/oroikono/PDECert/issues/new?template=failure-case.yml).
+It collects the equation, domain, conditions, original artifact, provenance,
+expected semantics, and redistribution terms without requiring corpus JSON.
+Small reproducible cases are the most useful. The atlas scope, record lifecycle,
+and planned artifact lanes are documented in [`corpus/ATLAS.md`](corpus/ATLAS.md).
 
 ## Pull requests
 
@@ -32,6 +34,13 @@ Candidate-corpus records must retain the unedited generator output and complete
 origin metadata. Do not reconstruct or polish an output and present it as a raw
 sample. New records should remain `pending` until a person applies the published
 labeling protocol.
+Validate a versioned corpus before requesting review:
+
+```bash
+pdecert corpus validate path/to/corpus.json
+pdecert corpus validate path/to/atlas-directory
+```
+
 Do not import `results/provisional-review.json` as a human review. Complete the
 blind pass in `corpus/LABELING.md` first, use a public reviewer identifier, and
 retain disagreement notes when a second reviewer is needed.

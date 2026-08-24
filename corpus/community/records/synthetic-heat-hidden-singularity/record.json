@@ -1,0 +1,22 @@
+{
+  "annotation": {
+    "annotators": [],
+    "failure_modes": [],
+    "rationale": null,
+    "status": "pending",
+    "verdict": null
+  },
+  "id": "synthetic-heat-hidden-singularity",
+  "origin": {
+    "generated_at": "2026-08-24T14:30:00+00:00",
+    "identifier": "experiments.adversarial_heat.build_cases",
+    "input": "Constructed adversarial candidate for the fully stated heat problem. A grid-alias perturbation hides an interior pole at x=1/3.",
+    "kind": "synthetic",
+    "license": "MIT",
+    "producer": "PDECert",
+    "revision": "f5a45d8f78e29608bee20e97b75fc9f29ced51f9",
+    "source_url": "https://github.com/oroikono/PDECert/blob/f5a45d8f78e29608bee20e97b75fc9f29ced51f9/experiments/adversarial_heat.py",
+    "version": "0.1.0"
+  },
+  "output_sha256": "0ac56685817f2d7d901ba5cb52976ccdce71bd9ede2fce4116007ad457f47455"
+}

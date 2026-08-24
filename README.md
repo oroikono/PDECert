@@ -1,4 +1,10 @@
-# PDECert
+<p align="center">
+  <img src="assets/pdecert-icon.png" alt="PDECert project icon" width="200">
+</p>
+
+<h1 align="center">PDECert</h1>
+
+<p align="center"><strong>Proof-carrying PDE solutions.</strong></p>
 
 Machine-generated PDE solutions should come with a certificate or a concrete
 counterexample.
@@ -26,6 +32,27 @@ PDE solvers and language models can produce expressions that look convincing
 and have a small residual on a fixed grid. That does not guarantee that they
 satisfy the full problem. A candidate can fail at a boundary, hide a pole
 between collocation points, or work only at one parameter value.
+
+## PDE Failure Atlas
+
+The [PDE Failure Atlas](corpus/ATLAS.md) turns those failures into a public,
+versioned corpus. Each record binds an unedited candidate to its stated problem,
+origin metadata, human review, and machine evidence. Contributors can propose a
+symbolic, PINN, neural-operator, numerical, or generated-program case without
+first learning the corpus schema by using the
+[failure-case issue form](https://github.com/oroikono/PDECert/issues/new?template=failure-case.yml).
+
+Versioned corpus files can be checked locally before review:
+
+```bash
+pdecert corpus validate corpus/pilot.json
+pdecert corpus validate corpus/community
+```
+
+The current public pilot has 20 records. The next coverage milestone is a
+100-record community release spanning multiple PDE families, artifact types,
+generators, and checker disagreements. Record count is not treated as evidence
+of representativeness; every release reports its coverage and known blind spots.
 
 The included experiment contains seven small heat-equation cases. Among the
 five deliberately wrong candidates, the initial results are:
