@@ -1,0 +1,22 @@
+{
+  "annotation": {
+    "annotators": [],
+    "failure_modes": [],
+    "rationale": null,
+    "status": "pending",
+    "verdict": null
+  },
+  "id": "qwen3-poisson-polynomial-01",
+  "origin": {
+    "generated_at": "2026-08-24T16:29:25.498618+00:00",
+    "identifier": "Qwen/Qwen3-1.7B",
+    "input": "{\"generation\": {\"do_sample\": false, \"max_new_tokens\": 160}, \"prompt\": \"Solve u_xx+u_yy=-4 on [0,1]^2 with u(0,y)=u(1,y)=y*(1-y) and u(x,0)=u(x,1)=x*(1-x).\\n\\nReturn one explicit candidate expression for every requested field. Use Python/SymPy syntax with variables x, y. You may use pi, E, sin, cos, sinh, cosh, tanh, exp, log, sqrt, Abs, +, -, *, /, **, and parentheses. Do not return an implicit equation, arbitrary function, derivative, integral, code block, or explanation. End with exactly:\\nFINAL u: <expression>\"}",
+    "kind": "open_model",
+    "license": "Apache-2.0",
+    "producer": "Qwen via Transformers",
+    "revision": "70d244cc86ccca08cf5af4e1e306ecf908b1ad5e",
+    "source_url": "https://huggingface.co/Qwen/Qwen3-1.7B",
+    "version": "4.55.4"
+  },
+  "output_sha256": "3bd0f77c9cebec01a0b5cfde6f5608d3f0e96090d958f6258966f3ece14a4b3b"
+}

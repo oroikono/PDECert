@@ -52,6 +52,7 @@ python -m experiments.collect_atlas_batch materialize \
   experiments/atlas_batches/qwen3_1_7b_batch01.json \
   --run-directory /path/to/scratch/qwen3-1.7b-batch-01 \
   --atlas corpus/community \
+  --rejections results/qwen3-1.7b-batch-01-rejections \
   --report results/qwen3-1.7b-batch-01-collection.json
 
 pdecert corpus validate corpus/community
@@ -61,6 +62,11 @@ The materializer accepts only the declared model, revision, settings, prompt,
 case identifier, and fields. It preserves the decoded response byte-for-byte as
 `raw-output.txt`. Surface extraction may remove a leading assignment and
 normalize `^` or Unicode pi; it does not repair mathematics.
+
+If a transcript cannot become a record, the materializer copies its original
+JSON bytes into the required rejection archive and records both transcript and
+raw-output hashes. A repeated run refuses to replace a different archived
+transcript.
 
 Every materialized record remains `pending`. Run human review under
 `corpus/LABELING.md` before exposing verifier or baseline outcomes to the

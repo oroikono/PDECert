@@ -356,11 +356,24 @@ def _write_bundle(directory: Path, payloads: dict[str, bytes]) -> None:
         (directory / name).write_bytes(content)
 
 
+def _archive_rejection(source: Path, directory: Path) -> Path:
+    content = source.read_bytes()
+    destination = directory / source.name
+    directory.mkdir(parents=True, exist_ok=True)
+    if destination.exists():
+        if destination.read_bytes() != content:
+            raise CollectionError(f"{destination}: refusing to overwrite a different transcript")
+    else:
+        destination.write_bytes(content)
+    return destination
+
+
 def materialize(
     manifest: dict[str, Any],
     run_directory: Path,
     atlas_directory: Path,
     report_path: Path,
+    rejections_directory: Path,
 ) -> dict[str, Any]:
     """Materialize every parseable transcript and report every attempted case."""
 
@@ -377,12 +390,17 @@ def materialize(
             payloads = _bundle_payloads(manifest, case, transcript)
             _write_bundle(atlas_directory / "records" / case["id"], payloads)
         except (CollectionError, ValueError) as error:
+            archived = _archive_rejection(transcript_path, rejections_directory)
             outcomes.append(
                 {
                     "error": str(error),
                     "id": case["id"],
                     "raw_output_sha256": digest,
                     "status": "not_materialized",
+                    "transcript": str(archived),
+                    "transcript_sha256": hashlib.sha256(
+                        transcript_path.read_bytes()
+                    ).hexdigest(),
                 }
             )
             continue
@@ -400,6 +418,7 @@ def materialize(
         ).hexdigest(),
         "model": manifest["model"],
         "outcomes": outcomes,
+        "rejections_directory": str(rejections_directory),
     }
     _atomic_json(report_path, report)
     return report
@@ -420,6 +439,7 @@ def _parser() -> argparse.ArgumentParser:
             )
         if name == "materialize":
             command.add_argument("--atlas", type=Path, default=Path("corpus/community"))
+            command.add_argument("--rejections", type=Path, required=True)
             command.add_argument("--report", type=Path, required=True)
     return parser
 
@@ -439,6 +459,7 @@ def main() -> None:
             arguments.run_directory,
             arguments.atlas,
             arguments.report,
+            arguments.rejections,
         )
         counts: dict[str, int] = {}
         for outcome in report["outcomes"]:

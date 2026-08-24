@@ -1,0 +1,22 @@
+{
+  "annotation": {
+    "annotators": [],
+    "failure_modes": [],
+    "rationale": null,
+    "status": "pending",
+    "verdict": null
+  },
+  "id": "qwen3-fisher-kpp-01",
+  "origin": {
+    "generated_at": "2026-08-24T16:29:27.855591+00:00",
+    "identifier": "Qwen/Qwen3-1.7B",
+    "input": "{\"generation\": {\"do_sample\": false, \"max_new_tokens\": 160}, \"prompt\": \"Solve u_t=u_xx+u*(1-u) for x in [-6,6], t in [0,2], with u(x,0)=(1+exp(x/sqrt(6)))**(-2) and boundary traces obtained by substituting x=-6 and x=6 into (1+exp(x/sqrt(6)-5*t/6))**(-2).\\n\\nReturn one explicit candidate expression for every requested field. Use Python/SymPy syntax with variables x, t. You may use pi, E, sin, cos, sinh, cosh, tanh, exp, log, sqrt, Abs, +, -, *, /, **, and parentheses. Do not return an implicit equation, arbitrary function, derivative, integral, code block, or explanation. End with exactly:\\nFINAL u: <expression>\"}",
+    "kind": "open_model",
+    "license": "Apache-2.0",
+    "producer": "Qwen via Transformers",
+    "revision": "70d244cc86ccca08cf5af4e1e306ecf908b1ad5e",
+    "source_url": "https://huggingface.co/Qwen/Qwen3-1.7B",
+    "version": "4.55.4"
+  },
+  "output_sha256": "fd4496138199cf29b9b0d3a829fd7ffd7a986711664b19ac01788e3911653ef1"
+}

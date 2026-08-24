@@ -1,0 +1,42 @@
+{
+  "conditions": [
+    {
+      "expression": "At(u, t, 0) - 2/cosh(x)**2",
+      "name": "initial condition"
+    },
+    {
+      "expression": "At(u, x, -5) - 2/cosh(-5-4*t)**2",
+      "name": "left boundary"
+    },
+    {
+      "expression": "At(u, x, 5) - 2/cosh(5-4*t)**2",
+      "name": "right boundary"
+    }
+  ],
+  "domains": {
+    "t": [
+      0.0,
+      1.0
+    ],
+    "x": [
+      -5.0,
+      5.0
+    ]
+  },
+  "fields": {
+    "u": "sqrt(2*cosh(4*t - 5)**2 + 2*cosh(4*t + 5)**2)"
+  },
+  "name": "KdV one-soliton problem",
+  "parameters": {},
+  "pde_residuals": [
+    {
+      "expression": "D(u, t) + 6*u*D(u, x) + D(u, x, 3)",
+      "name": "KdV PDE"
+    }
+  ],
+  "schema_version": 3,
+  "variables": [
+    "x",
+    "t"
+  ]
+}

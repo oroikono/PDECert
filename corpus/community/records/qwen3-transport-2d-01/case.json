@@ -1,0 +1,39 @@
+{
+  "conditions": [
+    {
+      "expression": "At(u, t, 0) - sin(pi*x)*cos(pi*y)",
+      "name": "initial condition"
+    }
+  ],
+  "domains": {
+    "t": [
+      0.0,
+      1.0
+    ],
+    "x": [
+      0.0,
+      1.0
+    ],
+    "y": [
+      0.0,
+      1.0
+    ]
+  },
+  "fields": {
+    "u": "t*sin(pi*x)*cos(pi*y) + sin(pi*x)*cos(pi*y)"
+  },
+  "name": "two-dimensional anisotropic transport",
+  "parameters": {},
+  "pde_residuals": [
+    {
+      "expression": "D(u, t) + D(u, x) + 2*D(u, y)",
+      "name": "transport PDE"
+    }
+  ],
+  "schema_version": 3,
+  "variables": [
+    "x",
+    "y",
+    "t"
+  ]
+}

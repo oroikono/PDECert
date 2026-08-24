@@ -1,0 +1,22 @@
+{
+  "annotation": {
+    "annotators": [],
+    "failure_modes": [],
+    "rationale": null,
+    "status": "pending",
+    "verdict": null
+  },
+  "id": "qwen3-kdv-soliton-01",
+  "origin": {
+    "generated_at": "2026-08-24T16:29:29.080259+00:00",
+    "identifier": "Qwen/Qwen3-1.7B",
+    "input": "{\"generation\": {\"do_sample\": false, \"max_new_tokens\": 160}, \"prompt\": \"Solve u_t+6*u*u_x+u_xxx=0 for x in [-5,5], t in [0,1], with u(x,0)=2/cosh(x)**2 and boundary traces u(-5,t)=2/cosh(-5-4*t)**2, u(5,t)=2/cosh(5-4*t)**2.\\n\\nReturn one explicit candidate expression for every requested field. Use Python/SymPy syntax with variables x, t. You may use pi, E, sin, cos, sinh, cosh, tanh, exp, log, sqrt, Abs, +, -, *, /, **, and parentheses. Do not return an implicit equation, arbitrary function, derivative, integral, code block, or explanation. End with exactly:\\nFINAL u: <expression>\"}",
+    "kind": "open_model",
+    "license": "Apache-2.0",
+    "producer": "Qwen via Transformers",
+    "revision": "70d244cc86ccca08cf5af4e1e306ecf908b1ad5e",
+    "source_url": "https://huggingface.co/Qwen/Qwen3-1.7B",
+    "version": "4.55.4"
+  },
+  "output_sha256": "1d24336a9ef71bfd4e97c6f69eaba525b6e832c029d8dce7d91fcd49080bf0e7"
+}

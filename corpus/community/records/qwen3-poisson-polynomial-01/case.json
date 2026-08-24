@@ -1,0 +1,46 @@
+{
+  "conditions": [
+    {
+      "expression": "At(u, x, 0) - y*(1-y)",
+      "name": "x zero"
+    },
+    {
+      "expression": "At(u, x, 1) - y*(1-y)",
+      "name": "x one"
+    },
+    {
+      "expression": "At(u, y, 0) - x*(1-x)",
+      "name": "y zero"
+    },
+    {
+      "expression": "At(u, y, 1) - x*(1-x)",
+      "name": "y one"
+    }
+  ],
+  "domains": {
+    "x": [
+      0.0,
+      1.0
+    ],
+    "y": [
+      0.0,
+      1.0
+    ]
+  },
+  "fields": {
+    "u": "x*(1 - x)/2 + y*(1 - y)/2 - 2*sinh(2*x) + 2*sinh(2*y)"
+  },
+  "name": "Poisson equation with polynomial boundary traces",
+  "parameters": {},
+  "pde_residuals": [
+    {
+      "expression": "D(u, x, 2) + D(u, y, 2) + 4",
+      "name": "Poisson PDE"
+    }
+  ],
+  "schema_version": 3,
+  "variables": [
+    "x",
+    "y"
+  ]
+}

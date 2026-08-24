@@ -1,0 +1,1 @@
+FINAL u: (x*(1 - x) + y*(1 - y) + 4*sinh(2*y) - 4*sinh(2*x))/2

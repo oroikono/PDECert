@@ -129,6 +129,7 @@ class AtlasBatchCollectionTests(unittest.TestCase):
                 run_directory,
                 root / "atlas",
                 root / "report.json",
+                root / "rejections",
             )
             record = load_record_bundle(root / "atlas" / "records" / case["id"])
 
@@ -148,18 +149,24 @@ class AtlasBatchCollectionTests(unittest.TestCase):
             root = Path(directory)
             run_directory = root / "run"
             run_directory.mkdir()
-            (run_directory / f"{case['id']}.json").write_text(json.dumps(transcript))
+            transcript_bytes = json.dumps(transcript).encode()
+            (run_directory / f"{case['id']}.json").write_bytes(transcript_bytes)
             report = materialize(
                 manifest,
                 run_directory,
                 root / "atlas",
                 root / "report.json",
+                root / "rejections",
             )
             materialized = (root / "atlas" / "records" / case["id"]).exists()
+            archived = root / "rejections" / f"{case['id']}.json"
+            archived_bytes = archived.read_bytes()
 
         outcome = report["outcomes"][0]
         self.assertEqual(outcome["status"], "not_materialized")
         self.assertIn("did not return field", outcome["error"])
+        self.assertEqual(archived_bytes, transcript_bytes)
+        self.assertEqual(outcome["transcript"], str(archived))
         self.assertFalse(materialized)
 
 

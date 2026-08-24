@@ -1,0 +1,22 @@
+{
+  "annotation": {
+    "annotators": [],
+    "failure_modes": [],
+    "rationale": null,
+    "status": "pending",
+    "verdict": null
+  },
+  "id": "qwen3-burgers-shock-01",
+  "origin": {
+    "generated_at": "2026-08-24T16:29:27.006732+00:00",
+    "identifier": "Qwen/Qwen3-1.7B",
+    "input": "{\"generation\": {\"do_sample\": false, \"max_new_tokens\": 160}, \"prompt\": \"Solve u_t+u*u_x=0.1*u_xx for x in [-2,2], t in [0,1], with u(x,0)=1-tanh(5*x), u(-2,t)=1-tanh(5*(-2-t)), and u(2,t)=1-tanh(5*(2-t)).\\n\\nReturn one explicit candidate expression for every requested field. Use Python/SymPy syntax with variables x, t. You may use pi, E, sin, cos, sinh, cosh, tanh, exp, log, sqrt, Abs, +, -, *, /, **, and parentheses. Do not return an implicit equation, arbitrary function, derivative, integral, code block, or explanation. End with exactly:\\nFINAL u: <expression>\"}",
+    "kind": "open_model",
+    "license": "Apache-2.0",
+    "producer": "Qwen via Transformers",
+    "revision": "70d244cc86ccca08cf5af4e1e306ecf908b1ad5e",
+    "source_url": "https://huggingface.co/Qwen/Qwen3-1.7B",
+    "version": "4.55.4"
+  },
+  "output_sha256": "dffd0e50f9958d0092c6430348e832ccb7eceaf50d17db989cc155fd4608948e"
+}

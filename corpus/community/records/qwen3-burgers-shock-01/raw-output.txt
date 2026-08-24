@@ -1,0 +1,1 @@
+FINAL u: (1 - tanh(5*x)) * exp(-t) + (1 - tanh(5*(2 - t))) * exp(-t)

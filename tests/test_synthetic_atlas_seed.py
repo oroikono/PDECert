@@ -60,10 +60,8 @@ class SyntheticAtlasSeedTests(unittest.TestCase):
         records = Path("corpus/community/records")
         generated = build_bundles()
 
-        self.assertEqual(
-            sorted(path.name for path in records.iterdir()),
-            sorted(generated),
-        )
+        checked_in = {path.name for path in records.iterdir() if path.is_dir()}
+        self.assertTrue(set(generated).issubset(checked_in))
         for record_id, expected in generated.items():
             actual = load_record_bundle(records / record_id)
             self.assertEqual(actual["id"], record_id)

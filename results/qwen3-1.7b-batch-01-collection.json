@@ -1,0 +1,57 @@
+{
+  "batch_id": "qwen3-1.7b-batch-01",
+  "manifest_sha256": "317bf07a0407f6be338434f70eaf1b22b69bda86be1f06bca08252fdce3c615c",
+  "model": {
+    "identifier": "Qwen/Qwen3-1.7B",
+    "license": "Apache-2.0",
+    "producer": "Qwen via Transformers",
+    "revision": "70d244cc86ccca08cf5af4e1e306ecf908b1ad5e",
+    "source_url": "https://huggingface.co/Qwen/Qwen3-1.7B"
+  },
+  "outcomes": [
+    {
+      "id": "qwen3-parametric-heat-01",
+      "raw_output_sha256": "bd995a8b8a8d328a798a8401731281f3583086e7bcad122f6879406afe1877e6",
+      "status": "materialized_pending_review"
+    },
+    {
+      "id": "qwen3-poisson-polynomial-01",
+      "raw_output_sha256": "3bd0f77c9cebec01a0b5cfde6f5608d3f0e96090d958f6258966f3ece14a4b3b",
+      "status": "materialized_pending_review"
+    },
+    {
+      "id": "qwen3-wave-speed-two-01",
+      "raw_output_sha256": "14e330693980fe80e43778ae18d61504acfd03d076cfe900bbeb2fc2a55016e1",
+      "status": "materialized_pending_review"
+    },
+    {
+      "id": "qwen3-burgers-shock-01",
+      "raw_output_sha256": "dffd0e50f9958d0092c6430348e832ccb7eceaf50d17db989cc155fd4608948e",
+      "status": "materialized_pending_review"
+    },
+    {
+      "id": "qwen3-fisher-kpp-01",
+      "raw_output_sha256": "fd4496138199cf29b9b0d3a829fd7ffd7a986711664b19ac01788e3911653ef1",
+      "status": "materialized_pending_review"
+    },
+    {
+      "id": "qwen3-kdv-soliton-01",
+      "raw_output_sha256": "1d24336a9ef71bfd4e97c6f69eaba525b6e832c029d8dce7d91fcd49080bf0e7",
+      "status": "materialized_pending_review"
+    },
+    {
+      "id": "qwen3-transport-2d-01",
+      "raw_output_sha256": "46de96de52548eddc1f4e44572303fb49fd8084adf5f96e16123d26fe0bea28c",
+      "status": "materialized_pending_review"
+    },
+    {
+      "error": "$.fields.u: unsupported function: v",
+      "id": "qwen3-coupled-wave-01",
+      "raw_output_sha256": "b32bfd22f0594baca301e37af03d9b0b703fbeda4437e5d25a2293de40027020",
+      "status": "not_materialized",
+      "transcript": "results/qwen3-1.7b-batch-01-rejections/qwen3-coupled-wave-01.json",
+      "transcript_sha256": "5f2321375b5f3b7320e082be818f23ab3b83221b11e9fbaeead65dc776496017"
+    }
+  ],
+  "rejections_directory": "results/qwen3-1.7b-batch-01-rejections"
+}

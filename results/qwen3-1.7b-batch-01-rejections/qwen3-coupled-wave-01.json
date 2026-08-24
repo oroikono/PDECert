@@ -1,0 +1,19 @@
+{
+  "batch_id": "qwen3-1.7b-batch-01",
+  "case_id": "qwen3-coupled-wave-01",
+  "generated_at": "2026-08-24T16:29:30.829149+00:00",
+  "generation": {
+    "do_sample": false,
+    "max_new_tokens": 160
+  },
+  "model": {
+    "identifier": "Qwen/Qwen3-1.7B",
+    "license": "Apache-2.0",
+    "producer": "Qwen via Transformers",
+    "revision": "70d244cc86ccca08cf5af4e1e306ecf908b1ad5e",
+    "source_url": "https://huggingface.co/Qwen/Qwen3-1.7B"
+  },
+  "prompt": "Solve u_t=v_x and v_t=u_x on [0,1] with u(x,0)=sin(pi*x), v(x,0)=0, u(0,t)=u(1,t)=0, v(0,t)=sin(pi*t), and v(1,t)=-sin(pi*t).\n\nReturn one explicit candidate expression for every requested field. Use Python/SymPy syntax with variables x, t. You may use pi, E, sin, cos, sinh, cosh, tanh, exp, log, sqrt, Abs, +, -, *, /, **, and parentheses. Do not return an implicit equation, arbitrary function, derivative, integral, code block, or explanation. End with exactly:\nFINAL u: <expression>\nFINAL v: <expression>",
+  "response": "FINAL u: sin(pi*x) * exp(-v(x,t))  \nFINAL v: sin(pi*t) * exp(-v(x,t))",
+  "transformers_version": "4.55.4"
+}
