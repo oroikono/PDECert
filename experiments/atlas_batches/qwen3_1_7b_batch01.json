@@ -1,0 +1,174 @@
+{
+  "batch_version": 1,
+  "description": "Predeclared natural-candidate batch spanning eight PDE structures.",
+  "generation": {
+    "do_sample": false,
+    "max_new_tokens": 160
+  },
+  "id": "qwen3-1.7b-batch-01",
+  "model": {
+    "identifier": "Qwen/Qwen3-1.7B",
+    "license": "Apache-2.0",
+    "producer": "Qwen via Transformers",
+    "revision": "70d244cc86ccca08cf5af4e1e306ecf908b1ad5e",
+    "source_url": "https://huggingface.co/Qwen/Qwen3-1.7B"
+  },
+  "cases": [
+    {
+      "fields": ["u"],
+      "id": "qwen3-parametric-heat-01",
+      "problem": {
+        "conditions": [
+          {"expression": "At(u, t, 0) - sin(pi*x)", "name": "initial condition"},
+          {"expression": "At(u, x, 0)", "name": "left boundary"},
+          {"expression": "At(u, x, 1)", "name": "right boundary"}
+        ],
+        "domains": {"k": [0.2, 2.0], "t": [0.0, 1.0], "x": [0.0, 1.0]},
+        "name": "parametric heat equation",
+        "parameters": {"k": ["positive"]},
+        "pde_residuals": [
+          {"expression": "D(u, t) - k*D(u, x, 2)", "name": "heat PDE"}
+        ],
+        "variables": ["x", "t", "k"]
+      },
+      "statement": "Solve u_t = k*u_xx for x,t in [0,1] and every k in [0.2,2], with u(x,0)=sin(pi*x) and u(0,t)=u(1,t)=0."
+    },
+    {
+      "fields": ["u"],
+      "id": "qwen3-poisson-polynomial-01",
+      "problem": {
+        "conditions": [
+          {"expression": "At(u, x, 0) - y*(1-y)", "name": "x zero"},
+          {"expression": "At(u, x, 1) - y*(1-y)", "name": "x one"},
+          {"expression": "At(u, y, 0) - x*(1-x)", "name": "y zero"},
+          {"expression": "At(u, y, 1) - x*(1-x)", "name": "y one"}
+        ],
+        "domains": {"x": [0.0, 1.0], "y": [0.0, 1.0]},
+        "name": "Poisson equation with polynomial boundary traces",
+        "parameters": {},
+        "pde_residuals": [
+          {"expression": "D(u, x, 2) + D(u, y, 2) + 4", "name": "Poisson PDE"}
+        ],
+        "variables": ["x", "y"]
+      },
+      "statement": "Solve u_xx+u_yy=-4 on [0,1]^2 with u(0,y)=u(1,y)=y*(1-y) and u(x,0)=u(x,1)=x*(1-x)."
+    },
+    {
+      "fields": ["u"],
+      "id": "qwen3-wave-speed-two-01",
+      "problem": {
+        "conditions": [
+          {"expression": "At(u, t, 0) - sin(pi*x)", "name": "initial position"},
+          {"expression": "At(D(u, t), t, 0)", "name": "initial velocity"},
+          {"expression": "At(u, x, 0)", "name": "left boundary"},
+          {"expression": "At(u, x, 1)", "name": "right boundary"}
+        ],
+        "domains": {"t": [0.0, 1.0], "x": [0.0, 1.0]},
+        "name": "wave equation with speed two",
+        "parameters": {},
+        "pde_residuals": [
+          {"expression": "D(u, t, 2) - 4*D(u, x, 2)", "name": "wave PDE"}
+        ],
+        "variables": ["x", "t"]
+      },
+      "statement": "Solve u_tt=4*u_xx on [0,1] with u(x,0)=sin(pi*x), u_t(x,0)=0, and zero endpoint values."
+    },
+    {
+      "fields": ["u"],
+      "id": "qwen3-burgers-shock-01",
+      "problem": {
+        "conditions": [
+          {"expression": "At(u, t, 0) - (1-tanh(5*x))", "name": "initial condition"},
+          {"expression": "At(u, x, -2) - (1-tanh(5*(-2-t)))", "name": "left boundary"},
+          {"expression": "At(u, x, 2) - (1-tanh(5*(2-t)))", "name": "right boundary"}
+        ],
+        "domains": {"t": [0.0, 1.0], "x": [-2.0, 2.0]},
+        "name": "viscous Burgers traveling shock",
+        "parameters": {},
+        "pde_residuals": [
+          {"expression": "D(u, t) + u*D(u, x) - Rational(1,10)*D(u, x, 2)", "name": "Burgers PDE"}
+        ],
+        "variables": ["x", "t"]
+      },
+      "statement": "Solve u_t+u*u_x=0.1*u_xx for x in [-2,2], t in [0,1], with u(x,0)=1-tanh(5*x), u(-2,t)=1-tanh(5*(-2-t)), and u(2,t)=1-tanh(5*(2-t))."
+    },
+    {
+      "fields": ["u"],
+      "id": "qwen3-fisher-kpp-01",
+      "problem": {
+        "conditions": [
+          {"expression": "At(u, t, 0) - (1+exp(x/sqrt(6)))**(-2)", "name": "initial condition"},
+          {"expression": "At(u, x, -6) - (1+exp(-6/sqrt(6)-5*t/6))**(-2)", "name": "left boundary"},
+          {"expression": "At(u, x, 6) - (1+exp(6/sqrt(6)-5*t/6))**(-2)", "name": "right boundary"}
+        ],
+        "domains": {"t": [0.0, 2.0], "x": [-6.0, 6.0]},
+        "name": "Fisher KPP traveling front",
+        "parameters": {},
+        "pde_residuals": [
+          {"expression": "D(u, t) - D(u, x, 2) - u*(1-u)", "name": "Fisher KPP PDE"}
+        ],
+        "variables": ["x", "t"]
+      },
+      "statement": "Solve u_t=u_xx+u*(1-u) for x in [-6,6], t in [0,2], with u(x,0)=(1+exp(x/sqrt(6)))**(-2) and boundary traces obtained by substituting x=-6 and x=6 into (1+exp(x/sqrt(6)-5*t/6))**(-2)."
+    },
+    {
+      "fields": ["u"],
+      "id": "qwen3-kdv-soliton-01",
+      "problem": {
+        "conditions": [
+          {"expression": "At(u, t, 0) - 2/cosh(x)**2", "name": "initial condition"},
+          {"expression": "At(u, x, -5) - 2/cosh(-5-4*t)**2", "name": "left boundary"},
+          {"expression": "At(u, x, 5) - 2/cosh(5-4*t)**2", "name": "right boundary"}
+        ],
+        "domains": {"t": [0.0, 1.0], "x": [-5.0, 5.0]},
+        "name": "KdV one-soliton problem",
+        "parameters": {},
+        "pde_residuals": [
+          {"expression": "D(u, t) + 6*u*D(u, x) + D(u, x, 3)", "name": "KdV PDE"}
+        ],
+        "variables": ["x", "t"]
+      },
+      "statement": "Solve u_t+6*u*u_x+u_xxx=0 for x in [-5,5], t in [0,1], with u(x,0)=2/cosh(x)**2 and boundary traces u(-5,t)=2/cosh(-5-4*t)**2, u(5,t)=2/cosh(5-4*t)**2."
+    },
+    {
+      "fields": ["u"],
+      "id": "qwen3-transport-2d-01",
+      "problem": {
+        "conditions": [
+          {"expression": "At(u, t, 0) - sin(pi*x)*cos(pi*y)", "name": "initial condition"}
+        ],
+        "domains": {"t": [0.0, 1.0], "x": [0.0, 1.0], "y": [0.0, 1.0]},
+        "name": "two-dimensional anisotropic transport",
+        "parameters": {},
+        "pde_residuals": [
+          {"expression": "D(u, t) + D(u, x) + 2*D(u, y)", "name": "transport PDE"}
+        ],
+        "variables": ["x", "y", "t"]
+      },
+      "statement": "Solve u_t+u_x+2*u_y=0 with u(x,y,0)=sin(pi*x)*cos(pi*y)."
+    },
+    {
+      "fields": ["u", "v"],
+      "id": "qwen3-coupled-wave-01",
+      "problem": {
+        "conditions": [
+          {"expression": "At(u, t, 0) - sin(pi*x)", "name": "u initial"},
+          {"expression": "At(v, t, 0)", "name": "v initial"},
+          {"expression": "At(u, x, 0)", "name": "u left"},
+          {"expression": "At(u, x, 1)", "name": "u right"},
+          {"expression": "At(v, x, 0) - sin(pi*t)", "name": "v left"},
+          {"expression": "At(v, x, 1) + sin(pi*t)", "name": "v right"}
+        ],
+        "domains": {"t": [0.0, 1.0], "x": [0.0, 1.0]},
+        "name": "coupled first-order wave system",
+        "parameters": {},
+        "pde_residuals": [
+          {"expression": "D(u, t) - D(v, x)", "name": "u_t minus v_x"},
+          {"expression": "D(v, t) - D(u, x)", "name": "v_t minus u_x"}
+        ],
+        "variables": ["x", "t"]
+      },
+      "statement": "Solve u_t=v_x and v_t=u_x on [0,1] with u(x,0)=sin(pi*x), v(x,0)=0, u(0,t)=u(1,t)=0, v(0,t)=sin(pi*t), and v(1,t)=-sin(pi*t)."
+    }
+  ]
+}

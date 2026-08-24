@@ -49,6 +49,10 @@ pdecert corpus validate corpus/pilot.json
 pdecert corpus validate corpus/community
 ```
 
+Open-model batches follow a
+[predeclared, resumable collection protocol](docs/atlas-open-model-collection.md)
+that retains raw responses and accounts for outputs that cannot be materialized.
+
 The current public pilot has 20 records. The next coverage milestone is a
 100-record community release spanning multiple PDE families, artifact types,
 generators, and checker disagreements. Record count is not treated as evidence
