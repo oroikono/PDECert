@@ -122,6 +122,9 @@ class CommandLineTests(unittest.TestCase):
         self.assertEqual(summary["verdicts"], {"invalid": 10, "valid": 10})
 
     def test_corpus_validate_accepts_a_modular_atlas_directory(self):
+        records = [
+            path for path in Path("corpus/community/records").iterdir() if path.is_dir()
+        ]
         output = io.StringIO()
         with redirect_stdout(output):
             exit_code = main(["corpus", "validate", "corpus/community"])
@@ -129,10 +132,11 @@ class CommandLineTests(unittest.TestCase):
         summary = json.loads(output.getvalue())
         self.assertEqual(exit_code, 0)
         self.assertEqual(summary["corpus_version"], 1)
-        self.assertEqual(summary["records"], 6)
+        self.assertEqual(summary["records"], len(records))
         self.assertEqual(summary["name"], "PDE Failure Atlas community intake")
-        self.assertEqual(summary["annotation_statuses"], {"pending": 6})
-        self.assertEqual(summary["origin_kinds"], {"synthetic": 6})
+        self.assertEqual(sum(summary["annotation_statuses"].values()), len(records))
+        self.assertEqual(sum(summary["origin_kinds"].values()), len(records))
+        self.assertGreaterEqual(summary["origin_kinds"]["synthetic"], 6)
 
     def test_corpus_validate_returns_input_error_for_invalid_json(self):
         with tempfile.TemporaryDirectory() as directory:

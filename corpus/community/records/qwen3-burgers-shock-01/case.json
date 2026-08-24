@@ -1,0 +1,42 @@
+{
+  "conditions": [
+    {
+      "expression": "At(u, t, 0) - (1-tanh(5*x))",
+      "name": "initial condition"
+    },
+    {
+      "expression": "At(u, x, -2) - (1-tanh(5*(-2-t)))",
+      "name": "left boundary"
+    },
+    {
+      "expression": "At(u, x, 2) - (1-tanh(5*(2-t)))",
+      "name": "right boundary"
+    }
+  ],
+  "domains": {
+    "t": [
+      0.0,
+      1.0
+    ],
+    "x": [
+      -2.0,
+      2.0
+    ]
+  },
+  "fields": {
+    "u": "(1 - tanh(5*x))*exp(-t) + (tanh(5*t - 10) + 1)*exp(-t)"
+  },
+  "name": "viscous Burgers traveling shock",
+  "parameters": {},
+  "pde_residuals": [
+    {
+      "expression": "D(u, t) + u*D(u, x) - Rational(1,10)*D(u, x, 2)",
+      "name": "Burgers PDE"
+    }
+  ],
+  "schema_version": 3,
+  "variables": [
+    "x",
+    "t"
+  ]
+}

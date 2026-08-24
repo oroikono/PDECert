@@ -1,0 +1,1 @@
+FINAL u: sin(pi*x)*cos(pi*y) + t*sin(pi*x)*cos(pi*y)

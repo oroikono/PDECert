@@ -1,0 +1,22 @@
+{
+  "annotation": {
+    "annotators": [],
+    "failure_modes": [],
+    "rationale": null,
+    "status": "pending",
+    "verdict": null
+  },
+  "id": "qwen3-wave-speed-two-01",
+  "origin": {
+    "generated_at": "2026-08-24T16:29:25.837960+00:00",
+    "identifier": "Qwen/Qwen3-1.7B",
+    "input": "{\"generation\": {\"do_sample\": false, \"max_new_tokens\": 160}, \"prompt\": \"Solve u_tt=4*u_xx on [0,1] with u(x,0)=sin(pi*x), u_t(x,0)=0, and zero endpoint values.\\n\\nReturn one explicit candidate expression for every requested field. Use Python/SymPy syntax with variables x, t. You may use pi, E, sin, cos, sinh, cosh, tanh, exp, log, sqrt, Abs, +, -, *, /, **, and parentheses. Do not return an implicit equation, arbitrary function, derivative, integral, code block, or explanation. End with exactly:\\nFINAL u: <expression>\"}",
+    "kind": "open_model",
+    "license": "Apache-2.0",
+    "producer": "Qwen via Transformers",
+    "revision": "70d244cc86ccca08cf5af4e1e306ecf908b1ad5e",
+    "source_url": "https://huggingface.co/Qwen/Qwen3-1.7B",
+    "version": "4.55.4"
+  },
+  "output_sha256": "14e330693980fe80e43778ae18d61504acfd03d076cfe900bbeb2fc2a55016e1"
+}

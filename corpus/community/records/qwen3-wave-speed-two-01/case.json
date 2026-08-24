@@ -1,0 +1,46 @@
+{
+  "conditions": [
+    {
+      "expression": "At(u, t, 0) - sin(pi*x)",
+      "name": "initial position"
+    },
+    {
+      "expression": "At(D(u, t), t, 0)",
+      "name": "initial velocity"
+    },
+    {
+      "expression": "At(u, x, 0)",
+      "name": "left boundary"
+    },
+    {
+      "expression": "At(u, x, 1)",
+      "name": "right boundary"
+    }
+  ],
+  "domains": {
+    "t": [
+      0.0,
+      1.0
+    ],
+    "x": [
+      0.0,
+      1.0
+    ]
+  },
+  "fields": {
+    "u": "sin(pi*x)"
+  },
+  "name": "wave equation with speed two",
+  "parameters": {},
+  "pde_residuals": [
+    {
+      "expression": "D(u, t, 2) - 4*D(u, x, 2)",
+      "name": "wave PDE"
+    }
+  ],
+  "schema_version": 3,
+  "variables": [
+    "x",
+    "t"
+  ]
+}
