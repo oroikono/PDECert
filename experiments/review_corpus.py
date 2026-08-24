@@ -8,7 +8,7 @@ import sys
 from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 
-from pdecert import FAILURE_MODES, CorpusError, load_corpus
+from pdecert import FAILURE_MODES, CorpusError, load_corpus_source
 
 
 InputFunction = Callable[[str], str]
@@ -241,7 +241,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     arguments = parser.parse_args(argv)
     try:
-        corpus = load_corpus(arguments.corpus)
+        corpus = load_corpus_source(arguments.corpus)
         review = load_or_create_review(arguments.output, corpus)
         run_session(corpus, review, arguments.output)
     except (CorpusError, OSError, ReviewSessionError) as error:
