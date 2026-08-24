@@ -16,7 +16,7 @@ from .schema import SCHEMA_VERSION, case_from_dict
 
 CORPUS_VERSION = 1
 ATLAS_VERSION = 1
-ORIGIN_KINDS = frozenset({"open_model", "symbolic_solver"})
+ORIGIN_KINDS = frozenset({"open_model", "symbolic_solver", "synthetic"})
 FAILURE_MODES = frozenset(
     {
         "boundary_condition",

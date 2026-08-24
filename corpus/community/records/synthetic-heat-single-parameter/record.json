@@ -1,0 +1,22 @@
+{
+  "annotation": {
+    "annotators": [],
+    "failure_modes": [],
+    "rationale": null,
+    "status": "pending",
+    "verdict": null
+  },
+  "id": "synthetic-heat-single-parameter",
+  "origin": {
+    "generated_at": "2026-08-24T14:30:00+00:00",
+    "identifier": "experiments.adversarial_heat.build_cases",
+    "input": "Constructed adversarial candidate for the fully stated heat problem. The candidate solves the equation only at k=1, not over the declared interval.",
+    "kind": "synthetic",
+    "license": "MIT",
+    "producer": "PDECert",
+    "revision": "f5a45d8f78e29608bee20e97b75fc9f29ced51f9",
+    "source_url": "https://github.com/oroikono/PDECert/blob/f5a45d8f78e29608bee20e97b75fc9f29ced51f9/experiments/adversarial_heat.py",
+    "version": "0.1.0"
+  },
+  "output_sha256": "1f2bcfa0e1a85219be7cbeb2f95e050a24fb4efb772d6aaabf71a62e09af6e70"
+}

@@ -107,8 +107,10 @@ class CommandLineTests(unittest.TestCase):
         summary = json.loads(output.getvalue())
         self.assertEqual(exit_code, 0)
         self.assertEqual(summary["corpus_version"], 1)
-        self.assertEqual(summary["records"], 0)
+        self.assertEqual(summary["records"], 6)
         self.assertEqual(summary["name"], "PDE Failure Atlas community intake")
+        self.assertEqual(summary["annotation_statuses"], {"pending": 6})
+        self.assertEqual(summary["origin_kinds"], {"synthetic": 6})
 
     def test_corpus_validate_returns_input_error_for_invalid_json(self):
         with tempfile.TemporaryDirectory() as directory:

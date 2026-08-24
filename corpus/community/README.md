@@ -16,6 +16,10 @@ The directory name must match the record ID. record.json contains provenance,
 the raw-output digest, and annotation state. case.json uses the latest PDECert
 problem schema. raw-output.txt is preserved byte-for-byte.
 
+The initial synthetic records are mechanism-isolating fixtures, not natural
+model outputs and not human ground truth. Their annotations stay pending until
+the published review protocol is completed.
+
 Validate the complete directory before opening a pull request:
 
 ~~~bash

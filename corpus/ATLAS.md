@@ -33,8 +33,9 @@ real use.
 
 ## Current and planned artifact lanes
 
-The version 1 corpus currently serializes symbolic expressions from open models
-and symbolic solvers. The repository can already check PyTorch callables in
+The version 1 corpus currently serializes symbolic expressions from open
+models, symbolic solvers, and explicitly identified synthetic constructions.
+The repository can already check PyTorch callables in
 memory, but it does not yet define a portable corpus representation for model
 weights and executable residual operators. Numerical fields and generated
 solver programs likewise need explicit formats and security boundaries before

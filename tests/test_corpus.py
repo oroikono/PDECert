@@ -197,6 +197,11 @@ class CorpusTests(unittest.TestCase):
         with self.assertRaisesRegex(CorpusError, "absolute HTTP"):
             validate_corpus(payload)
 
+    def test_synthetic_origin_is_explicitly_supported(self):
+        payload = copy.deepcopy(self.corpus)
+        payload["records"][0]["origin"]["kind"] = "synthetic"
+        validate_corpus(payload)
+
     def test_pending_annotation_cannot_hide_a_label(self):
         payload = copy.deepcopy(self.corpus)
         payload["records"][0]["annotation"]["verdict"] = "valid"

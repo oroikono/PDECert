@@ -1,0 +1,51 @@
+{
+  "conditions": [
+    {
+      "expression": "At(u, t, 0) - sin(pi*x)",
+      "name": "initial condition"
+    },
+    {
+      "expression": "At(u, x, 0)",
+      "name": "left boundary"
+    },
+    {
+      "expression": "At(u, x, 1)",
+      "name": "right boundary"
+    }
+  ],
+  "domains": {
+    "k": [
+      0.2,
+      2.0
+    ],
+    "t": [
+      0.0,
+      1.0
+    ],
+    "x": [
+      0.0,
+      1.0
+    ]
+  },
+  "fields": {
+    "u": "exp(-pi**2*t)*sin(pi*x)"
+  },
+  "name": "single_parameter_trap",
+  "parameters": {
+    "k": [
+      "positive"
+    ]
+  },
+  "pde_residuals": [
+    {
+      "expression": "D(u, t) - k*D(u, x, 2)",
+      "name": "parametric heat PDE"
+    }
+  ],
+  "schema_version": 3,
+  "variables": [
+    "x",
+    "t",
+    "k"
+  ]
+}
