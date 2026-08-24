@@ -1,8 +1,8 @@
-# PDECert
-
 <p align="center">
-  <img src="assets/pdecert-icon.png" alt="PDECert project icon" width="180">
+  <img src="assets/pdecert-icon.png" alt="PDECert project icon" width="200">
 </p>
+
+<h1 align="center">PDECert</h1>
 
 <p align="center"><strong>Proof-carrying PDE solutions.</strong></p>
 
