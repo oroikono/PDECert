@@ -43,7 +43,7 @@
         "input"
       ],
       "properties": {
-        "kind": { "enum": ["open_model", "symbolic_solver"] },
+        "kind": { "enum": ["open_model", "symbolic_solver", "synthetic"] },
         "producer": { "type": "string", "minLength": 1 },
         "version": { "type": ["string", "null"], "minLength": 1 },
         "identifier": { "type": "string", "minLength": 1 },
