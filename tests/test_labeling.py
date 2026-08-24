@@ -1,10 +1,20 @@
 import copy
 import hashlib
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
-from pdecert import ReviewError, apply_review, corpus_sha256, load_corpus, validate_corpus
+from experiments.apply_review import main as apply_review_main
+from pdecert import (
+    ReviewError,
+    apply_review,
+    corpus_sha256,
+    dump_atlas,
+    load_atlas,
+    load_corpus,
+    validate_corpus,
+)
 
 
 class LabelingTests(unittest.TestCase):
@@ -133,6 +143,55 @@ class LabelingTests(unittest.TestCase):
                 annotator="second-reviewer",
                 confirmed_independent_review=True,
             )
+
+    def test_review_command_writes_a_new_modular_atlas(self):
+        source = copy.deepcopy(self.corpus)
+        review = {
+            "review_version": 1,
+            "records": [
+                {
+                    "failure_modes": [],
+                    "id": record["id"],
+                    "rationale": "The test reviewer found the written semantics unclear.",
+                    "verdict": "unclear",
+                }
+                for record in source["records"]
+            ],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source_path = root / "pending-atlas"
+            review_path = root / "review.json"
+            output = root / "labeled-atlas"
+            dump_atlas(source, source_path)
+            review_path.write_text(json.dumps(review))
+            apply_review_main(
+                [
+                    str(review_path),
+                    "--corpus",
+                    str(source_path),
+                    "--output",
+                    str(output),
+                    "--annotator",
+                    "test-reviewer",
+                    "--confirm-independent-review",
+                ]
+            )
+            labeled = load_atlas(output)
+            unchanged = load_atlas(source_path)
+
+        self.assertTrue(
+            all(record["annotation"]["status"] == "pending" for record in unchanged["records"])
+        )
+        self.assertTrue(
+            all(record["annotation"]["status"] == "labeled" for record in labeled["records"])
+        )
+        self.assertTrue(
+            all(
+                record["annotation"]["annotators"] == ["test-reviewer"]
+                for record in labeled["records"]
+            )
+        )
 
 
 if __name__ == "__main__":

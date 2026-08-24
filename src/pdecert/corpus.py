@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import tempfile
 from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
@@ -317,3 +318,51 @@ def dump_corpus(value: object, path: str | Path) -> None:
 
     validate_corpus(value)
     Path(path).write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
+
+
+def dump_atlas(value: object, path: str | Path) -> None:
+    """Validate and atomically write a new modular Atlas directory."""
+
+    validate_corpus(value)
+    corpus = _object(value, "$")
+    destination = Path(path)
+    if destination.exists():
+        raise CorpusError(f"{destination}: refusing to overwrite an existing path")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+
+    with tempfile.TemporaryDirectory(
+        dir=destination.parent,
+        prefix=f".{destination.name}-",
+    ) as temporary:
+        staged = Path(temporary) / destination.name
+        records_directory = staged / "records"
+        records_directory.mkdir(parents=True)
+        manifest = {
+            "atlas_version": ATLAS_VERSION,
+            "description": corpus["description"],
+            "name": corpus["name"],
+        }
+        (staged / "atlas.json").write_text(
+            json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+        )
+        for record in sorted(corpus["records"], key=lambda item: item["id"]):
+            bundle = records_directory / record["id"]
+            bundle.mkdir()
+            metadata = {
+                "annotation": record["annotation"],
+                "id": record["id"],
+                "origin": record["origin"],
+                "output_sha256": record["output_sha256"],
+            }
+            (bundle / "record.json").write_text(
+                json.dumps(metadata, indent=2, sort_keys=True) + "\n"
+            )
+            (bundle / "case.json").write_text(
+                json.dumps(record["case"], indent=2, sort_keys=True) + "\n"
+            )
+            (bundle / "raw-output.txt").write_bytes(record["raw_output"].encode())
+
+        load_atlas(staged)
+        if destination.exists():
+            raise CorpusError(f"{destination}: refusing to overwrite an existing path")
+        staged.replace(destination)

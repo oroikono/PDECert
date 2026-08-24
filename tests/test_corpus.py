@@ -9,6 +9,7 @@ from pdecert import (
     ATLAS_VERSION,
     CorpusError,
     case_to_dict,
+    dump_atlas,
     dump_corpus,
     load_atlas,
     load_corpus,
@@ -109,6 +110,45 @@ class CorpusTests(unittest.TestCase):
             [record["id"] for record in loaded["records"]],
             ["sympy-wave-001", "sympy-wave-002"],
         )
+
+    def test_modular_atlas_dump_round_trip_is_deterministic(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "atlas"
+            dump_atlas(self.corpus, output)
+            loaded = load_atlas(output)
+
+            self.assertTrue((output / "atlas.json").read_text().endswith("\n"))
+            self.assertTrue(
+                (output / "records" / self.record["id"] / "record.json")
+                .read_text()
+                .endswith("\n")
+            )
+        self.assertEqual(loaded, self.corpus)
+
+    def test_modular_atlas_dump_preserves_raw_utf8_bytes(self):
+        corpus = copy.deepcopy(self.corpus)
+        raw_output = "u = α + β\r\n"
+        corpus["records"][0]["raw_output"] = raw_output
+        corpus["records"][0]["output_sha256"] = output_sha256(raw_output)
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "atlas"
+            dump_atlas(corpus, output)
+            stored = (
+                output / "records" / self.record["id"] / "raw-output.txt"
+            ).read_bytes()
+
+        self.assertEqual(stored, raw_output.encode())
+
+    def test_modular_atlas_dump_refuses_an_existing_destination(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "atlas"
+            output.mkdir()
+            marker = output / "keep.txt"
+            marker.write_text("preserve me")
+            with self.assertRaisesRegex(CorpusError, "refusing to overwrite"):
+                dump_atlas(self.corpus, output)
+
+            self.assertEqual(marker.read_text(), "preserve me")
 
     def test_modular_record_directory_must_match_its_id(self):
         with tempfile.TemporaryDirectory() as directory:
