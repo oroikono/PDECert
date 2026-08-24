@@ -1,10 +1,11 @@
 # PDECert
 
-Symbolic PDE candidates should come with a certificate or a concrete counterexample.
+Machine-generated PDE solutions should come with a certificate or a concrete
+counterexample.
 
-PDECert is an early verifier for analytical PDE solution candidates. It checks
-the PDE residual together with initial and boundary conditions, looks for domain
-singularities, and returns one of three outcomes:
+PDECert is an extensible verification framework for symbolic expressions and
+differentiable callable fields. It checks the PDE residual together with initial
+and boundary conditions and returns one of three outcomes:
 
 - `PROVED` when every current obligation is an exact symbolic identity;
 - `REFUTED` when it finds a singularity or a numerical counterexample;
@@ -15,8 +16,9 @@ treated as a proof.
 
 > [!IMPORTANT]
 > This is a research prototype, not a general theorem prover. The current
-> `PROVED` result applies only to the obligations and domain checks represented
-> by the input problem.
+> `PROVED` result applies only to symbolic obligations and domain checks
+> represented by the input problem. Passing callable samples is always
+> `INCONCLUSIVE`; sampling can refute but cannot prove.
 
 ## Why this exists
 
@@ -50,6 +52,14 @@ pytest
 python -m experiments.adversarial_heat
 python -m experiments.coupled_wave
 python -m experiments.sigs_poisson_gauss
+```
+
+Install the optional PyTorch backend to check callable models and PINNs:
+
+```bash
+pip install -e ".[dev,autodiff]"
+python -m examples.autodiff_heat
+python -m experiments.mixed_artifact_smoke
 ```
 
 The installed command accepts one versioned JSON case and prints a stable JSON
@@ -96,6 +106,53 @@ problem = Problem(
 report = verify(problem, (candidate,), symbolic_timeout=2.0)
 print(report.status)  # Status.PROVED
 ```
+
+## PyTorch and PINN-style fields
+
+`CallableCandidate` accepts named PyTorch functions or modules whose input has
+shape `(points, variables)`. An `AutodiffProblem` defines residual operators in
+terms of fields, coordinates, and automatic derivatives. Conditions can fix a
+coordinate to describe initial or boundary surfaces. A callable must evaluate
+each row independently; cross-sample attention and training-mode batch
+operations do not represent pointwise PDE derivatives under this checker.
+
+```python
+import torch
+
+from pdecert import (
+    AutodiffConstraint,
+    AutodiffProblem,
+    CallableCandidate,
+    verify_artifact,
+)
+
+
+def field(points):
+    x, t = points[:, 0:1], points[:, 1:2]
+    return torch.exp(-(torch.pi**2) * t) * torch.sin(torch.pi * x)
+
+
+problem = AutodiffProblem(
+    name="heat equation",
+    variables=("x", "t"),
+    domains={"x": (0.0, 1.0), "t": (0.0, 1.0)},
+    pde_residuals=(
+        AutodiffConstraint(
+            "heat PDE",
+            lambda value: value.derivative("u", "t")
+            - value.derivative("u", "x", order=2),
+        ),
+    ),
+)
+artifact = CallableCandidate.from_mapping({"u": field}, dtype="float64")
+report = verify_artifact(problem, artifact, tolerance=1e-9)
+print(report.status)  # INCONCLUSIVE: sampled success is not a proof
+```
+
+The complete example includes the initial condition, both boundary conditions,
+and a perturbed field that is refuted with a concrete point. See
+[`examples/autodiff_heat.py`](examples/autodiff_heat.py) and
+[`ADR-0002`](docs/adr/0002-general-solution-artifacts.md).
 
 ## JSON cases
 

@@ -19,6 +19,8 @@ import mpmath
 import sympy as sp
 
 if TYPE_CHECKING:
+    from .artifacts import SolutionArtifact, SymbolicCandidate
+    from .autodiff import AutodiffProblem
     from .checks import CheckerRegistry
 
 
@@ -308,7 +310,7 @@ def _find_singularity(
 
 def verify(
     problem: Problem,
-    candidate_expressions: Iterable[sp.Expr] | Mapping[str, sp.Expr],
+    candidate_expressions: Iterable[sp.Expr] | Mapping[str, sp.Expr] | SymbolicCandidate,
     *,
     tolerance: float = 1e-9,
     samples_per_axis: int = 5,
@@ -334,29 +336,66 @@ def verify(
     ):
         raise ValueError("symbolic_timeout must be finite and positive")
 
-    if isinstance(candidate_expressions, Mapping):
-        expressions = tuple(candidate_expressions.items())
-        if any(not isinstance(name, str) or not name for name, _ in expressions):
-            raise ValueError("candidate field names must be non-empty strings")
-    else:
-        expressions = tuple(
-            (f"candidate[{index}]", expression)
-            for index, expression in enumerate(candidate_expressions)
-        )
-    if not expressions:
-        raise ValueError("at least one candidate expression is required")
-    if any(not isinstance(expression, sp.Expr) for _, expression in expressions):
-        raise TypeError("candidate expressions must be SymPy expressions")
+    from .artifacts import SymbolicCandidate
+
+    artifact = (
+        candidate_expressions
+        if isinstance(candidate_expressions, SymbolicCandidate)
+        else SymbolicCandidate.from_expressions(candidate_expressions)
+    )
     from .checks import CheckContext, default_checker_registry, run_checks
 
     context = CheckContext(
         problem=problem,
-        candidate_fields=expressions,
+        candidate_fields=artifact.fields,
         tolerance=tolerance,
         samples_per_axis=samples_per_axis,
         symbolic_timeout=symbolic_timeout,
     )
     return run_checks(context, checker_registry or default_checker_registry())
+
+
+def verify_artifact(
+    problem: Problem | AutodiffProblem,
+    artifact: SolutionArtifact,
+    *,
+    tolerance: float | None = None,
+    samples_per_axis: int = 5,
+    symbolic_timeout: float | None = None,
+    checker_registry: CheckerRegistry | None = None,
+) -> Report:
+    """Verify a typed solution artifact with its compatible problem backend.
+
+    Symbolic inputs preserve :func:`verify` behavior. Callable inputs use the
+    optional PyTorch autodiff backend and remain inconclusive when all finite
+    samples pass. Mismatched problem and artifact types are rejected explicitly.
+    """
+
+    from .artifacts import CallableCandidate, SymbolicCandidate
+    from .autodiff import AutodiffProblem, verify_callable
+
+    if isinstance(problem, Problem) and isinstance(artifact, SymbolicCandidate):
+        return verify(
+            problem,
+            artifact,
+            tolerance=1e-9 if tolerance is None else tolerance,
+            samples_per_axis=samples_per_axis,
+            symbolic_timeout=symbolic_timeout,
+            checker_registry=checker_registry,
+        )
+    if isinstance(problem, AutodiffProblem) and isinstance(artifact, CallableCandidate):
+        if symbolic_timeout is not None:
+            raise ValueError("symbolic_timeout does not apply to callable artifacts")
+        return verify_callable(
+            problem,
+            artifact,
+            tolerance=1e-6 if tolerance is None else tolerance,
+            samples_per_axis=samples_per_axis,
+            checker_registry=checker_registry,
+        )
+    raise TypeError(
+        f"unsupported problem/artifact pair: {type(problem).__name__} and {type(artifact).__name__}"
+    )
 
 
 def fixed_collocation_check(

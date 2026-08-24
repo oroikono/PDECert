@@ -6,6 +6,13 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- A general `SolutionArtifact` protocol with concrete symbolic and differentiable
+  callable candidates.
+- Optional PyTorch automatic-differentiation residual checks for PDE, initial,
+  and boundary obligations.
+- A typed `verify_artifact` entry point that rejects incompatible problem and
+  artifact representations.
+- A runnable heat-equation example covering exact and perturbed callable fields.
 - An ordered, immutable checker registry with a public context, result, and
   checker protocol.
 - Built-in domain, exact-identity, and off-grid checks implemented through the
