@@ -1,18 +1,22 @@
 import copy
+import io
 import json
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 from experiments.review_corpus import (
     ReviewSessionError,
     load_or_create_review,
+    main,
     new_review,
     progress_bar,
     render_record,
     run_session,
 )
-from pdecert import load_corpus
+from pdecert import load_corpus, load_corpus_source
 
 
 def _one_record_corpus():
@@ -121,6 +125,28 @@ class ReviewSessionTests(unittest.TestCase):
 
     def test_progress_bar_reaches_full_width(self):
         self.assertEqual(progress_bar(20, 20), "[####################] 20/20")
+
+    def test_main_accepts_a_modular_atlas_directory(self):
+        corpus = load_corpus_source("corpus/community")
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "review.json"
+            messages = io.StringIO()
+            with patch("sys.stdin", io.StringIO("q\n")), redirect_stdout(messages):
+                exit_code = main(
+                    [
+                        "corpus/community",
+                        "--output",
+                        str(output),
+                    ]
+                )
+            saved = json.loads(output.read_text())
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(
+            [record["id"] for record in saved["records"]],
+            [record["id"] for record in corpus["records"]],
+        )
+        self.assertIn(f"CARD 1/{len(corpus['records'])}", messages.getvalue())
 
 
 if __name__ == "__main__":

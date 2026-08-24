@@ -336,6 +336,14 @@ For a resumable blind pass with one card at a time and a progress bar:
 python -m experiments.review_corpus
 ```
 
+The same runner accepts a modular Atlas directory. Keep its resumable review
+outside the tracked corpus:
+
+```bash
+python -m experiments.review_corpus corpus/community \
+  --output private-reviews/community-review.json
+```
+
 Once every annotation is complete, run the reproducible comparison report:
 
 ```bash
