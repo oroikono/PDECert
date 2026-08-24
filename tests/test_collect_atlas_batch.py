@@ -1,12 +1,16 @@
 import copy
 import json
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
 from experiments.collect_atlas_batch import (
     CollectionError,
     _case_payload,
+    _validate_observed_model,
     extract_fields,
     load_manifest,
     materialize,
@@ -67,6 +71,34 @@ class AtlasBatchCollectionTests(unittest.TestCase):
             extract_fields("FINAL u: x", ["u", "v"])
         with self.assertRaisesRegex(CollectionError, "more than once"):
             extract_fields("FINAL u: x\nFINAL u: y", ["u"])
+
+    def test_offline_model_validation_requires_the_pinned_snapshot(self):
+        revision = self.manifest["model"]["revision"]
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot = Path(directory) / revision
+            snapshot.mkdir()
+            download = Mock(return_value=str(snapshot))
+            module = SimpleNamespace(HfApi=Mock(), snapshot_download=download)
+            with patch.dict(sys.modules, {"huggingface_hub": module}):
+                _validate_observed_model(self.manifest, local_files_only=True)
+
+        download.assert_called_once_with(
+            repo_id=self.manifest["model"]["identifier"],
+            revision=revision,
+            local_files_only=True,
+        )
+
+    def test_offline_model_validation_rejects_a_different_snapshot(self):
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot = Path(directory) / ("0" * 40)
+            snapshot.mkdir()
+            module = SimpleNamespace(
+                HfApi=Mock(),
+                snapshot_download=Mock(return_value=str(snapshot)),
+            )
+            with patch.dict(sys.modules, {"huggingface_hub": module}):
+                with self.assertRaisesRegex(CollectionError, "model revision mismatch"):
+                    _validate_observed_model(self.manifest, local_files_only=True)
 
     def _transcript(self, manifest, case, response):
         return {

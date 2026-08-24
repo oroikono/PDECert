@@ -192,18 +192,35 @@ def _atomic_json(path: Path, value: object) -> None:
     temporary.replace(path)
 
 
-def _validate_observed_model(manifest: dict[str, Any]) -> None:
-    from huggingface_hub import HfApi
+def _validate_observed_model(
+    manifest: dict[str, Any], *, local_files_only: bool = False
+) -> None:
+    from huggingface_hub import HfApi, snapshot_download
 
     model = manifest["model"]
-    observed = HfApi().model_info(model["identifier"], revision=model["revision"]).sha
+    if local_files_only:
+        snapshot = Path(
+            snapshot_download(
+                repo_id=model["identifier"],
+                revision=model["revision"],
+                local_files_only=True,
+            )
+        ).resolve()
+        observed = snapshot.name
+    else:
+        observed = HfApi().model_info(model["identifier"], revision=model["revision"]).sha
     if observed != model["revision"]:
         raise CollectionError(
             f"model revision mismatch: expected {model['revision']}, observed {observed}"
         )
 
 
-def generate(manifest: dict[str, Any], run_directory: Path) -> None:
+def generate(
+    manifest: dict[str, Any],
+    run_directory: Path,
+    *,
+    local_files_only: bool = False,
+) -> None:
     """Generate every missing transcript once with the pinned open model."""
 
     try:
@@ -213,15 +230,17 @@ def generate(manifest: dict[str, Any], run_directory: Path) -> None:
     except ImportError as error:
         raise RuntimeError("install requirements/atlas-collection.txt") from error
 
-    _validate_observed_model(manifest)
+    _validate_observed_model(manifest, local_files_only=local_files_only)
     model_info = manifest["model"]
     tokenizer = AutoTokenizer.from_pretrained(
         model_info["identifier"],
         revision=model_info["revision"],
+        local_files_only=local_files_only,
     )
     model = AutoModelForCausalLM.from_pretrained(
         model_info["identifier"],
         revision=model_info["revision"],
+        local_files_only=local_files_only,
         torch_dtype="auto",
         device_map="auto",
     )
@@ -393,6 +412,12 @@ def _parser() -> argparse.ArgumentParser:
         command = subcommands.add_parser(name)
         command.add_argument("manifest", type=Path)
         command.add_argument("--run-directory", type=Path, required=True)
+        if name == "generate":
+            command.add_argument(
+                "--local-files-only",
+                action="store_true",
+                help="resolve and load the pinned revision from the local Hugging Face cache",
+            )
         if name == "materialize":
             command.add_argument("--atlas", type=Path, default=Path("corpus/community"))
             command.add_argument("--report", type=Path, required=True)
@@ -403,7 +428,11 @@ def main() -> None:
     arguments = _parser().parse_args()
     manifest = load_manifest(arguments.manifest)
     if arguments.command == "generate":
-        generate(manifest, arguments.run_directory)
+        generate(
+            manifest,
+            arguments.run_directory,
+            local_files_only=arguments.local_files_only,
+        )
     else:
         report = materialize(
             manifest,

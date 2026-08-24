@@ -35,6 +35,12 @@ Generation is greedy and the manifest pins a full model revision. Each case is
 written immediately. Existing transcripts are skipped, making an interrupted
 job resumable without silently rerunning earlier cases.
 
+On a compute node without network access, first download the pinned snapshot on
+a connected host into the same Hugging Face cache. Then add
+`--local-files-only` to the generation command. The collector resolves the
+cached snapshot directory and rejects it unless its name is the manifest's full
+revision, so offline execution keeps the same revision check.
+
 Do not edit model responses. Do not rerun a case because its answer is
 mathematically inconvenient. If a response cannot be parsed, retain the
 transcript and publish the `not_materialized` outcome in the collection report.
