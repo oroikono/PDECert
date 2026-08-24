@@ -86,6 +86,30 @@ class CommandLineTests(unittest.TestCase):
             main(["verify", "case.json", "--tolerance", "nan"])
         self.assertIn("must be finite and positive", errors.getvalue())
 
+    def test_corpus_validate_prints_a_coverage_summary(self):
+        output = io.StringIO()
+        with redirect_stdout(output):
+            exit_code = main(["corpus", "validate", "corpus/pilot.json"])
+
+        summary = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(summary["corpus_version"], 1)
+        self.assertEqual(summary["records"], 20)
+        self.assertEqual(summary["annotation_statuses"], {"labeled": 20})
+        self.assertEqual(summary["origin_kinds"], {"open_model": 10, "symbolic_solver": 10})
+        self.assertEqual(summary["verdicts"], {"invalid": 10, "valid": 10})
+
+    def test_corpus_validate_returns_input_error_for_invalid_json(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "invalid-corpus.json"
+            path.write_text("{")
+            errors = io.StringIO()
+            with redirect_stderr(errors):
+                exit_code = main(["corpus", "validate", str(path)])
+
+        self.assertEqual(exit_code, INPUT_ERROR)
+        self.assertIn("invalid JSON", errors.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()
