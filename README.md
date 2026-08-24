@@ -1,4 +1,10 @@
-# PDECert
+<p align="center">
+  <img src="assets/pdecert-icon.png" alt="PDECert project icon" width="200">
+</p>
+
+<h1 align="center">PDECert</h1>
+
+<p align="center"><strong>Proof-carrying PDE solutions.</strong></p>
 
 Machine-generated PDE solutions should come with a certificate or a concrete
 counterexample.
