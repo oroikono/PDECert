@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/oroikono/PDECert/schema/atlas-record-v1.schema.json",
+  "title": "PDECert modular atlas record metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "origin", "output_sha256", "annotation"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+    "origin": { "$ref": "corpus-v1.schema.json#/$defs/origin" },
+    "output_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "annotation": { "$ref": "corpus-v1.schema.json#/$defs/annotation" }
+  }
+}

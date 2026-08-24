@@ -38,6 +38,7 @@ Validate a versioned corpus before requesting review:
 
 ```bash
 pdecert corpus validate path/to/corpus.json
+pdecert corpus validate path/to/atlas-directory
 ```
 
 Do not import `results/provisional-review.json` as a human review. Complete the

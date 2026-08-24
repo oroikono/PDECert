@@ -48,6 +48,29 @@ Until those formats exist:
 - do not convert an unsupported artifact into a symbolic expression and present
   it as the original output.
 
+## Modular record bundles
+
+The community atlas stores one contribution per directory so unrelated pull
+requests do not edit the same large JSON document:
+
+~~~text
+community-atlas/
+├── atlas.json
+└── records/
+    └── <record-id>/
+        ├── record.json
+        ├── case.json
+        └── raw-output.txt
+~~~
+
+The atlas manifest supplies the collection name, description, and format
+version. Record metadata stays separate from the latest problem-schema case and
+the byte-preserved raw output. Directory names must match record IDs, and loose
+files or symlinked record directories are rejected.
+
+The monolithic corpus format remains supported for immutable releases and
+backward compatibility.
+
 ## Record lifecycle
 
 1. **Proposed:** a contributor opens a failure-case issue with a complete

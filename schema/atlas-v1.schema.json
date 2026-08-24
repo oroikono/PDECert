@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/oroikono/PDECert/schema/atlas-v1.schema.json",
+  "title": "PDECert modular atlas manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["atlas_version", "name", "description"],
+  "properties": {
+    "atlas_version": { "const": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "description": { "type": "string", "minLength": 1 }
+  }
+}
