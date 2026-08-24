@@ -69,15 +69,21 @@ report:
 pdecert verify examples/exact_heat.json
 pdecert verify examples/exact_heat.json --output report.json
 pdecert verify examples/exact_heat.json --symbolic-timeout 5
+pdecert verify examples/exact_heat.json --max-expression-ops 10000
 ```
 
 Exit code `0` means `PROVED`, `1` means `REFUTED`, `2` means `INCONCLUSIVE`,
 and `64` reports an unreadable or invalid input file. A non-zero result is not
 automatically a software failure; consumers should also read `report.status`.
 The CLI gives each singularity and symbolic-identity check two seconds by
-default. A deadline, unsupported deadline environment, or undecidable symbolic
-operation is recorded under `report.incomplete_reasons` and cannot produce a
-`PROVED` result.
+default. It also admits at most 10,000 structural operations to each symbolic
+domain or identity check. An expression above that limit skips the expensive
+symbolic operation, records the reason under `report.incomplete_reasons`, and
+cannot produce `PROVED`. Off-grid evaluation still runs and can return a concrete
+counterexample. The operation count limits input complexity; it does not bound
+intermediate expression growth or process memory. A deadline, unsupported
+deadline environment, or undecidable symbolic operation is likewise recorded
+as incomplete.
 
 ## Small example
 
@@ -349,12 +355,13 @@ Hub upload, viewer check, and immutable-link checklist.
 
 ## Current limits
 
-The prototype does not yet define weak or viscosity solution semantics. It also
-needs operation and memory budgets, stronger multivariate domain analysis,
-interval arithmetic, and supported a posteriori error bounds. Real-time symbolic
-deadlines are currently available only from the main thread on platforms that
-provide interval timers. When a check is incomplete, the intended behavior is
-`INCONCLUSIVE`.
+The prototype does not yet define weak or viscosity solution semantics. The CLI
+has a structural input-operation budget, but intermediate symbolic expressions
+still need enforceable memory limits. Stronger multivariate domain analysis,
+interval arithmetic, and supported a posteriori error bounds are also missing.
+Real-time symbolic deadlines are currently available only from the main thread
+on platforms that provide interval timers. When a check is incomplete, the
+intended behavior is `INCONCLUSIVE`.
 
 The next milestones are tracked in [ROADMAP.md](ROADMAP.md). Contributions that
 add one focused capability together with tests are welcome.

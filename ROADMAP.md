@@ -18,6 +18,8 @@ Available:
 - exact residual and initial/boundary-condition checks;
 - off-grid numerical counterexamples and singularity witnesses;
 - per-check symbolic deadlines with explicit incomplete reasons;
+- configurable input-expression operation budgets that abstain before expensive
+  symbolic work without disabling numerical counterexamples;
 - explicit parameter roles, assumptions, and domain-aware sampling;
 - named candidate fields and coupled residual systems;
 - a versioned JSON case format with restricted expression parsing;
@@ -25,7 +27,7 @@ Available:
 
 Release criteria:
 
-- operation and memory budgets for symbolic checks;
+- enforceable memory budgets for intermediate symbolic work;
 - stable error messages, documentation, and tests on supported Python versions.
 
 ## v0.2: natural-candidate benchmark

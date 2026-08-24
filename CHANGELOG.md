@@ -6,6 +6,8 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- A configurable structural operation budget for symbolic domain and identity
+  checks, with a finite CLI default and explicit inconclusive reasons.
 - A general `SolutionArtifact` protocol with concrete symbolic and differentiable
   callable candidates.
 - Optional PyTorch automatic-differentiation residual checks for PDE, initial,

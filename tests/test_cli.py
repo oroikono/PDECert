@@ -51,6 +51,22 @@ class CommandLineTests(unittest.TestCase):
         self.assertEqual(exit_code, 2)
         self.assertEqual(payload["report"]["status"], "INCONCLUSIVE")
 
+    def test_expression_budget_is_reported_as_inconclusive(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = self._write_case(directory, 0)
+            output = io.StringIO()
+            with redirect_stdout(output):
+                exit_code = main(["verify", str(path), "--max-expression-ops", "1"])
+        payload = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 2)
+        self.assertEqual(payload["report"]["status"], "INCONCLUSIVE")
+        self.assertTrue(
+            any(
+                "configured limit of 1" in reason
+                for reason in payload["report"]["incomplete_reasons"].values()
+            )
+        )
+
     def test_output_file_receives_report(self):
         with tempfile.TemporaryDirectory() as directory:
             path = self._write_case(directory, 0)
@@ -85,6 +101,12 @@ class CommandLineTests(unittest.TestCase):
         with redirect_stderr(errors), self.assertRaises(SystemExit):
             main(["verify", "case.json", "--tolerance", "nan"])
         self.assertIn("must be finite and positive", errors.getvalue())
+
+    def test_non_positive_expression_budget_is_rejected_by_argument_parser(self):
+        errors = io.StringIO()
+        with redirect_stderr(errors), self.assertRaises(SystemExit):
+            main(["verify", "case.json", "--max-expression-ops", "0"])
+        self.assertIn("must be at least one", errors.getvalue())
 
 
 if __name__ == "__main__":

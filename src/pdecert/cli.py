@@ -62,6 +62,12 @@ def _build_parser() -> argparse.ArgumentParser:
         default=2.0,
         help="seconds allowed for each symbolic check (default: 2)",
     )
+    verify_parser.add_argument(
+        "--max-expression-ops",
+        type=_positive_integer,
+        default=10_000,
+        help="maximum input operations admitted to a symbolic check (default: 10000)",
+    )
     return parser
 
 
@@ -74,6 +80,7 @@ def _run_verify(arguments: argparse.Namespace) -> int:
             tolerance=arguments.tolerance,
             samples_per_axis=arguments.samples_per_axis,
             symbolic_timeout=arguments.symbolic_timeout,
+            max_expression_ops=arguments.max_expression_ops,
         )
     except (OSError, SchemaError) as error:
         print(f"pdecert: {error}", file=sys.stderr)

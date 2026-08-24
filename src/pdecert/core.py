@@ -315,6 +315,7 @@ def verify(
     tolerance: float = 1e-9,
     samples_per_axis: int = 5,
     symbolic_timeout: float | None = None,
+    max_expression_ops: int | None = None,
     checker_registry: CheckerRegistry | None = None,
 ) -> Report:
     """Verify residuals and conditions for a symbolic candidate.
@@ -324,7 +325,9 @@ def verify(
     checking is inconclusive. Candidate expressions may be passed as a mapping
     to attach field names to domain diagnostics. ``symbolic_timeout`` applies
     separately to each domain and identity check; ``None`` leaves those
-    operations unbounded.
+    operations unbounded. ``max_expression_ops`` limits the structural operation
+    count admitted to symbolic domain and identity checks. It does not bound
+    intermediate expression growth.
     """
 
     if not math.isfinite(tolerance) or tolerance <= 0:
@@ -335,6 +338,12 @@ def verify(
         not math.isfinite(symbolic_timeout) or symbolic_timeout <= 0
     ):
         raise ValueError("symbolic_timeout must be finite and positive")
+    if max_expression_ops is not None and (
+        isinstance(max_expression_ops, bool)
+        or not isinstance(max_expression_ops, int)
+        or max_expression_ops < 1
+    ):
+        raise ValueError("max_expression_ops must be a positive integer")
 
     from .artifacts import SymbolicCandidate
 
@@ -351,6 +360,7 @@ def verify(
         tolerance=tolerance,
         samples_per_axis=samples_per_axis,
         symbolic_timeout=symbolic_timeout,
+        max_expression_ops=max_expression_ops,
     )
     return run_checks(context, checker_registry or default_checker_registry())
 
@@ -362,6 +372,7 @@ def verify_artifact(
     tolerance: float | None = None,
     samples_per_axis: int = 5,
     symbolic_timeout: float | None = None,
+    max_expression_ops: int | None = None,
     checker_registry: CheckerRegistry | None = None,
 ) -> Report:
     """Verify a typed solution artifact with its compatible problem backend.
@@ -381,11 +392,14 @@ def verify_artifact(
             tolerance=1e-9 if tolerance is None else tolerance,
             samples_per_axis=samples_per_axis,
             symbolic_timeout=symbolic_timeout,
+            max_expression_ops=max_expression_ops,
             checker_registry=checker_registry,
         )
     if isinstance(problem, AutodiffProblem) and isinstance(artifact, CallableCandidate):
         if symbolic_timeout is not None:
             raise ValueError("symbolic_timeout does not apply to callable artifacts")
+        if max_expression_ops is not None:
+            raise ValueError("max_expression_ops does not apply to callable artifacts")
         return verify_callable(
             problem,
             artifact,

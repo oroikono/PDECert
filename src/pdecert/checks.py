@@ -21,6 +21,7 @@ class CheckContext:
     tolerance: float
     samples_per_axis: int
     symbolic_timeout: float | None
+    max_expression_ops: int | None = None
 
     @property
     def constraints(self):
@@ -51,6 +52,19 @@ class CheckContext:
             self.constraint_obligation(index) for index, _ in enumerate(self.constraints)
         }
         return frozenset(domains | constraints)
+
+    def operation_budget_reason(self, expression: sp.Expr) -> str | None:
+        """Explain why an expression exceeds the configured structural budget."""
+
+        if self.max_expression_ops is None:
+            return None
+        operations = int(sp.count_ops(expression, visual=False))
+        if operations <= self.max_expression_ops:
+            return None
+        return (
+            f"input expression has {operations} operations, exceeding the "
+            f"configured limit of {self.max_expression_ops}"
+        )
 
 
 @dataclass(frozen=True)
@@ -129,9 +143,13 @@ class DomainChecker:
         proved: set[str] = set()
         incomplete: dict[str, str] = {}
         for field_name, expression in context.candidate_fields:
+            budget_reason = context.operation_budget_reason(expression)
             for variable in context.problem.variables:
                 lower, upper = context.problem.domains[variable]
                 check_name = f"{field_name} domain in {variable}"
+                if budget_reason is not None:
+                    incomplete[check_name] = budget_reason
+                    continue
                 location, error = _core._run_bounded(
                     lambda: _core._domain_singularity(expression, variable, lower, upper),
                     context.symbolic_timeout,
@@ -170,6 +188,10 @@ class ExactIdentityChecker:
         exact: dict[str, str] = {}
         incomplete: dict[str, str] = {}
         for index, constraint in enumerate(context.constraints):
+            if reason := context.operation_budget_reason(constraint.residual):
+                exact[constraint.name] = "unknown"
+                incomplete[constraint.name] = reason
+                continue
             decision, error = _core._run_bounded(
                 lambda: _core._is_zero(constraint.residual),
                 context.symbolic_timeout,
