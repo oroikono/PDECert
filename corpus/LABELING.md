@@ -58,8 +58,23 @@ python -m experiments.apply_review my-completed-review.json \
   --output corpus/pilot-labeled.json
 ```
 
-Review the resulting diff before replacing `corpus/pilot.json`. The importer
-never overwrites the source corpus implicitly.
+For a modular Atlas, provide the directory as `--corpus` and a new directory as
+`--output`:
+
+```bash
+python -m experiments.apply_review private-reviews/community-review.json \
+  --corpus corpus/community \
+  --annotator YOUR_PUBLIC_ID \
+  --confirm-independent-review \
+  --output private-reviews/community-labeled
+```
+
+The modular importer writes a complete new Atlas atomically and refuses an
+existing destination. It does not alter the source Atlas or the stored raw
+generator outputs.
+
+Review the resulting file or directory before making it canonical. The importer
+never overwrites the source corpus or Atlas implicitly.
 
 ## Provisional file
 
