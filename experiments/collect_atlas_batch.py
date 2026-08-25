@@ -124,8 +124,10 @@ def load_manifest(path: str | Path) -> dict[str, Any]:
         identifiers.add(record_id)
         _text(case["statement"], f"{path_prefix}.statement")
         fields = case["fields"]
-        if not isinstance(fields, list) or not fields or any(
-            not isinstance(field, str) or not field.isidentifier() for field in fields
+        if (
+            not isinstance(fields, list)
+            or not fields
+            or any(not isinstance(field, str) or not field.isidentifier() for field in fields)
         ):
             raise CollectionError(f"{path_prefix}.fields: expected Python identifiers")
         if len(set(fields)) != len(fields):
@@ -192,9 +194,7 @@ def _atomic_json(path: Path, value: object) -> None:
     temporary.replace(path)
 
 
-def _validate_observed_model(
-    manifest: dict[str, Any], *, local_files_only: bool = False
-) -> None:
+def _validate_observed_model(manifest: dict[str, Any], *, local_files_only: bool = False) -> None:
     from huggingface_hub import HfApi, snapshot_download
 
     model = manifest["model"]
@@ -398,9 +398,7 @@ def materialize(
                     "raw_output_sha256": digest,
                     "status": "not_materialized",
                     "transcript": str(archived),
-                    "transcript_sha256": hashlib.sha256(
-                        transcript_path.read_bytes()
-                    ).hexdigest(),
+                    "transcript_sha256": hashlib.sha256(transcript_path.read_bytes()).hexdigest(),
                 }
             )
             continue

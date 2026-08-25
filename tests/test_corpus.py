@@ -119,9 +119,7 @@ class CorpusTests(unittest.TestCase):
 
             self.assertTrue((output / "atlas.json").read_text().endswith("\n"))
             self.assertTrue(
-                (output / "records" / self.record["id"] / "record.json")
-                .read_text()
-                .endswith("\n")
+                (output / "records" / self.record["id"] / "record.json").read_text().endswith("\n")
             )
         self.assertEqual(loaded, self.corpus)
 
@@ -133,9 +131,7 @@ class CorpusTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "atlas"
             dump_atlas(corpus, output)
-            stored = (
-                output / "records" / self.record["id"] / "raw-output.txt"
-            ).read_bytes()
+            stored = (output / "records" / self.record["id"] / "raw-output.txt").read_bytes()
 
         self.assertEqual(stored, raw_output.encode())
 

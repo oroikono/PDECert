@@ -122,9 +122,7 @@ class CommandLineTests(unittest.TestCase):
         self.assertEqual(summary["verdicts"], {"invalid": 10, "valid": 10})
 
     def test_corpus_validate_accepts_a_modular_atlas_directory(self):
-        records = [
-            path for path in Path("corpus/community/records").iterdir() if path.is_dir()
-        ]
+        records = [path for path in Path("corpus/community/records").iterdir() if path.is_dir()]
         output = io.StringIO()
         with redirect_stdout(output):
             exit_code = main(["corpus", "validate", "corpus/community"])

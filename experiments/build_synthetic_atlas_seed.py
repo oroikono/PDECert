@@ -20,8 +20,7 @@ from pdecert import (
 _GENERATED_AT = "2026-08-24T14:30:00+00:00"
 _REVISION = "f5a45d8f78e29608bee20e97b75fc9f29ced51f9"
 _SOURCE_URL = (
-    "https://github.com/oroikono/PDECert/blob/"
-    f"{_REVISION}/experiments/adversarial_heat.py"
+    f"https://github.com/oroikono/PDECert/blob/{_REVISION}/experiments/adversarial_heat.py"
 )
 _SELECTION = (
     ("synthetic-heat-exact-control", "exact_heat_solution"),
@@ -44,9 +43,7 @@ class Bundle:
 
 def _serializable_case(case: Case) -> dict[str, object]:
     pde_source = (
-        "D(u, t) - k*D(u, x, 2)"
-        if case.name == "single_parameter_trap"
-        else "D(u, t) - D(u, x, 2)"
+        "D(u, t) - k*D(u, x, 2)" if case.name == "single_parameter_trap" else "D(u, t) - D(u, x, 2)"
     )
     condition_sources = (
         "At(u, t, 0) - sin(pi*x)",
