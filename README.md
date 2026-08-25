@@ -73,6 +73,9 @@ a small adversarial experiment, not yet evidence of broad benchmark performance.
 
 ## Install and run
 
+PDECert supports CPython 3.10 through 3.14. Every supported version runs the
+same lint and unit-test gates in continuous integration.
+
 ```bash
 git clone https://github.com/oroikono/PDECert.git
 cd PDECert
