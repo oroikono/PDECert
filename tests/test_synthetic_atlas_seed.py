@@ -34,9 +34,7 @@ class SyntheticAtlasSeedTests(unittest.TestCase):
         self.assertTrue(
             all(record["annotation"]["status"] == "pending" for record in atlas["records"])
         )
-        self.assertTrue(
-            all(record["annotation"]["verdict"] is None for record in atlas["records"])
-        )
+        self.assertTrue(all(record["annotation"]["verdict"] is None for record in atlas["records"]))
 
     def test_machine_outcomes_are_kept_separate_from_pending_labels(self):
         expected = {

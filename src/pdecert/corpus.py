@@ -342,9 +342,7 @@ def dump_atlas(value: object, path: str | Path) -> None:
             "description": corpus["description"],
             "name": corpus["name"],
         }
-        (staged / "atlas.json").write_text(
-            json.dumps(manifest, indent=2, sort_keys=True) + "\n"
-        )
+        (staged / "atlas.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
         for record in sorted(corpus["records"], key=lambda item: item["id"]):
             bundle = records_directory / record["id"]
             bundle.mkdir()

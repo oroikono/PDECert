@@ -42,9 +42,7 @@ class AtlasBatchCollectionTests(unittest.TestCase):
             "qwen3-burgers-shock-01": {"u": "1-tanh(5*(x-t))"},
             "qwen3-fisher-kpp-01": {"u": "(1+exp(x/sqrt(6)-5*t/6))**(-2)"},
             "qwen3-kdv-soliton-01": {"u": "2/cosh(x-4*t)**2"},
-            "qwen3-transport-2d-01": {
-                "u": "sin(pi*(x-t))*cos(pi*(y-2*t))"
-            },
+            "qwen3-transport-2d-01": {"u": "sin(pi*(x-t))*cos(pi*(y-2*t))"},
             "qwen3-coupled-wave-01": {
                 "u": "sin(pi*x)*cos(pi*t)",
                 "v": "cos(pi*x)*sin(pi*t)",
