@@ -6,6 +6,8 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- Recorded verifier-guided agent sessions, cross-model behavioral metrics, and
+  an optional real smolagents `ToolCallingAgent` integration.
 - A configurable structural operation budget for symbolic domain and identity
   checks, with a finite CLI default and explicit inconclusive reasons.
 - A contributor-facing PDE Failure Atlas protocol, structured issue intake,

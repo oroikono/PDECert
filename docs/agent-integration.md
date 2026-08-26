@@ -4,7 +4,7 @@ Agents generate or repair candidate artifacts. They are not verification
 backends and their judgments are not independent labels. PDECert evaluates the
 materialized artifact with the same verifier used for every other producer.
 
-The initial framework-neutral scaffold has four pieces:
+The framework-neutral layer has seven pieces:
 
 - `AgentProposal` keeps raw model output, generator identity, metadata, repair
   parent, and the host-materialized artifact separate;
@@ -12,6 +12,10 @@ The initial framework-neutral scaffold has four pieces:
 - `AgentTrace` records an ordered proposal → counterexample → repair history;
 - `SymbolicAgentTool` accepts only candidate fields while holding the trusted
   PDE problem outside the agent-controlled payload.
+- `SymbolicAgentSession` records accepted and rejected tool calls in order;
+- `AgentRun` retains one model run without publishing raw text by default;
+- `summarize_agent_runs` compares exact generator identities using verifier
+  outcomes, call counts, and repair-to-`PROVED` counts.
 
 Raw outputs are retained in memory and content-addressed with SHA-256. They are
 excluded from serialized traces by default because prompts or model responses
@@ -35,21 +39,56 @@ verifier = SymbolicAgentTool(trusted_case)
 feedback = verifier(json.dumps({"u": "exp(-pi**2*t)*sin(pi*x)"}))
 ```
 
-The callable can be wrapped without adding an agent framework to PDECert's core
-dependencies. For example, an application using smolagents can expose it through
-that framework's ordinary tool decorator:
+## Real smolagents runner
+
+Install the optional integration and pass an initialized smolagents model:
 
 ```python
-from smolagents import tool
+from smolagents import InferenceClientModel
+
+from pdecert.integrations.smolagents import run_smolagents_symbolic_agent
 
 
-@tool
-def verify_pde_candidate(candidate_fields_json: str) -> str:
-    """Verify candidate fields against the trusted PDE specification."""
-    return verifier(candidate_fields_json)
+model = InferenceClientModel(model_id="Qwen/Qwen3-Next-80B-A3B-Instruct")
+run = run_smolagents_symbolic_agent(
+    trusted_case=trusted_case,
+    model=model,
+    prompt="Find and verify a symbolic solution.",
+    run_id="heat-qwen-01",
+    problem_id="heat-01",
+    generator="Qwen/Qwen3-Next-80B-A3B-Instruct",
+)
 ```
 
-Equivalent wrappers can be written for other agent frameworks.
+The runner constructs a real `ToolCallingAgent` and invokes `agent.run`, so API
+calls are performed by the supplied model. The same entry point accepts local
+or provider-backed smolagents models. Credentials remain under smolagents and
+the provider SDK; PDECert does not read or serialize them.
+
+The adapter deliberately uses `ToolCallingAgent`, not `CodeAgent`. The model can
+only submit the declared JSON tool argument. `AgentRun` records every rejected
+payload, counterexample, and repair, and hashes raw text in its public form.
+Passing `include_raw_outputs=True` is required to serialize exact prompts or
+responses.
+
+```bash
+pip install -e '.[agents]'
+```
+
+## Cross-model metrics
+
+`summarize_agent_runs` groups runs by the exact `generator` string and reports:
+
+- tool calls and rejected calls;
+- materialized proposals;
+- first-attempt and final `PROVED` rates;
+- runs repaired from a non-`PROVED` first proposal to `PROVED`;
+- final `PROVED`, `REFUTED`, `INCONCLUSIVE`, or `NO_VALID_PROPOSAL` counts.
+
+These are verifier-grounded behavioral metrics. They are not called model
+accuracy and do not replace independently labeled benchmark outcomes. Keep the
+model revision, decoding parameters, prompt version, and seed in run metadata
+when publishing comparisons.
 
 ## Materialized callable and PINN proposals
 
@@ -67,16 +106,16 @@ such residuals would evaluate the wrong artifact.
 
 ## Deliberate exclusions
 
-- PDECert does not call an LLM API or choose a model.
+- PDECert does not choose a provider or model, and it never stores API keys.
 - It does not treat an agent's self-critique as ground truth.
 - It does not execute generated solver programs.
 - It does not hide or rewrite the raw response during materialization.
 - It does not claim that a repaired answer is correct until verification says
   what the available evidence establishes.
 
-`ProgramCandidate` requires a documented process-isolation boundary, resource
-limits, filesystem and network policy, and output validation before it can be
-added safely.
+Generated solver programs remain a separate artifact boundary. They require a
+documented process-isolation policy, resource limits, filesystem and network
+policy, and output validation before execution can be enabled.
 
 Run the framework-free example:
 
