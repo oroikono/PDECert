@@ -17,7 +17,13 @@ from .agent_runtime import (
     summarize_agent_runs,
 )
 from .benchmark import BENCHMARK_VERSION, BenchmarkError, corpus_sha256, evaluate_corpus
-from .artifacts import CallableCandidate, SolutionArtifact, SymbolicCandidate
+from .artifacts import (
+    PROGRAM_SOURCE_MAX_BYTES,
+    CallableCandidate,
+    ProgramCandidate,
+    SolutionArtifact,
+    SymbolicCandidate,
+)
 from .autodiff import (
     AutodiffCheckContext,
     AutodiffConstraint,
@@ -66,6 +72,18 @@ from .corpus import (
 )
 from .labeling import REVIEW_VERSION, ReviewError, apply_review
 from .release import RELEASE_VERSION, ReleaseError, build_release_bundle, validate_release_inputs
+from .programs import (
+    DisabledProgramSandbox,
+    ProgramError,
+    ProgramExecutionError,
+    ProgramIsolationError,
+    ProgramLimits,
+    ProgramOutput,
+    ProgramSandbox,
+    SandboxCapabilities,
+    SandboxResult,
+    execute_program_candidate,
+)
 from .schema import (
     SchemaError,
     VerificationCase,
@@ -100,13 +118,23 @@ __all__ = [
     "FAILURE_MODES",
     "ORIGIN_KINDS",
     "PARAMETER_ASSUMPTIONS",
+    "PROGRAM_SOURCE_MAX_BYTES",
     "Problem",
+    "ProgramCandidate",
+    "ProgramError",
+    "ProgramExecutionError",
+    "ProgramIsolationError",
+    "ProgramLimits",
+    "ProgramOutput",
+    "ProgramSandbox",
     "REVIEW_VERSION",
     "RELEASE_VERSION",
     "Report",
     "ReviewError",
     "ReleaseError",
     "SchemaError",
+    "SandboxCapabilities",
+    "SandboxResult",
     "Status",
     "SolutionArtifact",
     "SymbolicCandidate",
@@ -128,8 +156,10 @@ __all__ = [
     "dump_case",
     "dump_atlas",
     "dump_corpus",
+    "DisabledProgramSandbox",
     "evaluate_corpus",
     "evaluate_agent_proposal",
+    "execute_program_candidate",
     "default_checker_registry",
     "default_autodiff_checker_registry",
     "fixed_collocation_check",

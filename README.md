@@ -404,9 +404,24 @@ keeps the trusted problem outside agent-controlled symbolic tool input, and
 includes an optional real smolagents `ToolCallingAgent` runner. Cross-model
 summaries measure verifier calls and repair-to-`PROVED` behavior; they do not
 relabel those outcomes as human ground-truth accuracy. Generated program
-execution remains disabled. See
+execution remains disabled by default. See
 [`examples/agent_repair_loop.py`](examples/agent_repair_loop.py) for a
 framework-free proposal and repair trace.
+
+## Generated solver programs
+
+`ProgramCandidate` records untrusted Python source and declared output fields,
+but constructing it never executes the source. `execute_program_candidate`
+fails closed unless an explicitly configured `ProgramSandbox` declares process,
+network, filesystem, resource, and secret isolation. PDECert has no local
+`exec`, shell, or subprocess fallback.
+
+Successful isolated execution is not a certificate. The bounded JSON output is
+materialized through the restricted symbolic parser and then evaluated by the
+ordinary verifier. PDECert currently ships the contract and disabled default,
+not a production sandbox backend. See the
+[generated-program guide](docs/generated-programs.md) and
+[isolation decision](docs/adr/0005-generated-program-isolation.md).
 
 ## Current limits
 

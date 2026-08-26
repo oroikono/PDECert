@@ -8,6 +8,8 @@ All notable changes to PDECert are documented here.
 
 - Recorded verifier-guided agent sessions, cross-model behavioral metrics, and
   an optional real smolagents `ToolCallingAgent` integration.
+- A non-executing `ProgramCandidate`, deny-by-default sandbox protocol, bounded
+  JSON output contract, and generated-program isolation decision record.
 - A configurable structural operation budget for symbolic domain and identity
   checks, with a finite CLI default and explicit inconclusive reasons.
 - A contributor-facing PDE Failure Atlas protocol, structured issue intake,

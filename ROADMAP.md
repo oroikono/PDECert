@@ -74,7 +74,7 @@ Next:
 ## Longer-term research
 
 - gridded numerical artifacts with refinement and convergence checks;
-- generated solver programs behind a documented process-isolation boundary;
+- one audited production sandbox adapter for the deny-by-default generated-program contract;
 - interval-based counterexample search for supported expression classes;
 - explicit classical, weak, and other solution semantics;
 - a posteriori error bounds for supported numerical settings;
