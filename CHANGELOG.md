@@ -6,6 +6,9 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- An explicit, versioned Atlas coverage taxonomy for PDE families, solution
+  artifact types, and spatial dimensions, with CLI summaries and guarded
+  preservation through review import.
 - A configurable structural operation budget for symbolic domain and identity
   checks, with a finite CLI default and explicit inconclusive reasons.
 - A contributor-facing PDE Failure Atlas protocol, structured issue intake,
