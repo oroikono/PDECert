@@ -1,5 +1,13 @@
 """Public interface for PDECert."""
 
+from .agents import (
+    AGENT_TOOL_VERSION,
+    AgentEvaluation,
+    AgentProposal,
+    AgentTrace,
+    SymbolicAgentTool,
+    evaluate_agent_proposal,
+)
 from .benchmark import BENCHMARK_VERSION, BenchmarkError, corpus_sha256, evaluate_corpus
 from .artifacts import CallableCandidate, SolutionArtifact, SymbolicCandidate
 from .autodiff import (
@@ -60,7 +68,11 @@ from .schema import (
 )
 
 __all__ = [
+    "AGENT_TOOL_VERSION",
     "ANNOTATION_STATUSES",
+    "AgentEvaluation",
+    "AgentProposal",
+    "AgentTrace",
     "ATLAS_VERSION",
     "BENCHMARK_VERSION",
     "BenchmarkError",
@@ -86,6 +98,7 @@ __all__ = [
     "Status",
     "SolutionArtifact",
     "SymbolicCandidate",
+    "SymbolicAgentTool",
     "AutodiffCheckContext",
     "AutodiffConstraint",
     "AutodiffEvaluation",
@@ -103,6 +116,7 @@ __all__ = [
     "dump_atlas",
     "dump_corpus",
     "evaluate_corpus",
+    "evaluate_agent_proposal",
     "default_checker_registry",
     "default_autodiff_checker_registry",
     "fixed_collocation_check",
