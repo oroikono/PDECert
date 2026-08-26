@@ -10,7 +10,7 @@ import pdecert.core as core
 from experiments.adversarial_heat import build_cases
 from experiments.coupled_wave import build_case as build_coupled_case
 from experiments.sigs_poisson_gauss import build_probe
-from pdecert import Constraint, Problem, Status, fixed_collocation_check, verify
+from pdecert import EvidenceLevel, Constraint, Problem, Status, fixed_collocation_check, verify
 
 
 class ProblemValidationTests(unittest.TestCase):
@@ -68,6 +68,11 @@ class VerificationTests(unittest.TestCase):
             case = self.cases[name]
             self.assertEqual(verify(case.problem, (case.candidate,)).status, Status.PROVED, name)
 
+    def test_exact_proof_reports_exact_decision_evidence(self):
+        case = self.cases["exact_heat_solution"]
+        report = verify(case.problem, (case.candidate,))
+        self.assertEqual(report.decision_evidence, EvidenceLevel.EXACT)
+
     def test_exact_candidate_is_proved_with_a_symbolic_deadline(self):
         case = self.cases["exact_heat_solution"]
         report = verify(case.problem, (case.candidate,), symbolic_timeout=1.0)
@@ -100,6 +105,7 @@ class VerificationTests(unittest.TestCase):
         case = self.cases["hidden_singularity"]
         report = verify(case.problem, (case.candidate,))
         self.assertEqual(report.status, Status.REFUTED)
+        self.assertEqual(report.decision_evidence, EvidenceLevel.EXACT)
         self.assertIn("singularity", report.witness.reason)
 
     def test_parameter_trap_is_refuted_off_grid(self):
@@ -112,6 +118,7 @@ class VerificationTests(unittest.TestCase):
         report = verify(case.problem, (case.candidate,))
         self.assertTrue(accepted)
         self.assertEqual(report.status, Status.REFUTED)
+        self.assertEqual(report.decision_evidence, EvidenceLevel.EMPIRICAL)
         self.assertEqual(report.witness.point["k"], 0.2)
 
     def test_integer_parameter_is_sampled_only_at_integers(self):
@@ -148,6 +155,22 @@ class VerificationTests(unittest.TestCase):
         report = verify(case.problem, (case.candidate,))
         self.assertEqual(report.status, Status.INCONCLUSIVE)
         self.assertIn("heat PDE", report.incomplete_reasons)
+        self.assertIsNone(report.decision_evidence)
+
+    def test_domain_valid_identity_that_sympy_cannot_decide_is_inconclusive(self):
+        x = sp.symbols("x", real=True)
+        residual = sp.sqrt(x**2) - x
+        problem = Problem(
+            "nonnegative-domain identity",
+            (x,),
+            {x: (0.0, 1.0)},
+            (Constraint("domain-dependent identity", residual),),
+        )
+        report = verify(problem, (x,))
+        self.assertEqual(report.status, Status.INCONCLUSIVE)
+        self.assertEqual(report.exact_checks["domain-dependent identity"], "unknown")
+        self.assertEqual(report.max_sampled_residual, 0.0)
+        self.assertIsNone(report.decision_evidence)
 
     def test_exact_coupled_system_is_proved(self):
         case = build_coupled_case()
@@ -238,6 +261,7 @@ class VerificationTests(unittest.TestCase):
         case = self.cases["exact_heat_solution"]
         payload = verify(case.problem, (case.candidate,)).to_dict()
         self.assertEqual(payload["status"], "PROVED")
+        self.assertEqual(payload["decision_evidence"], "EXACT")
 
     def test_expression_budget_makes_large_identity_inconclusive(self):
         x = sp.symbols("x", real=True)

@@ -10,7 +10,7 @@ from typing import ClassVar
 
 from .artifacts import CallableCandidate
 from .checks import CheckResult, CheckerRegistry, run_checks
-from .core import Report, Witness
+from .core import EvidenceLevel, Report, Witness
 
 
 @dataclass(frozen=True)
@@ -214,6 +214,7 @@ class AutodiffResidualChecker:
                             "undefined",
                             "automatic differentiation produced a non-finite residual",
                         ),
+                        witness_level=EvidenceLevel.EMPIRICAL,
                         max_sampled_residual=float("inf"),
                     )
                 value, index_tensor = torch.max(absolute.reshape(-1), dim=0)
@@ -230,6 +231,7 @@ class AutodiffResidualChecker:
                             sampled_max,
                             "automatic differentiation found a violated obligation",
                         ),
+                        witness_level=EvidenceLevel.EMPIRICAL,
                         max_sampled_residual=max_residual,
                     )
                 incomplete[constraint.name] = (

@@ -8,6 +8,7 @@ from pdecert import (
     CheckerError,
     CheckerRegistry,
     Constraint,
+    EvidenceLevel,
     Problem,
     Status,
     Witness,
@@ -26,7 +27,8 @@ class NamedRefutationChecker:
                 point={},
                 residual="policy violation",
                 reason="custom checker supplied a reproducible refutation",
-            )
+            ),
+            witness_level=EvidenceLevel.EMPIRICAL,
         )
 
 
@@ -35,7 +37,44 @@ class UnknownObligationChecker:
 
     def check(self, context):
         del context
-        return CheckResult(proved_obligations=frozenset({"not-in-the-problem"}))
+        return CheckResult(
+            proved_obligations=frozenset({"not-in-the-problem"}),
+            proof_level=EvidenceLevel.EXACT,
+        )
+
+
+class EmpiricalProofChecker:
+    name = "empirical_proof"
+
+    def check(self, context):
+        return CheckResult(
+            proved_obligations=context.obligations,
+            proof_level=EvidenceLevel.EMPIRICAL,
+        )
+
+
+class RigorousBoundChecker:
+    name = "rigorous_bound"
+
+    def check(self, context):
+        return CheckResult(
+            proved_obligations=context.obligations,
+            proof_level=EvidenceLevel.RIGOROUS_BOUND,
+        )
+
+
+class UnclassifiedWitnessChecker:
+    name = "unclassified_witness"
+
+    def check(self, context):
+        return CheckResult(
+            witness=Witness(
+                constraint=context.constraints[0].name,
+                point={},
+                residual=1.0,
+                reason="test witness",
+            )
+        )
 
 
 class FailingChecker:
@@ -93,7 +132,33 @@ class CheckerRegistryTests(unittest.TestCase):
         registry = CheckerRegistry((NamedRefutationChecker(),))
         report = verify(self.problem, (self.x,), checker_registry=registry)
         self.assertEqual(report.status, Status.REFUTED)
+        self.assertEqual(report.decision_evidence, EvidenceLevel.EMPIRICAL)
         self.assertIn("custom checker", report.witness.reason)
+
+    def test_empirical_evidence_cannot_prove_obligations(self):
+        with self.assertRaisesRegex(CheckerError, "exact or rigorous-bound evidence"):
+            verify(
+                self.problem,
+                (self.x,),
+                checker_registry=CheckerRegistry((EmpiricalProofChecker(),)),
+            )
+
+    def test_rigorous_bound_can_prove_declared_obligations(self):
+        report = verify(
+            self.problem,
+            (self.x,),
+            checker_registry=CheckerRegistry((RigorousBoundChecker(),)),
+        )
+        self.assertEqual(report.status, Status.PROVED)
+        self.assertEqual(report.decision_evidence, EvidenceLevel.RIGOROUS_BOUND)
+
+    def test_witness_requires_an_evidence_level(self):
+        with self.assertRaisesRegex(CheckerError, "witness without evidence level"):
+            verify(
+                self.problem,
+                (self.x,),
+                checker_registry=CheckerRegistry((UnclassifiedWitnessChecker(),)),
+            )
 
     def test_documented_polynomial_checker_can_prove_known_obligations(self):
         residual = sp.Add(

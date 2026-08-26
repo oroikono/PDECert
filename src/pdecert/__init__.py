@@ -23,6 +23,7 @@ from .checks import (
 from .core import (
     PARAMETER_ASSUMPTIONS,
     Constraint,
+    EvidenceLevel,
     Problem,
     Report,
     Status,
@@ -73,6 +74,7 @@ __all__ = [
     "CORPUS_VERSION",
     "Constraint",
     "CorpusError",
+    "EvidenceLevel",
     "FAILURE_MODES",
     "ORIGIN_KINDS",
     "PARAMETER_ASSUMPTIONS",
