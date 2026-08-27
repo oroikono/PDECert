@@ -107,6 +107,8 @@ Next:
   checks that conservatively abstain after sampled success;
 - adapters for common SymPy and symbolic-regression workflows;
 - a small agent tool that returns a certificate, counterexample, or inconclusive result;
+- a provider-backed smolagents runner with complete proposal, rejection, and
+  repair traces, plus one public end-to-end smoke result;
 - a reproducible notebook or Space for exploring benchmark cases;
 - structured reports that candidate generators can use for repair.
 
