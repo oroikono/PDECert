@@ -9,7 +9,7 @@ from typing import Mapping, Protocol
 import sympy as sp
 
 from . import core as _core
-from .core import Problem, Report, Status, Witness
+from .core import EvidenceLevel, Problem, Report, Status, Witness
 
 
 @dataclass(frozen=True)
@@ -71,14 +71,16 @@ class CheckContext:
 class CheckResult:
     """Partial evidence returned by one checker.
 
-    Passing a finite sample must not appear in ``proved_obligations``. A checker
-    should report a refutation only with a concrete witness.
+    Passing a finite sample must not appear in ``proved_obligations``. Every
+    proof or witness must declare the strength of the evidence supporting it.
     """
 
     proved_obligations: frozenset[str] = frozenset()
+    proof_level: EvidenceLevel | None = None
     exact_checks: Mapping[str, str] = field(default_factory=dict)
     incomplete_reasons: Mapping[str, str] = field(default_factory=dict)
     witness: Witness | None = None
+    witness_level: EvidenceLevel | None = None
     max_sampled_residual: float = 0.0
 
 
@@ -161,6 +163,7 @@ class DomainChecker:
                     point, numeric = location
                     return CheckResult(
                         proved_obligations=frozenset(proved),
+                        proof_level=EvidenceLevel.EXACT if proved else None,
                         incomplete_reasons=incomplete,
                         witness=Witness(
                             constraint=f"{field_name} domain",
@@ -170,10 +173,12 @@ class DomainChecker:
                                 f"{field_name} has a singularity at {variable}={sp.sstr(point)}"
                             ),
                         ),
+                        witness_level=EvidenceLevel.EXACT,
                     )
                 proved.add(context.domain_obligation(field_name, variable))
         return CheckResult(
             proved_obligations=frozenset(proved),
+            proof_level=EvidenceLevel.EXACT if proved else None,
             incomplete_reasons=incomplete,
         )
 
@@ -207,6 +212,7 @@ class ExactIdentityChecker:
                 incomplete[constraint.name] = "symbolic simplification did not decide"
         return CheckResult(
             proved_obligations=frozenset(proved),
+            proof_level=EvidenceLevel.EXACT if proved else None,
             exact_checks=exact,
             incomplete_reasons=incomplete,
         )
@@ -246,6 +252,7 @@ class OffGridCounterexampleChecker:
                             residual=residual,
                             reason="off-grid evaluation found a violated obligation",
                         ),
+                        witness_level=EvidenceLevel.EMPIRICAL,
                         max_sampled_residual=max_residual,
                     )
         return CheckResult(max_sampled_residual=max_residual)
@@ -268,6 +275,7 @@ def run_checks(context: CheckContext, registry: CheckerRegistry) -> Report:
 
     report = Report(status=Status.INCONCLUSIVE)
     proved: set[str] = set()
+    proof_levels: dict[str, EvidenceLevel] = {}
     obligations = context.obligations
     for checker in registry.checkers:
         try:
@@ -286,7 +294,31 @@ def run_checks(context: CheckContext, registry: CheckerRegistry) -> Report:
         if unknown:
             names = ", ".join(sorted(unknown))
             raise CheckerError(f"checker {checker.name} proved unknown obligation(s): {names}")
+        if result.proved_obligations and result.proof_level not in {
+            EvidenceLevel.EXACT,
+            EvidenceLevel.RIGOROUS_BOUND,
+        }:
+            raise CheckerError(
+                f"checker {checker.name} must attach exact or rigorous-bound evidence "
+                "to proved obligations"
+            )
+        if not result.proved_obligations and result.proof_level is not None:
+            raise CheckerError(
+                f"checker {checker.name} returned a proof level without proved obligations"
+            )
+        if result.witness is not None and result.witness_level is None:
+            raise CheckerError(f"checker {checker.name} returned a witness without evidence level")
+        if result.witness is None and result.witness_level is not None:
+            raise CheckerError(f"checker {checker.name} returned a witness level without a witness")
         proved.update(result.proved_obligations)
+        if result.proof_level is not None:
+            for obligation in result.proved_obligations:
+                previous = proof_levels.get(obligation)
+                if previous is None or (
+                    previous is EvidenceLevel.RIGOROUS_BOUND
+                    and result.proof_level is EvidenceLevel.EXACT
+                ):
+                    proof_levels[obligation] = result.proof_level
         report.exact_checks.update(result.exact_checks)
         report.incomplete_reasons.update(result.incomplete_reasons)
         report.max_sampled_residual = max(
@@ -296,8 +328,14 @@ def run_checks(context: CheckContext, registry: CheckerRegistry) -> Report:
         if result.witness is not None:
             report.status = Status.REFUTED
             report.witness = result.witness
+            report.decision_evidence = result.witness_level
             return report
         if obligations <= proved:
             report.status = Status.PROVED
+            report.decision_evidence = (
+                EvidenceLevel.EXACT
+                if all(proof_levels[item] is EvidenceLevel.EXACT for item in obligations)
+                else EvidenceLevel.RIGOROUS_BOUND
+            )
             return report
     return report

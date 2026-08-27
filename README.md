@@ -13,12 +13,17 @@ PDECert is an extensible verification framework for symbolic expressions and
 differentiable callable fields. It checks the PDE residual together with initial
 and boundary conditions and returns one of three outcomes:
 
-- `PROVED` when every current obligation is an exact symbolic identity;
+- `PROVED` when every current obligation has exact or rigorous-bound evidence;
 - `REFUTED` when it finds a singularity or a numerical counterexample;
 - `INCONCLUSIVE` when the available checks cannot decide.
 
 Numerical sampling is only used to refute. Passing sampled points is never
 treated as a proof.
+
+Every decisive report also states its `decision_evidence`: `EXACT`,
+`RIGOROUS_BOUND`, or `EMPIRICAL`. Exact identities and future validated bounds
+may prove represented obligations. Floating-point and autodiff checks are
+empirical; they can expose a violation but cannot prove a passing candidate.
 
 > [!IMPORTANT]
 > This is a research prototype, not a general theorem prover. The current
@@ -26,12 +31,23 @@ treated as a proof.
 > represented by the input problem. Passing callable samples is always
 > `INCONCLUSIVE`; sampling can refute but cannot prove.
 
+> [!NOTE]
+> Failure of symbolic simplification is not a rejection. PDECert records the
+> undecided obligation and returns `INCONCLUSIVE` unless another checker finds a
+> witness. See [ADR-0003](docs/adr/0003-decision-evidence-levels.md).
+
 ## Why this exists
 
 PDE solvers and language models can produce expressions that look convincing
 and have a small residual on a fixed grid. That does not guarantee that they
 satisfy the full problem. A candidate can fail at a boundary, hide a pole
 between collocation points, or work only at one parameter value.
+
+The project does not claim that PDE residual checking, PINN certification, or
+structured PDE specifications are new. The
+[research landscape](docs/research-landscape.md) records the closest prior work,
+the claims it rules out, and the narrower cross-artifact benchmark hypothesis
+that PDECert is testing.
 
 ## PDE Failure Atlas
 
@@ -411,8 +427,10 @@ Real-time symbolic deadlines are currently available only from the main thread
 on platforms that provide interval timers. When a check is incomplete, the
 intended behavior is `INCONCLUSIVE`.
 
-The next milestones are tracked in [ROADMAP.md](ROADMAP.md). Contributions that
-add one focused capability together with tests are welcome.
+The next milestones are tracked in [ROADMAP.md](ROADMAP.md). The
+[architecture map](ARCHITECTURE.md) explains the package layers and contributor
+workstreams. Contributions that follow the focused workflow in
+[CONTRIBUTING.md](CONTRIBUTING.md) are welcome.
 
 ## Citation
 

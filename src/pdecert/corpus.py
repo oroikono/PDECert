@@ -17,6 +17,10 @@ from .schema import SCHEMA_VERSION, case_from_dict
 
 CORPUS_VERSION = 1
 ATLAS_VERSION = 1
+COVERAGE_VERSION = 1
+ARTIFACT_TYPES = frozenset(
+    {"callable_model", "numerical_field", "solver_program", "symbolic_expression"}
+)
 ORIGIN_KINDS = frozenset({"open_model", "symbolic_solver", "synthetic"})
 FAILURE_MODES = frozenset(
     {
@@ -33,6 +37,7 @@ FAILURE_MODES = frozenset(
 ANNOTATION_STATUSES = frozenset({"adjudicated", "labeled", "pending"})
 VERDICTS = frozenset({"invalid", "unclear", "valid"})
 _RECORD_ID = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
+_TAXONOMY_SLUG = re.compile(r"^[a-z0-9][a-z0-9_]*$")
 _BUNDLE_FILES = frozenset({"case.json", "raw-output.txt", "record.json"})
 
 
@@ -212,6 +217,61 @@ def validate_corpus(value: object) -> None:
         identifiers.add(record_id)
 
 
+def validate_atlas_coverage(value: object, record_ids: set[str]) -> None:
+    """Validate explicit coverage metadata against an Atlas record set."""
+
+    coverage = _object(value, "$")
+    _exact_keys(coverage, {"coverage_version", "records"}, "$")
+    version = coverage["coverage_version"]
+    if isinstance(version, bool) or version != COVERAGE_VERSION:
+        raise _error("$.coverage_version", f"expected {COVERAGE_VERSION}")
+
+    entries = _object(coverage["records"], "$.records")
+    if any(not isinstance(record_id, str) for record_id in entries):
+        raise _error("$.records", "record ids must be strings")
+    actual_ids = set(entries)
+    missing = sorted(record_ids - actual_ids)
+    unknown = sorted(actual_ids - record_ids)
+    if missing:
+        raise _error("$.records", f"missing record id(s): {', '.join(missing)}")
+    if unknown:
+        raise _error("$.records", f"unknown record id(s): {', '.join(unknown)}")
+
+    for record_id in sorted(record_ids):
+        path = f"$.records.{record_id}"
+        entry = _object(entries[record_id], path)
+        _exact_keys(entry, {"artifact_type", "pde_families", "spatial_dimension"}, path)
+
+        artifact_type = _text(entry["artifact_type"], f"{path}.artifact_type")
+        if artifact_type not in ARTIFACT_TYPES:
+            raise _error(
+                f"{path}.artifact_type",
+                f"expected one of: {', '.join(sorted(ARTIFACT_TYPES))}",
+            )
+
+        families = entry["pde_families"]
+        if not isinstance(families, list) or not families:
+            raise _error(f"{path}.pde_families", "expected a non-empty list")
+        if any(
+            not isinstance(family, str) or not _TAXONOMY_SLUG.fullmatch(family)
+            for family in families
+        ):
+            raise _error(
+                f"{path}.pde_families",
+                "expected lowercase taxonomy slugs",
+            )
+        if len(set(families)) != len(families):
+            raise _error(f"{path}.pde_families", "PDE families must be unique")
+
+        spatial_dimension = entry["spatial_dimension"]
+        if (
+            isinstance(spatial_dimension, bool)
+            or not isinstance(spatial_dimension, int)
+            or spatial_dimension < 1
+        ):
+            raise _error(f"{path}.spatial_dimension", "expected a positive integer")
+
+
 def _load_json(source: Path) -> object:
     try:
         payload = json.loads(source.read_text())
@@ -226,6 +286,17 @@ def load_corpus(path: str | Path) -> dict[str, Any]:
     source = Path(path)
     payload = _load_json(source)
     validate_corpus(payload)
+    return payload
+
+
+def load_atlas_coverage(path: str | Path, record_ids: set[str]) -> dict[str, Any]:
+    """Load and validate one Atlas coverage taxonomy document."""
+
+    source = Path(path) / "coverage.json"
+    if source.is_symlink() or not source.is_file():
+        raise CorpusError(f"{source}: expected a regular file")
+    payload = _load_json(source)
+    validate_atlas_coverage(payload, record_ids)
     return payload
 
 
@@ -301,6 +372,9 @@ def load_atlas(path: str | Path) -> dict[str, Any]:
         "records": records,
     }
     validate_corpus(corpus)
+    coverage_path = source / "coverage.json"
+    if coverage_path.exists() or coverage_path.is_symlink():
+        load_atlas_coverage(source, {record["id"] for record in records})
     return corpus
 
 
@@ -320,11 +394,21 @@ def dump_corpus(value: object, path: str | Path) -> None:
     Path(path).write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
 
 
-def dump_atlas(value: object, path: str | Path) -> None:
+def dump_atlas(
+    value: object,
+    path: str | Path,
+    *,
+    coverage: object | None = None,
+) -> None:
     """Validate and atomically write a new modular Atlas directory."""
 
     validate_corpus(value)
     corpus = _object(value, "$")
+    if coverage is not None:
+        validate_atlas_coverage(
+            coverage,
+            {record["id"] for record in corpus["records"]},
+        )
     destination = Path(path)
     if destination.exists():
         raise CorpusError(f"{destination}: refusing to overwrite an existing path")
@@ -343,6 +427,10 @@ def dump_atlas(value: object, path: str | Path) -> None:
             "name": corpus["name"],
         }
         (staged / "atlas.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+        if coverage is not None:
+            (staged / "coverage.json").write_text(
+                json.dumps(coverage, indent=2, sort_keys=True) + "\n"
+            )
         for record in sorted(corpus["records"], key=lambda item: item["id"]):
             bundle = records_directory / record["id"]
             bundle.mkdir()

@@ -1,0 +1,70 @@
+{
+  "coverage_version": 1,
+  "records": {
+    "qwen3-burgers-shock-01": {
+      "artifact_type": "symbolic_expression",
+      "pde_families": ["viscous_burgers"],
+      "spatial_dimension": 1
+    },
+    "qwen3-fisher-kpp-01": {
+      "artifact_type": "symbolic_expression",
+      "pde_families": ["fisher_kpp"],
+      "spatial_dimension": 1
+    },
+    "qwen3-kdv-soliton-01": {
+      "artifact_type": "symbolic_expression",
+      "pde_families": ["kdv"],
+      "spatial_dimension": 1
+    },
+    "qwen3-parametric-heat-01": {
+      "artifact_type": "symbolic_expression",
+      "pde_families": ["heat"],
+      "spatial_dimension": 1
+    },
+    "qwen3-poisson-polynomial-01": {
+      "artifact_type": "symbolic_expression",
+      "pde_families": ["poisson"],
+      "spatial_dimension": 2
+    },
+    "qwen3-transport-2d-01": {
+      "artifact_type": "symbolic_expression",
+      "pde_families": ["linear_transport"],
+      "spatial_dimension": 2
+    },
+    "qwen3-wave-speed-two-01": {
+      "artifact_type": "symbolic_expression",
+      "pde_families": ["wave"],
+      "spatial_dimension": 1
+    },
+    "synthetic-heat-below-tolerance": {
+      "artifact_type": "symbolic_expression",
+      "pde_families": ["heat"],
+      "spatial_dimension": 1
+    },
+    "synthetic-heat-exact-control": {
+      "artifact_type": "symbolic_expression",
+      "pde_families": ["heat"],
+      "spatial_dimension": 1
+    },
+    "synthetic-heat-fixed-grid-alias": {
+      "artifact_type": "symbolic_expression",
+      "pde_families": ["heat"],
+      "spatial_dimension": 1
+    },
+    "synthetic-heat-hidden-singularity": {
+      "artifact_type": "symbolic_expression",
+      "pde_families": ["heat"],
+      "spatial_dimension": 1
+    },
+    "synthetic-heat-pde-only-boundary": {
+      "artifact_type": "symbolic_expression",
+      "pde_families": ["heat"],
+      "spatial_dimension": 1
+    },
+    "synthetic-heat-single-parameter": {
+      "artifact_type": "symbolic_expression",
+      "pde_families": ["heat"],
+      "spatial_dimension": 1
+    }
+  }
+}

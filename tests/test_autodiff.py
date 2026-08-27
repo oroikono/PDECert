@@ -11,6 +11,7 @@ from pdecert import (  # noqa: E402
     CallableCandidate,
     Constraint,
     EvaluationLane,
+    EvidenceLevel,
     LaneVerificationOptions,
     MatchedCase,
     Problem,
@@ -70,6 +71,7 @@ def test_exact_callable_is_inconclusive_not_falsely_proved():
     artifact = CallableCandidate.from_mapping({"u": exact_heat}, dtype="float64")
     report = verify_artifact(heat_problem(), artifact, tolerance=1e-9)
     assert report.status is Status.INCONCLUSIVE
+    assert report.decision_evidence is None
     assert report.witness is None
     assert report.max_sampled_residual < 1e-9
     assert set(report.incomplete_reasons) == {
@@ -87,6 +89,7 @@ def test_perturbed_callable_is_refuted_with_a_concrete_point():
     artifact = CallableCandidate.from_mapping({"u": perturbed_heat}, dtype="float64")
     report = verify_artifact(heat_problem(), artifact, tolerance=1e-9)
     assert report.status is Status.REFUTED
+    assert report.decision_evidence is EvidenceLevel.EMPIRICAL
     assert report.witness.constraint == "heat PDE"
     assert set(report.witness.point) == {"x", "t"}
     assert report.witness.residual > 1e-3
