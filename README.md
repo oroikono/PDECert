@@ -110,7 +110,14 @@ Install the optional PyTorch backend to check callable models and PINNs:
 pip install -e ".[dev,autodiff]"
 python -m examples.autodiff_heat
 python -m experiments.mixed_artifact_smoke
+python -m experiments.trained_burgers_pair
 ```
+
+The trained Burgers example pairs an exact symbolic traveling wave with a
+separately trained, frozen PINN stored as architecture-restricted JSON. Exact
+evidence remains confined to the symbolic lane; sampled callable checks can
+refute or abstain, never prove. See
+[`docs/trained-callable-pairs.md`](docs/trained-callable-pairs.md).
 
 The installed command accepts one versioned JSON case and prints a stable JSON
 report:

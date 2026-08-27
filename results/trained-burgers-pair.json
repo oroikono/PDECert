@@ -1,0 +1,105 @@
+{
+  "evidence_note": "Exact evidence applies only to the symbolic lane. Callable sampling can refute the frozen PINN or remain inconclusive; it cannot prove a continuous-domain claim.",
+  "fixture": {
+    "artifact_id": "burgers-pinn-seed-20260827",
+    "configuration_sha256": "b21df353a25165307fc2ff907595a87aff36d3875aeed057080f1f867160b130",
+    "path": "benchmarks/matched/burgers-classical-01/pinn.json",
+    "sha256": "26dc2309edbadaaa1c31284e2ef0576205768861f048a98247bcd36ad165968e",
+    "source_files_sha256": {
+      "experiments/burgers_pinn_fixture.py": "c9bfc76a05b9c2e88cdfd90a40b6dc26622d444fe50c997cf2c0459ff8a42f86",
+      "experiments/train_burgers_pinn.py": "c8d10a22309e881c022b517571ef56fba9b543dda302cbb717080b45ef415506",
+      "experiments/trained_burgers_pair.py": "ad04fdcfc0b4bb379d295acf5a76fa9096043fe6b2a212d44762680cd7e5a8d8"
+    },
+    "training": {
+      "collocation": {
+        "initial_points": 33,
+        "pde_grid": {
+          "t_points": 17,
+          "x_points": 17
+        },
+        "points_per_boundary": 33
+      },
+      "device": "cpu",
+      "final_losses": {
+        "boundary_mse": 5.278179671153376e-07,
+        "initial_mse": 3.1856599405619723e-06,
+        "pde_mse": 0.0001438402823069667,
+        "weighted_total": 0.00018097506138373983
+      },
+      "generated_at": "2026-08-27T07:28:27.342488+00:00",
+      "learning_rate": 0.003,
+      "loss_weights": {
+        "boundary": 10.0,
+        "initial": 10.0,
+        "pde": 1.0
+      },
+      "method": "physics_informed_collocation",
+      "optimizer": "Adam",
+      "script": "experiments/train_burgers_pinn.py",
+      "script_sha256": "c8d10a22309e881c022b517571ef56fba9b543dda302cbb717080b45ef415506",
+      "seed": 20260827,
+      "steps": 3000,
+      "torch_version": "2.5.1+cu121"
+    },
+    "weights_sha256": "6fdcc65fb446d2aa5bd74e3326693c27fe6cc8684356cf78013c37671f3a9898"
+  },
+  "matched_report": {
+    "case_id": "burgers-traveling-wave-classical-01",
+    "coordinate_names": [
+      "x",
+      "t"
+    ],
+    "field_names": [
+      "u"
+    ],
+    "lanes": [
+      {
+        "artifact_kind": "symbolic",
+        "name": "symbolic-exact",
+        "report": {
+          "decision_evidence": "EXACT",
+          "exact_checks": {
+            "Burgers PDE": "identity",
+            "initial condition": "identity",
+            "left boundary": "identity",
+            "right boundary": "identity"
+          },
+          "incomplete_reasons": {},
+          "max_sampled_residual": 0.0,
+          "status": "PROVED",
+          "witness": null
+        }
+      },
+      {
+        "artifact_kind": "callable",
+        "name": "trained-pinn",
+        "report": {
+          "decision_evidence": "EMPIRICAL",
+          "exact_checks": {},
+          "incomplete_reasons": {},
+          "max_sampled_residual": 0.023379096939821986,
+          "status": "REFUTED",
+          "witness": {
+            "constraint": "Burgers PDE",
+            "point": {
+              "t": 0.9285714285714286,
+              "x": 0.2857142857142858
+            },
+            "reason": "automatic differentiation found a violated obligation",
+            "residual": 0.023379096939821986
+          }
+        }
+      }
+    ],
+    "solution_semantics": "classical strong solution"
+  },
+  "scope": "Classical strong-form obligations on x in [-1, 1], t in [0, 1].",
+  "suite": "trained-burgers-pair-v1",
+  "torch_version": "2.5.1",
+  "unsupported": [
+    "weak or entropy-solution semantics",
+    "discontinuous inviscid shocks",
+    "solution-error certification from residual size",
+    "architectures other than the declared dense tanh network"
+  ]
+}
