@@ -7,7 +7,13 @@ import json
 from collections.abc import Sequence
 from pathlib import Path
 
-from pdecert import apply_review, dump_atlas, dump_corpus, load_corpus_source
+from pdecert import (
+    apply_review,
+    dump_atlas,
+    dump_corpus,
+    load_atlas_coverage,
+    load_corpus_source,
+)
 
 
 def main(argv: Sequence[str] | None = None) -> None:
@@ -28,7 +34,16 @@ def main(argv: Sequence[str] | None = None) -> None:
         confirmed_independent_review=arguments.confirm_independent_review,
     )
     if arguments.corpus.is_dir():
-        dump_atlas(labeled, arguments.output)
+        coverage_path = arguments.corpus / "coverage.json"
+        coverage = (
+            load_atlas_coverage(
+                arguments.corpus,
+                {record["id"] for record in corpus["records"]},
+            )
+            if coverage_path.exists()
+            else None
+        )
+        dump_atlas(labeled, arguments.output, coverage=coverage)
         kind = "atlas"
     else:
         dump_corpus(labeled, arguments.output)

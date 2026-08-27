@@ -46,6 +46,14 @@ class Status(str, Enum):
     INCONCLUSIVE = "INCONCLUSIVE"
 
 
+class EvidenceLevel(str, Enum):
+    """Mathematical strength supporting a decisive verification outcome."""
+
+    EXACT = "EXACT"
+    RIGOROUS_BOUND = "RIGOROUS_BOUND"
+    EMPIRICAL = "EMPIRICAL"
+
+
 @dataclass(frozen=True)
 class Constraint:
     """A named residual that should be identically zero."""
@@ -122,6 +130,7 @@ class Report:
     """Machine-readable result returned by :func:`verify`."""
 
     status: Status
+    decision_evidence: EvidenceLevel | None = None
     exact_checks: dict[str, str] = field(default_factory=dict)
     incomplete_reasons: dict[str, str] = field(default_factory=dict)
     witness: Witness | None = None
@@ -132,6 +141,9 @@ class Report:
 
         payload = asdict(self)
         payload["status"] = self.status.value
+        payload["decision_evidence"] = (
+            self.decision_evidence.value if self.decision_evidence is not None else None
+        )
         return payload
 
 

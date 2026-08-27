@@ -10,7 +10,7 @@ from collections import Counter
 from collections.abc import Sequence
 from pathlib import Path
 
-from .corpus import CorpusError, load_corpus_source
+from .corpus import CorpusError, load_atlas_coverage, load_corpus_source
 from .core import Status, verify
 from .schema import SCHEMA_VERSION, SchemaError, load_case
 
@@ -143,6 +143,31 @@ def _run_corpus_validate(arguments: argparse.Namespace) -> int:
         "records": len(records),
         "verdicts": _counts(verdicts),
     }
+    coverage_path = arguments.corpus / "coverage.json"
+    if arguments.corpus.is_dir() and coverage_path.exists():
+        coverage = load_atlas_coverage(
+            arguments.corpus,
+            {record["id"] for record in records},
+        )
+        taxonomy = coverage["records"]
+        summary.update(
+            {
+                "artifact_types": _counts(
+                    [taxonomy[record["id"]]["artifact_type"] for record in records]
+                ),
+                "coverage_version": coverage["coverage_version"],
+                "pde_families": _counts(
+                    [
+                        family
+                        for record in records
+                        for family in taxonomy[record["id"]]["pde_families"]
+                    ]
+                ),
+                "spatial_dimensions": _counts(
+                    [str(taxonomy[record["id"]]["spatial_dimension"]) for record in records]
+                ),
+            }
+        )
     print(json.dumps(summary, indent=2, sort_keys=True))
     return 0
 

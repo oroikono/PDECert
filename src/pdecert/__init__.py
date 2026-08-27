@@ -39,6 +39,7 @@ from .checks import (
 from .core import (
     PARAMETER_ASSUMPTIONS,
     Constraint,
+    EvidenceLevel,
     Problem,
     Report,
     Status,
@@ -49,8 +50,10 @@ from .core import (
 )
 from .corpus import (
     ANNOTATION_STATUSES,
+    ARTIFACT_TYPES,
     ATLAS_VERSION,
     CORPUS_VERSION,
+    COVERAGE_VERSION,
     FAILURE_MODES,
     ORIGIN_KINDS,
     VERDICTS,
@@ -58,13 +61,23 @@ from .corpus import (
     dump_atlas,
     dump_corpus,
     load_atlas,
+    load_atlas_coverage,
     load_corpus,
     load_corpus_source,
     load_record_bundle,
     output_sha256,
+    validate_atlas_coverage,
     validate_corpus,
 )
 from .labeling import REVIEW_VERSION, ReviewError, apply_review
+from .matched import (
+    EvaluationLane,
+    LaneReport,
+    LaneVerificationOptions,
+    MatchedCase,
+    MatchedReport,
+    verify_matched_case,
+)
 from .release import RELEASE_VERSION, ReleaseError, build_release_bundle, validate_release_inputs
 from .schema import (
     SchemaError,
@@ -78,6 +91,7 @@ from .schema import (
 __all__ = [
     "AGENT_TOOL_VERSION",
     "ANNOTATION_STATUSES",
+    "ARTIFACT_TYPES",
     "AgentBenchmarkReport",
     "AgentEvaluation",
     "AgentModelMetrics",
@@ -95,9 +109,16 @@ __all__ = [
     "CheckerError",
     "CheckerRegistry",
     "CORPUS_VERSION",
+    "COVERAGE_VERSION",
     "Constraint",
     "CorpusError",
+    "EvidenceLevel",
     "FAILURE_MODES",
+    "EvaluationLane",
+    "LaneReport",
+    "LaneVerificationOptions",
+    "MatchedCase",
+    "MatchedReport",
     "ORIGIN_KINDS",
     "PARAMETER_ASSUMPTIONS",
     "Problem",
@@ -135,17 +156,20 @@ __all__ = [
     "fixed_collocation_check",
     "load_case",
     "load_atlas",
+    "load_atlas_coverage",
     "load_corpus",
     "load_corpus_source",
     "load_record_bundle",
     "output_sha256",
     "run_checks",
     "summarize_agent_runs",
+    "validate_atlas_coverage",
     "validate_corpus",
     "validate_release_inputs",
     "verify",
     "verify_artifact",
     "verify_callable",
+    "verify_matched_case",
 ]
 
 __version__ = "0.1.0"
