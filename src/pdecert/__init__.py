@@ -54,6 +54,14 @@ from .corpus import (
     validate_corpus,
 )
 from .labeling import REVIEW_VERSION, ReviewError, apply_review
+from .matched import (
+    EvaluationLane,
+    LaneReport,
+    LaneVerificationOptions,
+    MatchedCase,
+    MatchedReport,
+    verify_matched_case,
+)
 from .release import RELEASE_VERSION, ReleaseError, build_release_bundle, validate_release_inputs
 from .schema import (
     SchemaError,
@@ -82,6 +90,11 @@ __all__ = [
     "CorpusError",
     "EvidenceLevel",
     "FAILURE_MODES",
+    "EvaluationLane",
+    "LaneReport",
+    "LaneVerificationOptions",
+    "MatchedCase",
+    "MatchedReport",
     "ORIGIN_KINDS",
     "PARAMETER_ASSUMPTIONS",
     "Problem",
@@ -128,6 +141,7 @@ __all__ = [
     "verify",
     "verify_artifact",
     "verify_callable",
+    "verify_matched_case",
 ]
 
 __version__ = "0.1.0"

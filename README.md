@@ -210,6 +210,12 @@ and a perturbed field that is refuted with a concrete point. See
 [`examples/autodiff_heat.py`](examples/autodiff_heat.py) and
 [`ADR-0002`](docs/adr/0002-general-solution-artifacts.md).
 
+To evaluate multiple representations of the same mathematical problem without
+combining their evidence, use a [`MatchedCase`](docs/matched-cases.md). The
+[`matched heat example`](examples/matched_heat.py) keeps exact symbolic and
+sampled callable results in separate lanes and intentionally reports no overall
+status.
+
 ## JSON cases
 
 Version 3 of the case format stores a fully instantiated problem: declared real
