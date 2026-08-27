@@ -1,0 +1,14 @@
+{
+  "artifact_path": "benchmarks/matched/burgers-classical-01/pinn.json",
+  "artifact_sha256": "26dc2309edbadaaa1c31284e2ef0576205768861f048a98247bcd36ad165968e",
+  "base_revision": "7c811120e55f593369cf05cdc44847977ea32b32",
+  "configuration_sha256": "b21df353a25165307fc2ff907595a87aff36d3875aeed057080f1f867160b130",
+  "euler_job_id": "11931023",
+  "schema_version": 1,
+  "source_files_sha256": {
+    "experiments/burgers_pinn_fixture.py": "c9bfc76a05b9c2e88cdfd90a40b6dc26622d444fe50c997cf2c0459ff8a42f86",
+    "experiments/train_burgers_pinn.py": "c8d10a22309e881c022b517571ef56fba9b543dda302cbb717080b45ef415506",
+    "experiments/trained_burgers_pair.py": "ad04fdcfc0b4bb379d295acf5a76fa9096043fe6b2a212d44762680cd7e5a8d8"
+  },
+  "weights_sha256": "6fdcc65fb446d2aa5bd74e3326693c27fe6cc8684356cf78013c37671f3a9898"
+}

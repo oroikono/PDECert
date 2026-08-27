@@ -6,6 +6,9 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- A nonlinear viscous-Burgers matched fixture pairing an exact symbolic
+  traveling wave with an independently trained, frozen PINN, including a
+  restricted JSON loader, training provenance, tests, and a reproducible report.
 - A bounded real-model agent smoke runner that records provider, model revision,
   prompt, decoding request, environment, raw verifier interactions, and the
   reproducibility limits of hosted inference.

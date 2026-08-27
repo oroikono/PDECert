@@ -45,6 +45,11 @@ These gates replace a raw 100-record target as the primary research milestone.
 Corpus growth still matters, but only together with artifact, family, origin,
 and evaluator-disagreement coverage.
 
+The first nonlinear symbolic/trained-callable fixture now exercises this gate
+for one viscous Burgers problem. The gate remains incomplete until multiple
+independently generated and trained pairs are represented in the corpus with
+documented coverage.
+
 ## v0.1: dependable verification interface
 
 The first release should let a user save one fully instantiated verification
