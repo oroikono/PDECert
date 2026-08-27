@@ -1,12 +1,12 @@
 cff-version: 1.2.0
 message: "If you use PDECert or its pilot benchmark, please cite this software."
-title: "PDECert: Conservative verification for symbolic PDE candidates"
+title: "PDECert: Conservative verification for machine-generated PDE solution artifacts"
 type: software
 authors:
   - family-names: "Oikonomou"
     given-names: "Orestis"
-version: 0.1.0
-date-released: 2026-08-24
+version: 0.1.1rc1
+date-released: 2026-08-27
 repository-code: "https://github.com/oroikono/PDECert"
 url: "https://github.com/oroikono/PDECert"
 license: MIT

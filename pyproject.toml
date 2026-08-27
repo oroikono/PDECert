@@ -4,11 +4,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pdecert"
-version = "0.1.0"
+version = "0.1.1rc1"
 description = "Conservative verification for machine-generated PDE solution artifacts"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
   { name = "Orestis Oikonomou", email = "ooikonomou@ethz.ch" },
 ]
@@ -50,11 +51,35 @@ dev = [
 ]
 
 [project.urls]
+Changelog = "https://github.com/oroikono/PDECert/blob/main/CHANGELOG.md"
 Repository = "https://github.com/oroikono/PDECert"
 Issues = "https://github.com/oroikono/PDECert/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pdecert"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/ARCHITECTURE.md",
+  "/CHANGELOG.md",
+  "/CITATION.cff",
+  "/CONTRIBUTING.md",
+  "/LICENSE",
+  "/README.md",
+  "/RELEASE.md",
+  "/ROADMAP.md",
+  "/assets",
+  "/benchmarks",
+  "/corpus",
+  "/docs",
+  "/examples",
+  "/experiments",
+  "/requirements",
+  "/results",
+  "/schema",
+  "/src",
+  "/tests",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
