@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/oroikono/PDECert/schema/atlas-coverage-v1.schema.json",
+  "title": "PDECert Atlas coverage taxonomy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["coverage_version", "records"],
+  "properties": {
+    "coverage_version": { "const": 1 },
+    "records": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+      "additionalProperties": { "$ref": "#/$defs/taxonomy" }
+    }
+  },
+  "$defs": {
+    "taxonomy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_type", "pde_families", "spatial_dimension"],
+      "properties": {
+        "artifact_type": {
+          "enum": [
+            "callable_model",
+            "numerical_field",
+            "solver_program",
+            "symbolic_expression"
+          ]
+        },
+        "pde_families": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_]*$" }
+        },
+        "spatial_dimension": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

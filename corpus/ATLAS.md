@@ -97,11 +97,34 @@ When contributing a versioned corpus file, validate it locally:
 
 ```bash
 pdecert corpus validate path/to/corpus.json
+pdecert corpus validate path/to/modular-atlas
 ```
 
 The command validates every embedded case, origin record, raw-output digest,
 annotation state, and record identifier. It then prints a compact coverage
 summary. Validation does not establish that a human label is correct.
+
+## Explicit coverage taxonomy
+
+A modular Atlas may include `coverage.json`, validated against
+[`atlas-coverage-v1.schema.json`](../schema/atlas-coverage-v1.schema.json). The
+file must contain exactly one entry for every record: missing and unknown record
+IDs are rejected. Each entry declares:
+
+- `artifact_type`: `symbolic_expression`, `callable_model`, `numerical_field`,
+  or `solver_program`;
+- `pde_families`: one or more lowercase taxonomy slugs;
+- `spatial_dimension`: the number of spatial coordinates, excluding time and
+  parameters.
+
+PDE-family slugs are intentionally extensible rather than a closed enum. Use an
+established slug when one exists, and document a genuinely new family in the
+same contribution. The taxonomy describes coverage; it is not a correctness
+label and is not shown during blind review.
+
+When `coverage.json` is present, `pdecert corpus validate` reports counts for
+artifact types, PDE families, and spatial dimensions after checking that the
+taxonomy and record set agree.
 
 ## Coverage plan
 
