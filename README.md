@@ -43,6 +43,12 @@ and have a small residual on a fixed grid. That does not guarantee that they
 satisfy the full problem. A candidate can fail at a boundary, hide a pole
 between collocation points, or work only at one parameter value.
 
+The project does not claim that PDE residual checking, PINN certification, or
+structured PDE specifications are new. The
+[research landscape](docs/research-landscape.md) records the closest prior work,
+the claims it rules out, and the narrower cross-artifact benchmark hypothesis
+that PDECert is testing.
+
 ## PDE Failure Atlas
 
 The [PDE Failure Atlas](corpus/ATLAS.md) turns those failures into a public,
