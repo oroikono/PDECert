@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+import hashlib
+import re
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from typing import ClassVar, Protocol, runtime_checkable
 
 import sympy as sp
+
+
+PROGRAM_SOURCE_MAX_BYTES = 1_000_000
 
 
 @runtime_checkable
@@ -100,6 +105,50 @@ class CallableCandidate:
         return cls(tuple(fields.items()), backend=backend, dtype=dtype, device=device)
 
 
+@dataclass(frozen=True)
+class ProgramCandidate:
+    """Untrusted source that may produce named symbolic candidate fields.
+
+    Constructing this record never executes ``source``. Execution is available
+    only through :func:`pdecert.execute_program_candidate`, which requires an
+    explicitly configured isolation backend satisfying PDECert's sandbox
+    contract. A successful program writes one JSON object mapping the declared
+    field names to restricted symbolic expression strings.
+    """
+
+    source: str
+    declared_field_names: tuple[str, ...]
+    language: str = "python"
+    kind: ClassVar[str] = "program"
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.source, str) or not self.source.strip():
+            raise ValueError("program source must be a non-empty string")
+        if len(self.source.encode("utf-8")) > PROGRAM_SOURCE_MAX_BYTES:
+            raise ValueError(
+                f"program source exceeds the {PROGRAM_SOURCE_MAX_BYTES}-byte artifact limit"
+            )
+        if isinstance(self.declared_field_names, str):
+            raise TypeError("declared_field_names must be an iterable of field names")
+        names = tuple(self.declared_field_names)
+        _validate_program_field_names(names)
+        object.__setattr__(self, "declared_field_names", names)
+        if self.language != "python":
+            raise ValueError("the only supported program language is 'python'")
+
+    @property
+    def field_names(self) -> tuple[str, ...]:
+        """Return the fields the program is required to emit."""
+
+        return self.declared_field_names
+
+    @property
+    def source_sha256(self) -> str:
+        """Return a stable digest for provenance and sandbox requests."""
+
+        return hashlib.sha256(self.source.encode("utf-8")).hexdigest()
+
+
 def _validate_fields(
     fields: tuple[tuple[str, object], ...],
     *,
@@ -115,3 +164,14 @@ def _validate_fields(
         raise ValueError("candidate field names must be unique")
     if value_type is not None and any(not isinstance(value, value_type) for _, value in fields):
         raise TypeError(f"candidate fields must be {value_label}")
+
+
+def _validate_program_field_names(names: tuple[str, ...]) -> None:
+    if not names:
+        raise ValueError("at least one candidate field is required")
+    if any(not isinstance(name, str) or not name for name in names):
+        raise ValueError("candidate field names must be non-empty strings")
+    if len(names) != len(set(names)):
+        raise ValueError("candidate field names must be unique")
+    if any(re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name) is None for name in names):
+        raise ValueError("candidate field names must be identifiers")
