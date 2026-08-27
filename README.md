@@ -417,6 +417,16 @@ the full report, and a checksum manifest, and refuses pending labels or a
 nonempty destination. Follow [RELEASE.md](RELEASE.md) for the final review,
 Hub upload, viewer check, and immutable-link checklist.
 
+## LLM and agent workflows
+
+Agents can submit candidate artifacts, receive a counterexample or conservative
+verification report, and propose a linked repair. The
+[agent integration scaffold](docs/agent-integration.md) preserves raw-output
+provenance and keeps the trusted problem outside agent-controlled symbolic tool
+input. It does not execute generated programs or treat agent judgments as human
+ground truth. See [`examples/agent_repair_loop.py`](examples/agent_repair_loop.py)
+for a framework-free proposal and repair trace.
+
 ## Current limits
 
 The prototype does not yet define weak or viscosity solution semantics. The CLI
