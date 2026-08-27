@@ -8,6 +8,14 @@ from .agents import (
     SymbolicAgentTool,
     evaluate_agent_proposal,
 )
+from .agent_runtime import (
+    AgentBenchmarkReport,
+    AgentModelMetrics,
+    AgentRun,
+    AgentToolCall,
+    SymbolicAgentSession,
+    summarize_agent_runs,
+)
 from .benchmark import BENCHMARK_VERSION, BenchmarkError, corpus_sha256, evaluate_corpus
 from .artifacts import CallableCandidate, SolutionArtifact, SymbolicCandidate
 from .autodiff import (
@@ -84,8 +92,12 @@ __all__ = [
     "AGENT_TOOL_VERSION",
     "ANNOTATION_STATUSES",
     "ARTIFACT_TYPES",
+    "AgentBenchmarkReport",
     "AgentEvaluation",
+    "AgentModelMetrics",
     "AgentProposal",
+    "AgentRun",
+    "AgentToolCall",
     "AgentTrace",
     "ATLAS_VERSION",
     "BENCHMARK_VERSION",
@@ -119,6 +131,7 @@ __all__ = [
     "Status",
     "SolutionArtifact",
     "SymbolicCandidate",
+    "SymbolicAgentSession",
     "SymbolicAgentTool",
     "AutodiffCheckContext",
     "AutodiffConstraint",
@@ -149,6 +162,7 @@ __all__ = [
     "load_record_bundle",
     "output_sha256",
     "run_checks",
+    "summarize_agent_runs",
     "validate_atlas_coverage",
     "validate_corpus",
     "validate_release_inputs",

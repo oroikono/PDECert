@@ -421,11 +421,14 @@ Hub upload, viewer check, and immutable-link checklist.
 
 Agents can submit candidate artifacts, receive a counterexample or conservative
 verification report, and propose a linked repair. The
-[agent integration scaffold](docs/agent-integration.md) preserves raw-output
-provenance and keeps the trusted problem outside agent-controlled symbolic tool
-input. It does not execute generated programs or treat agent judgments as human
-ground truth. See [`examples/agent_repair_loop.py`](examples/agent_repair_loop.py)
-for a framework-free proposal and repair trace.
+[agent integration](docs/agent-integration.md) preserves raw-output provenance,
+keeps the trusted problem outside agent-controlled symbolic tool input, and
+includes an optional real smolagents `ToolCallingAgent` runner. Cross-model
+summaries measure verifier calls and repair-to-`PROVED` behavior; they do not
+relabel those outcomes as human ground-truth accuracy. Generated program
+execution remains disabled. See
+[`examples/agent_repair_loop.py`](examples/agent_repair_loop.py) for a
+framework-free proposal and repair trace.
 
 ## Current limits
 

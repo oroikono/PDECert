@@ -6,6 +6,8 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- Recorded verifier-guided agent sessions, cross-model behavioral metrics, and
+  an optional real smolagents `ToolCallingAgent` integration.
 - Machine-readable decision-evidence levels distinguishing exact identities,
   rigorous bounds, and empirical evaluations, with checker-contract enforcement
   that prevents sampled evidence from proving obligations.

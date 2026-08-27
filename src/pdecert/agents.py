@@ -224,36 +224,57 @@ class SymbolicAgentTool:
     def evaluate(self, candidate_fields_json: str) -> dict[str, object]:
         """Return stable tool feedback without executing generated code."""
 
-        if not isinstance(candidate_fields_json, str):
-            return _tool_error("candidate fields must be supplied as a JSON string")
-        if len(candidate_fields_json.encode("utf-8")) > self.max_payload_bytes:
-            return _tool_error(f"candidate payload exceeds the {self.max_payload_bytes}-byte limit")
         try:
-            candidate_fields = json.loads(candidate_fields_json)
-        except json.JSONDecodeError as error:
-            return _tool_error(f"invalid JSON: {error.msg}")
-        if not isinstance(candidate_fields, dict):
-            return _tool_error("candidate payload must be a JSON object")
-        if set(candidate_fields) != set(self.trusted_case.field_names):
-            expected = ", ".join(self.trusted_case.field_names)
-            return _tool_error(f"candidate fields must be exactly: {expected}")
-
-        try:
-            ordered_fields = {
-                name: candidate_fields[name] for name in self.trusted_case.field_names
-            }
-            candidate_case = _materialize_symbolic_fields(self.trusted_case, ordered_fields)
-        except SchemaError as error:
+            artifact = self.materialize(candidate_fields_json)
+        except (SchemaError, TypeError, ValueError) as error:
             return _tool_error(str(error))
 
-        report = verify_artifact(
-            candidate_case.problem,
-            SymbolicCandidate.from_expressions(candidate_case.candidate_fields),
+        evaluation = evaluate_agent_proposal(
+            self.trusted_case,
+            AgentProposal(
+                proposal_id="tool-evaluation",
+                generator="pdecert-agent-tool",
+                artifact=artifact,
+                raw_output=candidate_fields_json,
+            ),
             tolerance=self.tolerance,
             samples_per_axis=self.samples_per_axis,
             symbolic_timeout=self.symbolic_timeout,
             max_expression_ops=self.max_expression_ops,
         )
+        return self.feedback(evaluation.report)
+
+    def materialize(self, candidate_fields_json: str) -> SymbolicCandidate:
+        """Parse one bounded tool payload into a symbolic artifact.
+
+        This method is useful to agent-framework adapters that need to retain
+        the exact proposal alongside the verification report. It performs the
+        same input checks as :meth:`evaluate` and never executes Python code.
+        """
+
+        if not isinstance(candidate_fields_json, str):
+            raise TypeError("candidate fields must be supplied as a JSON string")
+        if len(candidate_fields_json.encode("utf-8")) > self.max_payload_bytes:
+            raise ValueError(f"candidate payload exceeds the {self.max_payload_bytes}-byte limit")
+        try:
+            candidate_fields = json.loads(candidate_fields_json)
+        except json.JSONDecodeError as error:
+            raise ValueError(f"invalid JSON: {error.msg}") from error
+        if not isinstance(candidate_fields, dict):
+            raise ValueError("candidate payload must be a JSON object")
+        if set(candidate_fields) != set(self.trusted_case.field_names):
+            expected = ", ".join(self.trusted_case.field_names)
+            raise ValueError(f"candidate fields must be exactly: {expected}")
+
+        ordered_fields = {name: candidate_fields[name] for name in self.trusted_case.field_names}
+        candidate_case = _materialize_symbolic_fields(self.trusted_case, ordered_fields)
+        return SymbolicCandidate.from_expressions(candidate_case.candidate_fields)
+
+    def feedback(self, report: Report) -> dict[str, object]:
+        """Render an existing report through the stable agent-tool schema."""
+
+        if not isinstance(report, Report):
+            raise TypeError("report must be a Report")
         return {
             "ok": True,
             "tool_version": AGENT_TOOL_VERSION,
