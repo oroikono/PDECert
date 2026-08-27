@@ -1,4 +1,42 @@
-# Pilot benchmark release
+# Release procedures
+
+## Python package release candidate
+
+PDECert publishes with PyPI Trusted Publishing. The release workflow builds
+from the GitHub release tag, checks both distributions, and exchanges GitHub's
+short-lived OpenID Connect identity for a PyPI upload token. No long-lived PyPI
+token belongs in the repository or GitHub secrets.
+
+Before the first publication, create a pending publisher for project name
+`pdecert` in PyPI with these exact values:
+
+- owner: `oroikono`
+- repository: `PDECert`
+- workflow: `release.yml`
+- environment: `pypi`
+
+Create the matching GitHub `pypi` environment and require manual approval for
+deployment. See PyPI's
+[trusted-publisher guide](https://docs.pypi.org/trusted-publishers/using-a-publisher/).
+
+Before publishing:
+
+1. Confirm `pyproject.toml`, `CITATION.cff`, and the release tag name the same
+   version. Python version `0.1.1rc1` uses Git tag `v0.1.1rc1`.
+2. Confirm the pull-request and `main` test matrices are green.
+3. Build twice with `python -m build` and byte-compare the wheel and sdist.
+4. Run `python -m twine check dist/*`.
+5. Install the wheel and sdist into separate empty environments. Run
+   `pdecert --help` and verify `examples/exact_heat.json` from outside the
+   repository checkout.
+6. Publish a GitHub prerelease from the exact tag. Approve the protected `pypi`
+   deployment only after the build job succeeds.
+
+After publication, install from PyPI in a new environment, compare PyPI's file
+digests with the inspected artifacts, and rerun the installed command. A broken
+release is yanked and superseded; published files and tags are never replaced.
+
+## Pilot benchmark release
 
 This checklist prevents an unlabeled, mismatched, or synthetic test fixture from
 being presented as the public pilot benchmark.

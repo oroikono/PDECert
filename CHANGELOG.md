@@ -4,6 +4,15 @@ All notable changes to PDECert are documented here.
 
 ## Unreleased
 
+## 0.1.1rc1 - 2026-08-27
+
+### Changed
+
+- Restricted source distributions to an explicit public-file allowlist so local
+  environments and unrelated checkout files cannot leak into release archives.
+- Added clean wheel and source-install smoke tests and updated GitHub Actions to
+  its current Node.js runtime.
+
 ### Added
 
 - A nonlinear viscous-Burgers matched fixture pairing an exact symbolic
