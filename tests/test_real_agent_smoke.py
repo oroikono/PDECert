@@ -34,6 +34,8 @@ class RealAgentSmokeTests(unittest.TestCase):
             seed=0,
             pdecert_revision="b" * 40,
             generated_at="2026-08-27T00:00:00+00:00",
+            smolagents_version="1.26.0",
+            huggingface_hub_version="1.28.0",
         )
 
         self.assertIn("not independent ground-truth", result["scope"])

@@ -36,9 +36,7 @@ def heat_case():
             "variables": ["x", "t"],
             "domains": {"x": [0.0, 1.0], "t": [0.0, 1.0]},
             "parameters": {},
-            "pde_residuals": [
-                {"name": "heat PDE", "expression": "D(u, t) - D(u, x, 2)"}
-            ],
+            "pde_residuals": [{"name": "heat PDE", "expression": "D(u, t) - D(u, x, 2)"}],
             "conditions": [
                 {"name": "initial condition", "expression": "At(u, t, 0) - sin(pi*x)"},
                 {"name": "left boundary", "expression": "At(u, x, 0)"},
@@ -70,7 +68,9 @@ def resolve_live_revision(model_id: str, provider: str) -> str:
     selected = next((item for item in mappings if item.provider == provider), None)
     if selected is None:
         available = ", ".join(sorted(item.provider for item in mappings)) or "none"
-        raise RuntimeError(f"provider {provider!r} is unavailable; advertised providers: {available}")
+        raise RuntimeError(
+            f"provider {provider!r} is unavailable; advertised providers: {available}"
+        )
     if selected.status != "live":
         raise RuntimeError(f"provider {provider!r} is not live (status={selected.status!r})")
     if not isinstance(info.sha, str) or re.fullmatch(r"[0-9a-f]{40}", info.sha) is None:
@@ -101,6 +101,8 @@ def build_result(
     seed: int,
     pdecert_revision: str,
     generated_at: str,
+    smolagents_version: str,
+    huggingface_hub_version: str,
 ) -> dict[str, object]:
     """Build the deliberately public, self-describing smoke artifact."""
 
@@ -131,8 +133,8 @@ def build_result(
         },
         "environment": {
             "pdecert_revision": pdecert_revision,
-            "smolagents_version": version("smolagents"),
-            "huggingface_hub_version": version("huggingface_hub"),
+            "smolagents_version": smolagents_version,
+            "huggingface_hub_version": huggingface_hub_version,
         },
         "run": run.to_dict(include_raw_outputs=True),
         "summary": summarize_agent_runs([run]).to_dict(),
@@ -193,6 +195,8 @@ def run_experiment(
         seed=seed,
         pdecert_revision=source_revision,
         generated_at=datetime.now(timezone.utc).isoformat(),
+        smolagents_version=version("smolagents"),
+        huggingface_hub_version=version("huggingface_hub"),
     )
 
 
