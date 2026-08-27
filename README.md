@@ -421,8 +421,10 @@ Real-time symbolic deadlines are currently available only from the main thread
 on platforms that provide interval timers. When a check is incomplete, the
 intended behavior is `INCONCLUSIVE`.
 
-The next milestones are tracked in [ROADMAP.md](ROADMAP.md). Contributions that
-add one focused capability together with tests are welcome.
+The next milestones are tracked in [ROADMAP.md](ROADMAP.md). The
+[architecture map](ARCHITECTURE.md) explains the package layers and contributor
+workstreams. Contributions that follow the focused workflow in
+[CONTRIBUTING.md](CONTRIBUTING.md) are welcome.
 
 ## Citation
 

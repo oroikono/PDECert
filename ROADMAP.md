@@ -6,6 +6,45 @@ be symbolic expressions, differentiable models, numerical fields, or generated
 solver programs. The project is currently an early research prototype. This
 roadmap describes public project outcomes, not a private development schedule.
 
+Work is organized by the package layers and contributor workstreams in
+[`ARCHITECTURE.md`](ARCHITECTURE.md). Progress is credited when an outcome has
+implementation, tests, documentation, and reproducible evidence—not for commit,
+pull-request, or corpus-record counts alone.
+
+## First publishable cross-artifact release
+
+The next research release should test one central hypothesis: whether explicit
+evidence strength and abstention reveal failures that siloed symbolic and SciML
+evaluators miss. The required gates are ordered so contributors can land small,
+independently useful slices.
+
+1. **Evidence semantics:** reports distinguish exact symbolic evidence,
+   rigorous bounds, empirical diagnostics, and missing evidence without
+   changing conservative statuses.
+2. **Community architecture:** package boundaries, backend contracts,
+   compatibility expectations, and contribution definitions of done are public.
+3. **Matched-case contract:** one mathematical case can bind multiple candidate
+   artifacts without pretending that their evaluators have equal guarantees.
+4. **Natural symbolic/callable pairs:** the corpus includes independently
+   generated symbolic outputs and trained callable models on matched problems.
+5. **Gridded artifact lane:** numerical and neural-operator fields have explicit
+   coordinates, discretization metadata, and non-autodiff evaluation semantics.
+6. **Realistic coverage:** nonlinear, coupled, multidimensional, discontinuous,
+   and irregular-domain limitations are represented and reported.
+7. **Failure taxonomy:** corruptions and natural failures cover boundary,
+   initial-condition, parameter, phase, singularity, localization, and
+   representation errors.
+8. **Baseline suite:** SymPy, fixed collocation, reference-field metrics, and
+   applicable established SciML evaluators run through reproducible adapters.
+9. **Rigorous backend:** at least one external or native validated backend is
+   independently reproduced with explicit assumptions and certificate scope.
+10. **Public audit:** independent labels, disagreement adjudication, uncertainty
+    reporting, immutable artifacts, and a complete baseline report are released.
+
+These gates replace a raw 100-record target as the primary research milestone.
+Corpus growth still matters, but only together with artifact, family, origin,
+and evaluator-disagreement coverage.
+
 ## v0.1: dependable verification interface
 
 The first release should let a user save one fully instantiated verification
