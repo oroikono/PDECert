@@ -6,6 +6,9 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- A bounded real-model agent smoke runner that records provider, model revision,
+  prompt, decoding request, environment, raw verifier interactions, and the
+  reproducibility limits of hosted inference.
 - Recorded verifier-guided agent sessions, cross-model behavioral metrics, and
   an optional real smolagents `ToolCallingAgent` integration.
 - A non-executing `ProgramCandidate`, deny-by-default sandbox protocol, bounded

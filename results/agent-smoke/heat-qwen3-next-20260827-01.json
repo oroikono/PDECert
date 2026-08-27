@@ -1,0 +1,180 @@
+{
+  "environment": {
+    "huggingface_hub_version": "1.28.0",
+    "pdecert_revision": "649ad5f24d32d754c6cb3173ee5ff8fb8ba582d6",
+    "smolagents_version": "1.26.0"
+  },
+  "generated_at": "2026-08-27T02:04:11.237946+00:00",
+  "invocation": {
+    "max_steps": 4,
+    "max_tokens": 768,
+    "model_id": "Qwen/Qwen3-Next-80B-A3B-Instruct",
+    "model_revision": "9c7f2fbe84465e40164a94cc16cd30b6999b0cc7",
+    "provider": "novita",
+    "seed_requested": 0,
+    "temperature": 0.0,
+    "timeout_seconds": 120
+  },
+  "prompt": "Find u(x, t) on 0 <= x <= 1 and 0 <= t <= 1 satisfying D(u, t) - D(u, x, 2) = 0, u(x, 0) = sin(pi*x), and u(0, t) = u(1, t) = 0. Submit exactly one candidate field named u. Use Python/SymPy syntax.",
+  "prompt_version": "heat-dirichlet-v1",
+  "reproducibility_note": "The Hub repository revision is recorded, but a hosted provider may update its serving stack or model deployment independently.",
+  "run": {
+    "final_output": "u(x, t) = sin(pi*x)*exp(-pi**2*t)",
+    "final_output_sha256": "9ad5c1619511cb7cb9de977445a8b257364591150cc74998c288261d64a34486",
+    "generator": "Qwen/Qwen3-Next-80B-A3B-Instruct@9c7f2fbe84465e40164a94cc16cd30b6999b0cc7 via novita",
+    "metadata": {
+      "model_id": "Qwen/Qwen3-Next-80B-A3B-Instruct",
+      "model_revision": "9c7f2fbe84465e40164a94cc16cd30b6999b0cc7",
+      "pdecert_revision": "649ad5f24d32d754c6cb3173ee5ff8fb8ba582d6",
+      "prompt_version": "heat-dirichlet-v1",
+      "provider": "novita",
+      "seed_requested": "0"
+    },
+    "problem_id": "heat-dirichlet-01",
+    "run_id": "heat-qwen3-next-20260827-01",
+    "tool_calls": [
+      {
+        "call_id": "call-1",
+        "candidate_fields_json": "{\"u\": \"sin(pi*x)*exp(-pi**2*t)\"]",
+        "candidate_fields_sha256": "5df63c7050da8cf7e7a4862588fc067ac0da9368015f3d192b4ee8e4243aac24",
+        "response": {
+          "error": "invalid JSON: Expecting ',' delimiter",
+          "ok": false,
+          "tool_version": 1
+        }
+      },
+      {
+        "call_id": "call-2",
+        "candidate_fields_json": "{\"u\": \"sin(pi*x)*exp(-pi**2*t)\"}",
+        "candidate_fields_sha256": "56a86de9d6cfd2fa5b879eae9865d2a0c671fa3203ce295e0357efc2214d2cfc",
+        "response": {
+          "field_names": [
+            "u"
+          ],
+          "ok": true,
+          "problem": "one-dimensional heat equation",
+          "report": {
+            "decision_evidence": "EXACT",
+            "exact_checks": {
+              "heat PDE": "identity",
+              "initial condition": "identity",
+              "left boundary": "identity",
+              "right boundary": "identity"
+            },
+            "incomplete_reasons": {},
+            "max_sampled_residual": 0.0,
+            "status": "PROVED",
+            "witness": null
+          },
+          "tool_version": 1
+        }
+      }
+    ],
+    "trace": {
+      "evaluations": [
+        {
+          "proposal": {
+            "artifact_kind": "symbolic",
+            "field_names": [
+              "u"
+            ],
+            "generator": "Qwen/Qwen3-Next-80B-A3B-Instruct@9c7f2fbe84465e40164a94cc16cd30b6999b0cc7 via novita",
+            "metadata": {
+              "model_id": "Qwen/Qwen3-Next-80B-A3B-Instruct",
+              "model_revision": "9c7f2fbe84465e40164a94cc16cd30b6999b0cc7",
+              "pdecert_revision": "649ad5f24d32d754c6cb3173ee5ff8fb8ba582d6",
+              "prompt_version": "heat-dirichlet-v1",
+              "provider": "novita",
+              "seed_requested": "0"
+            },
+            "parent_proposal_id": null,
+            "proposal_id": "proposal-1",
+            "raw_output": "{\"u\": \"sin(pi*x)*exp(-pi**2*t)\"}",
+            "raw_output_sha256": "56a86de9d6cfd2fa5b879eae9865d2a0c671fa3203ce295e0357efc2214d2cfc"
+          },
+          "verification": {
+            "decision_evidence": "EXACT",
+            "exact_checks": {
+              "heat PDE": "identity",
+              "initial condition": "identity",
+              "left boundary": "identity",
+              "right boundary": "identity"
+            },
+            "incomplete_reasons": {},
+            "max_sampled_residual": 0.0,
+            "status": "PROVED",
+            "witness": null
+          }
+        }
+      ],
+      "problem_id": "heat-dirichlet-01",
+      "run_id": "heat-qwen3-next-20260827-01"
+    }
+  },
+  "schema_version": 1,
+  "scope": "Single-case integration evidence; not independent ground-truth labeling or a population-level model comparison.",
+  "suite": "real-agent-smoke-v1",
+  "summary": {
+    "metric_scope": "Verifier-grounded agent behavior; this is not independent ground-truth accuracy.",
+    "models": [
+      {
+        "final_proved_rate": 1.0,
+        "final_proved_runs": 1,
+        "final_status_counts": {
+          "PROVED": 1
+        },
+        "first_proved_rate": 1.0,
+        "first_proved_runs": 1,
+        "generator": "Qwen/Qwen3-Next-80B-A3B-Instruct@9c7f2fbe84465e40164a94cc16cd30b6999b0cc7 via novita",
+        "materialized_proposals": 1,
+        "mean_tool_calls_per_run": 2.0,
+        "rejected_tool_calls": 1,
+        "repaired_to_proved_runs": 0,
+        "runs": 1,
+        "tool_calls": 2
+      }
+    ]
+  },
+  "trusted_case": {
+    "conditions": [
+      {
+        "expression": "At(u, t, 0) - sin(pi*x)",
+        "name": "initial condition"
+      },
+      {
+        "expression": "At(u, x, 0)",
+        "name": "left boundary"
+      },
+      {
+        "expression": "At(u, x, 1)",
+        "name": "right boundary"
+      }
+    ],
+    "domains": {
+      "t": [
+        0.0,
+        1.0
+      ],
+      "x": [
+        0.0,
+        1.0
+      ]
+    },
+    "fields": {
+      "u": "exp(-pi**2*t)*sin(pi*x)"
+    },
+    "name": "one-dimensional heat equation",
+    "parameters": {},
+    "pde_residuals": [
+      {
+        "expression": "D(u, t) - D(u, x, 2)",
+        "name": "heat PDE"
+      }
+    ],
+    "schema_version": 3,
+    "variables": [
+      "x",
+      "t"
+    ]
+  }
+}

@@ -71,6 +71,22 @@ payload, counterexample, and repair, and hashes raw text in its public form.
 Passing `include_raw_outputs=True` is required to serialize exact prompts or
 responses.
 
+Run the bounded provider-backed integration case with an existing Hugging Face
+login:
+
+```bash
+python -m experiments.real_agent_smoke \
+  --run-id heat-qwen3-next-20260827-01 \
+  --output results/agent-smoke/heat-qwen3-next-20260827-01.json
+```
+
+The script checks that the requested inference provider is currently live,
+records the full Hub revision, prompt, decoding request, package versions, raw
+tool payloads, and final response, and refuses to overwrite an earlier result.
+It never reads or serializes the Hugging Face token. A Hub revision does not
+fully pin a hosted deployment, so every output carries that limitation. The
+single heat-equation run is integration evidence, not a model benchmark.
+
 ```bash
 pip install -e '.[agents]'
 ```
