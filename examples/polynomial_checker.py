@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import sympy as sp
 
-from pdecert import CheckContext, CheckResult
+from pdecert import CheckContext, CheckResult, EvidenceLevel
 
 
 class ExpandedPolynomialChecker:
@@ -28,5 +28,6 @@ class ExpandedPolynomialChecker:
                 exact[constraint.name] = "identity"
         return CheckResult(
             proved_obligations=frozenset(proved),
+            proof_level=EvidenceLevel.EXACT if proved else None,
             exact_checks=exact,
         )

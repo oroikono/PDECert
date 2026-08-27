@@ -3,6 +3,21 @@
 Thanks for taking an interest in PDECert. The project is still small, so focused
 changes are easiest to review.
 
+Start with [`ARCHITECTURE.md`](ARCHITECTURE.md) to see the package layers,
+extension boundaries, evidence rules, and six contributor workstreams. New work
+should deliver one vertical slice rather than changing several unrelated layers.
+
+## Choose a workstream
+
+| Workstream | Good first contribution | Extra review requirement |
+| --- | --- | --- |
+| Soundness core | Improve an incomplete diagnostic or resource limit | Adversarial tests and compatibility analysis |
+| Artifact representations | Validate metadata for one candidate representation | Demonstrate faithful round-trip or evaluation semantics |
+| Verification backends | Add one narrowly supported checker | State assumptions, evidence strength, and abstention boundary |
+| Benchmark science | Contribute one natural failure or matched case | Preserve provenance and follow independent review protocol |
+| Ecosystem integrations | Add an optional loader or report adapter | Test without making the integration a core dependency |
+| Developer experience | Improve setup, CI, documentation, or packaging | Tie the change to a reproducible contributor problem |
+
 ## Good ways to begin
 
 - Share a real symbolic, neural, or numerical PDE candidate that was accepted by
@@ -30,6 +45,23 @@ Before opening a pull request:
 4. Run `pytest` and `ruff check .` locally.
 5. State what the result proves, and what it does not prove.
 
+### Definition of done
+
+A behavior-changing pull request is complete when it includes:
+
+- a concise statement of supported and unsupported scope;
+- implementation behind the appropriate extension boundary;
+- valid, invalid, and unsupported or inconclusive tests;
+- one minimal example, fixture, or replayable witness;
+- updated user or contributor documentation;
+- exact verification commands and results; and
+- a changelog entry when public behavior or a report contract changes.
+
+Do not split one coherent capability into activity-only pull requests. Large
+backends should instead be decomposed into independently useful vertical slices,
+such as representation validation, derivative reconstruction, and convergence
+evaluation.
+
 Candidate-corpus records must retain the unedited generator output and complete
 origin metadata. Do not reconstruct or polish an output and present it as a raw
 sample. New records should remain `pending` until a person applies the published
@@ -48,6 +80,16 @@ retain disagreement notes when a second reviewer is needed.
 For soundness-sensitive changes, a new check must not turn finite numerical
 sampling into a `PROVED` result. If the reasoning is incomplete, return
 `INCONCLUSIVE` and record why.
+
+Every new checker or evaluator must document:
+
+1. accepted artifact and problem representations;
+2. obligations and solution semantics it addresses;
+3. whether its evidence is exact symbolic, rigorously bounded, or empirical;
+4. the form of a replayable refutation witness;
+5. unsupported inputs and abstention behavior; and
+6. dependencies, precision, tolerances, seeds, and resource limits needed for
+   reproduction.
 
 Symbolic complexity limits must preserve counterexample search where practical.
 Skipping an over-budget exact check is an incomplete proof attempt, not evidence
