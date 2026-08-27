@@ -34,8 +34,10 @@ from .core import (
 )
 from .corpus import (
     ANNOTATION_STATUSES,
+    ARTIFACT_TYPES,
     ATLAS_VERSION,
     CORPUS_VERSION,
+    COVERAGE_VERSION,
     FAILURE_MODES,
     ORIGIN_KINDS,
     VERDICTS,
@@ -43,10 +45,12 @@ from .corpus import (
     dump_atlas,
     dump_corpus,
     load_atlas,
+    load_atlas_coverage,
     load_corpus,
     load_corpus_source,
     load_record_bundle,
     output_sha256,
+    validate_atlas_coverage,
     validate_corpus,
 )
 from .labeling import REVIEW_VERSION, ReviewError, apply_review
@@ -62,6 +66,7 @@ from .schema import (
 
 __all__ = [
     "ANNOTATION_STATUSES",
+    "ARTIFACT_TYPES",
     "ATLAS_VERSION",
     "BENCHMARK_VERSION",
     "BenchmarkError",
@@ -72,6 +77,7 @@ __all__ = [
     "CheckerError",
     "CheckerRegistry",
     "CORPUS_VERSION",
+    "COVERAGE_VERSION",
     "Constraint",
     "CorpusError",
     "EvidenceLevel",
@@ -110,11 +116,13 @@ __all__ = [
     "fixed_collocation_check",
     "load_case",
     "load_atlas",
+    "load_atlas_coverage",
     "load_corpus",
     "load_corpus_source",
     "load_record_bundle",
     "output_sha256",
     "run_checks",
+    "validate_atlas_coverage",
     "validate_corpus",
     "validate_release_inputs",
     "verify",

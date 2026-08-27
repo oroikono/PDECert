@@ -148,6 +148,19 @@ class CommandLineTests(unittest.TestCase):
         self.assertEqual(exit_code, INPUT_ERROR)
         self.assertIn("invalid JSON", errors.getvalue())
 
+    def test_corpus_validate_reports_modular_atlas_taxonomy(self):
+        output = io.StringIO()
+        with redirect_stdout(output):
+            exit_code = main(["corpus", "validate", "corpus/community"])
+
+        summary = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(summary["coverage_version"], 1)
+        self.assertEqual(summary["artifact_types"], {"symbolic_expression": 13})
+        self.assertEqual(summary["pde_families"]["heat"], 7)
+        self.assertEqual(summary["pde_families"]["poisson"], 1)
+        self.assertEqual(summary["spatial_dimensions"], {"1": 11, "2": 2})
+
 
 if __name__ == "__main__":
     unittest.main()

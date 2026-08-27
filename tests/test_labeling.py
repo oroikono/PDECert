@@ -12,6 +12,7 @@ from pdecert import (
     corpus_sha256,
     dump_atlas,
     load_atlas,
+    load_atlas_coverage,
     load_corpus,
     validate_corpus,
 )
@@ -163,7 +164,18 @@ class LabelingTests(unittest.TestCase):
             source_path = root / "pending-atlas"
             review_path = root / "review.json"
             output = root / "labeled-atlas"
-            dump_atlas(source, source_path)
+            coverage = {
+                "coverage_version": 1,
+                "records": {
+                    record["id"]: {
+                        "artifact_type": "symbolic_expression",
+                        "pde_families": ["test_family"],
+                        "spatial_dimension": 1,
+                    }
+                    for record in source["records"]
+                },
+            }
+            dump_atlas(source, source_path, coverage=coverage)
             review_path.write_text(json.dumps(review))
             apply_review_main(
                 [
@@ -179,6 +191,10 @@ class LabelingTests(unittest.TestCase):
             )
             labeled = load_atlas(output)
             unchanged = load_atlas(source_path)
+            labeled_coverage = load_atlas_coverage(
+                output,
+                {record["id"] for record in labeled["records"]},
+            )
 
         self.assertTrue(
             all(record["annotation"]["status"] == "pending" for record in unchanged["records"])
@@ -192,6 +208,7 @@ class LabelingTests(unittest.TestCase):
                 for record in labeled["records"]
             )
         )
+        self.assertEqual(labeled_coverage, coverage)
 
 
 if __name__ == "__main__":

@@ -6,12 +6,15 @@ from pathlib import Path
 
 from experiments.coupled_wave import build_case
 from pdecert import (
+    ARTIFACT_TYPES,
     ATLAS_VERSION,
+    COVERAGE_VERSION,
     CorpusError,
     case_to_dict,
     dump_atlas,
     dump_corpus,
     load_atlas,
+    load_atlas_coverage,
     load_corpus,
     load_corpus_source,
     load_record_bundle,
@@ -77,6 +80,20 @@ class CorpusTests(unittest.TestCase):
         }
         (root / "atlas.json").write_text(json.dumps(manifest))
 
+    def _write_coverage(self, root: Path, record_ids: list[str]) -> None:
+        coverage = {
+            "coverage_version": COVERAGE_VERSION,
+            "records": {
+                record_id: {
+                    "artifact_type": "symbolic_expression",
+                    "pde_families": ["wave"],
+                    "spatial_dimension": 1,
+                }
+                for record_id in record_ids
+            },
+        }
+        (root / "coverage.json").write_text(json.dumps(coverage))
+
     def test_valid_record_passes(self):
         validate_corpus(self.corpus)
 
@@ -110,6 +127,45 @@ class CorpusTests(unittest.TestCase):
             [record["id"] for record in loaded["records"]],
             ["sympy-wave-001", "sympy-wave-002"],
         )
+
+    def test_modular_atlas_loads_explicit_coverage_taxonomy(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self._write_manifest(root)
+            self._write_bundle(root, self.record)
+            self._write_coverage(root, [self.record["id"]])
+            coverage = load_atlas_coverage(root, {self.record["id"]})
+            loaded = load_atlas(root)
+
+        self.assertEqual(loaded["records"], [self.record])
+        self.assertEqual(coverage["coverage_version"], COVERAGE_VERSION)
+        self.assertEqual(
+            coverage["records"][self.record["id"]]["artifact_type"],
+            "symbolic_expression",
+        )
+        self.assertIn("callable_model", ARTIFACT_TYPES)
+
+    def test_modular_atlas_coverage_must_match_record_ids(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self._write_manifest(root)
+            self._write_bundle(root, self.record)
+            self._write_coverage(root, [])
+            with self.assertRaisesRegex(CorpusError, "missing record id"):
+                load_atlas(root)
+
+    def test_modular_atlas_coverage_rejects_invalid_taxonomy(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self._write_manifest(root)
+            self._write_bundle(root, self.record)
+            self._write_coverage(root, [self.record["id"]])
+            coverage_path = root / "coverage.json"
+            coverage = json.loads(coverage_path.read_text())
+            coverage["records"][self.record["id"]]["pde_families"] = ["Wave Equation"]
+            coverage_path.write_text(json.dumps(coverage))
+            with self.assertRaisesRegex(CorpusError, "lowercase taxonomy slugs"):
+                load_atlas(root)
 
     def test_modular_atlas_dump_round_trip_is_deterministic(self):
         with tempfile.TemporaryDirectory() as directory:
