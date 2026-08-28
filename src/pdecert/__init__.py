@@ -1,5 +1,7 @@
 """Public interface for PDECert."""
 
+from importlib.metadata import PackageNotFoundError, version as distribution_version
+
 from .agents import (
     AGENT_TOOL_VERSION,
     AgentEvaluation,
@@ -229,4 +231,7 @@ __all__ = [
     "verify_matched_case",
 ]
 
-__version__ = "0.1.0"
+try:
+    __version__ = distribution_version("pdecert")
+except PackageNotFoundError:
+    __version__ = "0+unknown"
