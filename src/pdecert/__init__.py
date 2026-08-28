@@ -73,6 +73,7 @@ from .reports import (
     load_report,
     report_from_dict,
 )
+from .quickstart import QUICKSTART_VERSION, render_quickstart, run_quickstart
 from .corpus import (
     ANNOTATION_STATUSES,
     ARTIFACT_TYPES,
@@ -200,6 +201,7 @@ __all__ = [
     "OperatorCompileError",
     "PARAMETER_ASSUMPTIONS",
     "PROGRAM_SOURCE_MAX_BYTES",
+    "QUICKSTART_VERSION",
     "Problem",
     "ProblemTemplate",
     "ProgramCandidate",
@@ -276,6 +278,8 @@ __all__ = [
     "summarize_agent_runs",
     "evidence_event_from_dict",
     "report_from_dict",
+    "render_quickstart",
+    "run_quickstart",
     "template_from_case",
     "template_from_dict",
     "template_to_dict",

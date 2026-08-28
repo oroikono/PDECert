@@ -4,6 +4,8 @@ All notable changes to PDECert are documented here.
 
 ## Unreleased
 
+## 0.1.1rc2 - 2026-08-28
+
 ### Changed
 
 - Runtime version reporting now comes from installed package metadata, keeping
@@ -14,6 +16,9 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- A deterministic `pdecert quickstart` command that demonstrates exact proof,
+  empirical refutation, conservative abstention, and a recorded agent repair
+  trace from clean wheel and source-distribution installs.
 - A versioned decision-report contract with obligation-level exact, rigorous,
   empirical, and abstention events, strict JSON loading, and a canonical schema.
 - A restricted compiler from retained version 3 operator sources to PyTorch
