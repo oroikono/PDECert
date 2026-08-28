@@ -22,13 +22,13 @@ deployment. See PyPI's
 Before publishing:
 
 1. Confirm `pyproject.toml`, `CITATION.cff`, and the release tag name the same
-   version. Python version `0.1.1rc1` uses Git tag `v0.1.1rc1`.
+   version. Python version `0.1.1rc2` uses Git tag `v0.1.1rc2`.
 2. Confirm the pull-request and `main` test matrices are green.
 3. Build twice with `python -m build` and byte-compare the wheel and sdist.
 4. Run `python -m twine check dist/*`.
 5. Install the wheel and sdist into separate empty environments. Run
-   `pdecert --help` and verify `examples/exact_heat.json` from outside the
-   repository checkout.
+   `pdecert --help`, `pdecert quickstart --json`, and verify
+   `examples/exact_heat.json` from outside the repository checkout.
 6. Publish a GitHub prerelease from the exact tag. Approve the protected `pypi`
    deployment only after the build job succeeds.
 

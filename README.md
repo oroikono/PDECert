@@ -40,6 +40,21 @@ empirical counterexamples, sampled passes, and abstentions. See the
 > undecided obligation and returns `INCONCLUSIVE` unless another checker finds a
 > witness. See [ADR-0003](docs/adr/0003-decision-evidence-levels.md).
 
+## Five-minute quickstart
+
+Install the release candidate and run the complete offline demonstration:
+
+```bash
+python -m pip install pdecert==0.1.1rc2
+pdecert quickstart
+pdecert quickstart --json > pdecert-quickstart.json
+```
+
+It reproduces an exact symbolic proof, a boundary counterexample, a sampled
+pass that correctly remains `INCONCLUSIVE`, and a recorded agent proposal-to-
+repair trace. No repository checkout, optional dependency, credential, network
+call, or model API is used. See the [walkthrough and scope](docs/quickstart.md).
+
 ## Why this exists
 
 PDE solvers and language models can produce expressions that look convincing

@@ -19,6 +19,7 @@ from .manifests import (
     run_manifest_sha256,
     validate_run_bundle,
 )
+from .quickstart import render_quickstart, run_quickstart
 from .schema import SCHEMA_VERSION, SchemaError, load_case
 from .templates import TEMPLATE_VERSION, TemplateError, load_template
 
@@ -29,6 +30,7 @@ EXIT_CODES = {
     Status.INCONCLUSIVE: 2,
 }
 INPUT_ERROR = 64
+SOFTWARE_ERROR = 70
 
 
 def _positive_float(value: str) -> float:
@@ -51,6 +53,16 @@ def _build_parser() -> argparse.ArgumentParser:
         description="Evaluate PDE solution artifacts without treating sampling as proof.",
     )
     subcommands = parser.add_subparsers(dest="command", required=True)
+    quickstart_parser = subcommands.add_parser(
+        "quickstart",
+        help="run the deterministic offline evidence demonstration",
+    )
+    quickstart_parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="json_output",
+        help="print complete machine-readable reports and proposal provenance",
+    )
     verify_parser = subcommands.add_parser("verify", help="verify one JSON case")
     verify_parser.add_argument("case", type=Path, help="path to a versioned JSON case")
     verify_parser.add_argument("-o", "--output", type=Path, help="write the JSON report to a file")
@@ -104,6 +116,15 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     run_validate.add_argument("manifest", type=Path, help="path to a run manifest JSON file")
     return parser
+
+
+def _run_quickstart(arguments: argparse.Namespace) -> int:
+    payload = run_quickstart()
+    if arguments.json_output:
+        print(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False))
+    else:
+        print(render_quickstart(payload), end="")
+    return 0 if payload["passed"] else SOFTWARE_ERROR
 
 
 def _run_verify(arguments: argparse.Namespace) -> int:
@@ -239,6 +260,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     parser = _build_parser()
     arguments = parser.parse_args(argv)
+    if arguments.command == "quickstart":
+        return _run_quickstart(arguments)
     if arguments.command == "verify":
         return _run_verify(arguments)
     if arguments.command == "corpus" and arguments.corpus_command == "validate":
