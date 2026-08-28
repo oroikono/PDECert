@@ -66,6 +66,7 @@ be copied into new modules.
 | `checks.py` | Symbolic checker protocol, registry, built-in checks, and evidence aggregation | New symbolic methods implement `Checker`; they do not add branches to the orchestrator. |
 | `autodiff.py` | Callable problem description and PyTorch residual evaluation | Keep PyTorch optional and sampled success inconclusive. |
 | `compiler.py` | Restricted lowering from retained operator sources to callable residuals | Reject unsupported semantics before evaluation; do not transfer evidence between artifacts. |
+| `templates.py` | Candidate-free problem specifications and explicit symbolic bindings | Keep problem ownership separate from candidate provenance and preserve declared solution semantics. |
 | `schema.py` | Restricted, versioned problem serialization | Never execute arbitrary code from a case file. Schema changes require migration and compatibility tests. |
 | `corpus.py` | Versioned candidate and Atlas records with provenance | Raw model or solver outputs remain unedited. Annotation state stays distinct from machine evidence. |
 | `labeling.py` | Blind review and guarded label import | Machine proposals are never represented as independent human ground truth. |
@@ -225,3 +226,5 @@ The preferred sequence is:
   vertical slices, and release gates for community evolution.
 - [`ADR-0006`](docs/adr/0006-portable-operator-lowering.md): a declared subset
   of trusted operator sources can drive symbolic and callable lanes.
+- [`ADR-0007`](docs/adr/0007-candidate-free-problem-templates.md): trusted
+  problem templates are serialized independently from candidate artifacts.

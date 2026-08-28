@@ -219,6 +219,28 @@ and a perturbed field that is refuted with a concrete point. See
 
 ### One operator source for symbolic and callable candidates
 
+A candidate-free template keeps the trusted task separate from any model or
+solver output:
+
+```python
+from pdecert import bind_symbolic_candidate, load_template, verify
+
+template = load_template("examples/heat-template.json")
+case = bind_symbolic_candidate(
+    template,
+    {"u": "exp(-pi**2*t)*sin(pi*x)"},
+)
+report = verify(case.problem, case.candidate_fields)
+```
+
+The same template can be compiled for a separately supplied PyTorch callable.
+It defines classical strong, pointwise obligations; it does not contain a
+candidate and cannot transfer exact evidence from one artifact to another.
+Validate a public task with `pdecert template validate TEMPLATE.json`. See the
+[`problem-template contract`](docs/problem-templates.md),
+[`heat template`](examples/heat-template.json), and
+[`two-lane example`](examples/problem_template.py).
+
 Version 3 constraint expressions can also be compiled into an
 `AutodiffProblem`. This removes the handwritten duplicate between a trusted
 symbolic PDE specification and its callable residual operators:
@@ -257,6 +279,9 @@ single-field and coupled examples in [`examples/`](examples/).
 Version 1 and version 2 inputs remain readable. Their positional candidate
 expressions are assigned stable names such as `candidate_0` when loaded. New
 files are written as version 3.
+
+Candidate-free tasks use the separate version-1 template format rather than a
+partially populated case. This leaves existing case semantics unchanged.
 
 Named fields make coupled systems explicit:
 

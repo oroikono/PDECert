@@ -10,6 +10,9 @@ All notable changes to PDECert are documented here.
   automatic-differentiation problems, with explicit parameter and boundary
   limitations, composite-expression derivatives, tests, and a single-source
   heat example.
+- A separately versioned, candidate-free problem-template format with strict
+  symbolic binding, direct callable lowering, CLI validation, a JSON schema,
+  architecture decision, and a reproducible heat example.
 
 ## 0.1.1rc1 - 2026-08-27
 

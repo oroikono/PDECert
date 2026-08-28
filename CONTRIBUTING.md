@@ -120,6 +120,13 @@ one callable regression for any new lowering, plus an unsupported test when the
 same syntax has backend-dependent semantics. Do not silently approximate a
 symbolic function with a numerically different PyTorch operation.
 
+Reusable tasks follow the candidate-free boundary in
+[`ADR-0007`](docs/adr/0007-candidate-free-problem-templates.md). Put trusted
+operators and solution semantics in a `ProblemTemplate`; bind model or solver
+outputs separately. A new template-semantics value requires a faithful backend
+and its own architectural review. Do not label weak, entropy, or distributional
+problems as `classical_strong` to make them pass version-1 validation.
+
 ## Local setup
 
 ```bash

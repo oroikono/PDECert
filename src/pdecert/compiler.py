@@ -14,6 +14,7 @@ from collections.abc import Mapping
 
 from .autodiff import AutodiffConstraint, AutodiffEvaluation, AutodiffProblem
 from .schema import VerificationCase
+from .templates import ProblemTemplate
 
 
 _MAX_DERIVATIVE_ORDER = 8
@@ -44,13 +45,14 @@ class OperatorCompileError(ValueError):
     """Raised when a valid symbolic case has no faithful callable lowering."""
 
 
-def compile_autodiff_problem(case: VerificationCase) -> AutodiffProblem:
-    """Compile one schema-v3-style case into a PyTorch autodiff problem.
+def compile_autodiff_problem(case: VerificationCase | ProblemTemplate) -> AutodiffProblem:
+    """Compile one case or candidate-free template into an autodiff problem.
 
-    The trusted constraint sources become callable residual operators; the
-    candidate expressions stored in ``case`` are not executed or translated.
-    A separately supplied :class:`~pdecert.CallableCandidate` is evaluated
-    against the compiled problem.
+    The trusted constraint sources become callable residual operators. A
+    template contains no candidate; candidate expressions in a fully
+    instantiated case are not executed or translated. A separately supplied
+    :class:`~pdecert.CallableCandidate` is evaluated against the compiled
+    problem.
 
     Current scope is parameter-free classical problems on rectangular domains.
     ``At(expr, coordinate, value)`` is lowered to an autodiff surface only when
@@ -59,23 +61,45 @@ def compile_autodiff_problem(case: VerificationCase) -> AutodiffProblem:
     fail during compilation rather than changing verification semantics.
     """
 
-    if not isinstance(case, VerificationCase):
-        raise TypeError("case must be a VerificationCase")
-    if case.problem.parameter_assumptions:
-        names = ", ".join(str(variable) for variable in case.problem.parameter_assumptions)
+    if isinstance(case, VerificationCase):
+        name = case.problem.name
+        parameters = {
+            str(variable): assumptions
+            for variable, assumptions in case.problem.parameter_assumptions.items()
+        }
+        variables = tuple(str(variable) for variable in case.problem.variables)
+        domains = {
+            str(variable): case.problem.domains[variable] for variable in case.problem.variables
+        }
+        field_names = frozenset(case.field_names)
+        pde_sources = tuple(
+            (constraint.name, constraint.source) for constraint in case.problem.pde_residuals
+        )
+        condition_sources = tuple(
+            (constraint.name, constraint.source) for constraint in case.problem.conditions
+        )
+    elif isinstance(case, ProblemTemplate):
+        name = case.name
+        parameters = case.parameters
+        variables = case.variables
+        domains = case.domains
+        field_names = frozenset(case.field_names)
+        pde_sources = tuple(
+            (constraint.name, constraint.expression) for constraint in case.pde_residuals
+        )
+        condition_sources = tuple(
+            (constraint.name, constraint.expression) for constraint in case.conditions
+        )
+    else:
+        raise TypeError("case must be a VerificationCase or ProblemTemplate")
+    if parameters:
+        names = ", ".join(sorted(parameters))
         raise OperatorCompileError(
             "callable lowering does not yet support parameter variables: " + names
         )
 
-    variables = tuple(str(variable) for variable in case.problem.variables)
-    domains = {str(variable): case.problem.domains[variable] for variable in case.problem.variables}
-    field_names = frozenset(case.field_names)
     variable_names = frozenset(variables)
-    sources = tuple(
-        constraint.source
-        for constraint in case.problem.pde_residuals + case.problem.conditions
-        if constraint.source is not None
-    )
+    sources = tuple(source for _, source in pde_sources + condition_sources if source is not None)
     missing_fields = sorted(
         field
         for field in field_names
@@ -89,26 +113,26 @@ def compile_autodiff_problem(case: VerificationCase) -> AutodiffProblem:
 
     pde_residuals = tuple(
         _compile_constraint(
-            constraint.name,
-            constraint.source,
+            constraint_name,
+            source,
             variables=variable_names,
             fields=field_names,
             domains=domains,
         )
-        for constraint in case.problem.pde_residuals
+        for constraint_name, source in pde_sources
     )
     conditions = tuple(
         _compile_constraint(
-            constraint.name,
-            constraint.source,
+            constraint_name,
+            source,
             variables=variable_names,
             fields=field_names,
             domains=domains,
         )
-        for constraint in case.problem.conditions
+        for constraint_name, source in condition_sources
     )
     return AutodiffProblem(
-        name=case.problem.name,
+        name=name,
         variables=variables,
         domains=domains,
         pde_residuals=pde_residuals,
