@@ -114,6 +114,12 @@ symbolic contributors should not need it. Autodiff checks must cover the PDE and
 represented initial or boundary surfaces, report non-finite outputs, and remain
 `INCONCLUSIVE` after finite sampled success.
 
+Portable operator additions must also follow the declared subset in
+[`ADR-0006`](docs/adr/0006-portable-operator-lowering.md). Add one symbolic and
+one callable regression for any new lowering, plus an unsupported test when the
+same syntax has backend-dependent semantics. Do not silently approximate a
+symbolic function with a numerically different PyTorch operation.
+
 ## Local setup
 
 ```bash

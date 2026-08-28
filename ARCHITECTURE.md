@@ -65,6 +65,7 @@ be copied into new modules.
 | `artifacts.py` | Representation-neutral candidate identity plus concrete artifact types | Add an artifact only after its native evaluation semantics are understood. |
 | `checks.py` | Symbolic checker protocol, registry, built-in checks, and evidence aggregation | New symbolic methods implement `Checker`; they do not add branches to the orchestrator. |
 | `autodiff.py` | Callable problem description and PyTorch residual evaluation | Keep PyTorch optional and sampled success inconclusive. |
+| `compiler.py` | Restricted lowering from retained operator sources to callable residuals | Reject unsupported semantics before evaluation; do not transfer evidence between artifacts. |
 | `schema.py` | Restricted, versioned problem serialization | Never execute arbitrary code from a case file. Schema changes require migration and compatibility tests. |
 | `corpus.py` | Versioned candidate and Atlas records with provenance | Raw model or solver outputs remain unedited. Annotation state stays distinct from machine evidence. |
 | `labeling.py` | Blind review and guarded label import | Machine proposals are never represented as independent human ground truth. |
@@ -222,3 +223,5 @@ The preferred sequence is:
   artifacts with representation-specific verification.
 - [`ADR-0004`](docs/adr/0004-community-evolution-model.md): workstreams,
   vertical slices, and release gates for community evolution.
+- [`ADR-0006`](docs/adr/0006-portable-operator-lowering.md): a declared subset
+  of trusted operator sources can drive symbolic and callable lanes.

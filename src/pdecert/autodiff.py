@@ -114,8 +114,24 @@ class AutodiffEvaluation:
         except KeyError as error:
             raise KeyError(f"unknown candidate field: {name}") from error
 
+    def constant(self, value):
+        """Broadcast a scalar through the current tensor backend and point batch."""
+
+        return self._torch.zeros_like(self.coordinate(self._variables[0])) + value
+
     def derivative(self, field_name: str, variable: str, *, order: int = 1):
         """Differentiate a field with respect to a coordinate using autograd."""
+
+        return self.derivative_value(self.field(field_name), variable, order=order)
+
+    def derivative_value(self, value, variable: str, *, order: int = 1):
+        """Differentiate an evaluated expression with respect to a coordinate.
+
+        This is the expression-level counterpart to :meth:`derivative`. It lets
+        a restricted operator compiler evaluate terms such as ``D(u * v, x)``
+        without teaching the compiler about a particular neural-network type.
+        The same pointwise-candidate restriction applies.
+        """
 
         if not isinstance(order, int) or order < 1:
             raise ValueError("derivative order must be a positive integer")
@@ -124,7 +140,9 @@ class AutodiffEvaluation:
         except ValueError as error:
             raise KeyError(f"unknown coordinate: {variable}") from error
 
-        derivative = self.field(field_name)
+        derivative = value
+        if not self._torch.is_tensor(derivative):
+            derivative = self.constant(derivative)
         for _ in range(order):
             if not derivative.requires_grad:
                 return self._torch.zeros_like(derivative)

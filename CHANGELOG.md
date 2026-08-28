@@ -4,6 +4,13 @@ All notable changes to PDECert are documented here.
 
 ## Unreleased
 
+### Added
+
+- A restricted compiler from retained version 3 operator sources to PyTorch
+  automatic-differentiation problems, with explicit parameter and boundary
+  limitations, composite-expression derivatives, tests, and a single-source
+  heat example.
+
 ## 0.1.1rc1 - 2026-08-27
 
 ### Changed
