@@ -10,13 +10,15 @@ import math
 import signal
 import threading
 from collections.abc import Callable, Iterable, Mapping
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from enum import Enum
 from itertools import product
 from typing import TYPE_CHECKING, TypeVar
 
 import mpmath
 import sympy as sp
+
+from .evidence import EvidenceEvent, EvidenceLevel, Witness
 
 if TYPE_CHECKING:
     from .artifacts import SolutionArtifact, SymbolicCandidate
@@ -25,6 +27,8 @@ if TYPE_CHECKING:
 
 
 _Result = TypeVar("_Result")
+REPORT_VERSION = 1
+AGGREGATION_POLICY_VERSION = 1
 PARAMETER_ASSUMPTIONS = frozenset(
     {"integer", "negative", "nonnegative", "nonpositive", "nonzero", "positive"}
 )
@@ -44,14 +48,6 @@ class Status(str, Enum):
     PROVED = "PROVED"
     REFUTED = "REFUTED"
     INCONCLUSIVE = "INCONCLUSIVE"
-
-
-class EvidenceLevel(str, Enum):
-    """Mathematical strength supporting a decisive verification outcome."""
-
-    EXACT = "EXACT"
-    RIGOROUS_BOUND = "RIGOROUS_BOUND"
-    EMPIRICAL = "EMPIRICAL"
 
 
 @dataclass(frozen=True)
@@ -115,16 +111,6 @@ class Problem:
                 raise ValueError(f"domain for integer parameter {parameter} contains no integers")
 
 
-@dataclass(frozen=True)
-class Witness:
-    """A concrete reason why a candidate was refuted."""
-
-    constraint: str
-    point: dict[str, float | str]
-    residual: float | str
-    reason: str
-
-
 @dataclass
 class Report:
     """Machine-readable result returned by :func:`verify`."""
@@ -135,16 +121,32 @@ class Report:
     incomplete_reasons: dict[str, str] = field(default_factory=dict)
     witness: Witness | None = None
     max_sampled_residual: float = 0.0
+    evidence_events: list[EvidenceEvent] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        if math.isnan(self.max_sampled_residual) or self.max_sampled_residual < 0:
+            raise ValueError("max_sampled_residual must be nonnegative and not NaN")
 
     def to_dict(self) -> dict[str, object]:
         """Return a JSON-serializable representation."""
 
-        payload = asdict(self)
-        payload["status"] = self.status.value
-        payload["decision_evidence"] = (
-            self.decision_evidence.value if self.decision_evidence is not None else None
-        )
-        return payload
+        return {
+            "report_version": REPORT_VERSION,
+            "aggregation_policy_version": AGGREGATION_POLICY_VERSION,
+            "status": self.status.value,
+            "decision_evidence": (
+                self.decision_evidence.value if self.decision_evidence is not None else None
+            ),
+            "exact_checks": dict(self.exact_checks),
+            "incomplete_reasons": dict(self.incomplete_reasons),
+            "witness": self.witness.to_dict() if self.witness is not None else None,
+            "max_sampled_residual": (
+                self.max_sampled_residual
+                if math.isfinite(self.max_sampled_residual)
+                else "infinity"
+            ),
+            "evidence_events": [event.to_dict() for event in self.evidence_events],
+        }
 
 
 def _is_zero(expr: sp.Expr) -> bool | None:

@@ -24,6 +24,10 @@ Every decisive report also states its `decision_evidence`: `EXACT`,
 `RIGOROUS_BOUND`, or `EMPIRICAL`. Exact identities and future validated bounds
 may prove represented obligations. Floating-point and autodiff checks are
 empirical; they can expose a violation but cannot prove a passing candidate.
+Versioned reports also retain one `evidence_events` record per checked
+obligation so consumers can distinguish exact discharge, structured bounds,
+empirical counterexamples, sampled passes, and abstentions. See the
+[`report contract`](docs/evidence-reports.md).
 
 > [!IMPORTANT]
 > This is a research prototype, not a general theorem prover. The current
@@ -351,7 +355,9 @@ Verification stages implement a public `Checker` protocol and run through an
 ordered, immutable `CheckerRegistry`. Built-in and external checkers receive the
 same `CheckContext` and return partial evidence as a `CheckResult`. The
 orchestrator accepts proof evidence only for obligations already defined by the
-problem and requires a concrete witness for refutation.
+problem and requires a concrete witness for refutation. New checkers should
+attach an `EvidenceEvent` for each claimed proof, counterexample, sampled pass,
+or abstention; rigorous claims additionally require structured `BoundEvidence`.
 
 Registries are supplied explicitly so installing an unrelated package cannot
 silently change verification behavior:

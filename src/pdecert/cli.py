@@ -126,7 +126,7 @@ def _run_verify(arguments: argparse.Namespace) -> int:
         "report": report.to_dict(),
         "schema_version": SCHEMA_VERSION,
     }
-    rendered = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    rendered = json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"
     if arguments.output is None:
         print(rendered, end="")
     else:
