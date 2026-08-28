@@ -18,6 +18,9 @@ All notable changes to PDECert are documented here.
 - A separately versioned, candidate-free problem-template format with strict
   symbolic binding, direct callable lowering, CLI validation, a JSON schema,
   architecture decision, and a reproducible heat example.
+- A backend-neutral, digest-bound run-manifest format with path-safe bundle
+  validation, immutable evaluator configuration, CLI support, a JSON schema,
+  tamper tests, and a complete symbolic example bundle.
 
 ## 0.1.1rc1 - 2026-08-27
 

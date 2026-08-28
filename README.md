@@ -283,6 +283,23 @@ files are written as version 3.
 Candidate-free tasks use the separate version-1 template format rather than a
 partially populated case. This leaves existing case semantics unchanged.
 
+## Reproducible run bundles
+
+A versioned run manifest binds one problem template, candidate artifact,
+evaluator configuration, environment, and report by SHA-256. Validate the
+complete example from any checkout:
+
+```bash
+pdecert run validate examples/heat-run-manifest.json
+```
+
+The command detects changed or missing files, path traversal, invalid template
+semantics, candidate-field mismatch, and non-standard JSON reports. Its scope
+is deliberately `content_identity_only`: matching hashes do not establish
+authorship, trusted execution, or mathematical correctness. See the
+[`run-manifest guide`](docs/run-manifests.md) and
+[`ADR-0008`](docs/adr/0008-digest-bound-run-manifests.md).
+
 Named fields make coupled systems explicit:
 
 ```json

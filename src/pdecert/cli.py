@@ -12,6 +12,13 @@ from pathlib import Path
 
 from .corpus import CorpusError, load_atlas_coverage, load_corpus_source
 from .core import Status, verify
+from .manifests import (
+    INTEGRITY_SCOPE,
+    RUN_MANIFEST_VERSION,
+    RunManifestError,
+    run_manifest_sha256,
+    validate_run_bundle,
+)
 from .schema import SCHEMA_VERSION, SchemaError, load_case
 from .templates import TEMPLATE_VERSION, TemplateError, load_template
 
@@ -90,6 +97,12 @@ def _build_parser() -> argparse.ArgumentParser:
         "validate", help="validate a versioned problem template"
     )
     template_validate.add_argument("template", type=Path, help="path to a template JSON file")
+    run_parser = subcommands.add_parser("run", help="inspect digest-bound evaluation runs")
+    run_commands = run_parser.add_subparsers(dest="run_command", required=True)
+    run_validate = run_commands.add_parser(
+        "validate", help="validate a run manifest and all referenced files"
+    )
+    run_validate.add_argument("manifest", type=Path, help="path to a run manifest JSON file")
     return parser
 
 
@@ -201,6 +214,26 @@ def _run_template_validate(arguments: argparse.Namespace) -> int:
     return 0
 
 
+def _run_manifest_validate(arguments: argparse.Namespace) -> int:
+    try:
+        manifest = validate_run_bundle(arguments.manifest)
+    except (OSError, RunManifestError) as error:
+        print(f"pdecert: {error}", file=sys.stderr)
+        return INPUT_ERROR
+    summary = {
+        "artifact_id": manifest.candidate.artifact_id,
+        "artifact_kind": manifest.candidate.kind,
+        "evaluator": manifest.evaluator.name,
+        "integrity_scope": INTEGRITY_SCOPE,
+        "manifest_sha256": run_manifest_sha256(manifest),
+        "manifest_version": RUN_MANIFEST_VERSION,
+        "problem_id": manifest.problem_id,
+        "run_id": manifest.run_id,
+    }
+    print(json.dumps(summary, indent=2, sort_keys=True))
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the command-line interface and return a process exit code."""
 
@@ -212,6 +245,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run_corpus_validate(arguments)
     if arguments.command == "template" and arguments.template_command == "validate":
         return _run_template_validate(arguments)
+    if arguments.command == "run" and arguments.run_command == "validate":
+        return _run_manifest_validate(arguments)
     parser.error(f"unknown command: {arguments.command}")
     return INPUT_ERROR
 

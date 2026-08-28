@@ -112,6 +112,8 @@ Next:
   and PyTorch-callable evaluation without combining their evidence;
 - a versioned, candidate-free problem template with explicit symbolic binding,
   callable lowering, CLI validation, and unchanged case-schema compatibility;
+- a digest-bound run manifest for problem, candidate, evaluator configuration,
+  environment, and report identity across symbolic, callable, and agent lanes;
 - automatic-differentiation residual, initial-condition, and boundary-condition
   checks that conservatively abstain after sampled success;
 - adapters for common SymPy and symbolic-regression workflows;
