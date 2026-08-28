@@ -1,6 +1,6 @@
 # ADR-0003: Explicit decision-evidence levels
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-08-26
 **Decider:** Orestis Oikonomou
 
@@ -104,7 +104,7 @@ Option B preserves a common decision vocabulary while making the guarantee
 boundary explicit. It is deliberately smaller than a full proof-object format:
 the immediate goal is to prevent unsound evidence promotion before interval and
 weak-form backends arrive. Detailed bound objects and per-obligation provenance
-will require a versioned report schema.
+are defined by [`ADR-0009`](0009-versioned-evidence-reports.md).
 
 Adopting OpenMath immediately would address only part of representation
 interchange and would not solve branch cuts, weak semantics, resource limits, or
@@ -123,7 +123,8 @@ classical rectangular-domain expressions.
   decisions without pretending they are exact identities.
 - Existing consumers that require an exact report-key set must update for the
   added `decision_evidence` field.
-- Detailed per-obligation proof objects remain future work.
+- Detailed per-obligation evidence is serialized without removing the summary
+  fields introduced by this decision.
 
 ## Action items
 

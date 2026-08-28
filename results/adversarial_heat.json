@@ -8,7 +8,70 @@
     "pde_only_fixed_grid_accepts": true,
     "pde_only_max_residual": 0.0,
     "pdecert": {
+      "aggregation_policy_version": 1,
       "decision_evidence": "EXACT",
+      "evidence_events": [
+        {
+          "bound": null,
+          "checker": "domain",
+          "detail": "symbolic singularity analysis found no enumerated point in the domain",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "domain:candidate[0]:x",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "domain",
+          "detail": "symbolic singularity analysis found no enumerated point in the domain",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "domain:candidate[0]:t",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:0",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:1",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:2",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:3",
+          "outcome": "DISCHARGED",
+          "witness": null
+        }
+      ],
       "exact_checks": {
         "heat PDE": "identity",
         "initial condition": "identity",
@@ -17,6 +80,7 @@
       },
       "incomplete_reasons": {},
       "max_sampled_residual": 0.0,
+      "report_version": 1,
       "status": "PROVED",
       "witness": null
     },
@@ -31,7 +95,70 @@
     "pde_only_fixed_grid_accepts": true,
     "pde_only_max_residual": 0.0,
     "pdecert": {
+      "aggregation_policy_version": 1,
       "decision_evidence": "EXACT",
+      "evidence_events": [
+        {
+          "bound": null,
+          "checker": "domain",
+          "detail": "symbolic singularity analysis found no enumerated point in the domain",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "domain:candidate[0]:x",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "domain",
+          "detail": "symbolic singularity analysis found no enumerated point in the domain",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "domain:candidate[0]:t",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:0",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:1",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:2",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:3",
+          "outcome": "DISCHARGED",
+          "witness": null
+        }
+      ],
       "exact_checks": {
         "heat PDE": "identity",
         "initial condition": "identity",
@@ -40,6 +167,7 @@
       },
       "incomplete_reasons": {},
       "max_sampled_residual": 0.0,
+      "report_version": 1,
       "status": "PROVED",
       "witness": null
     },
@@ -54,7 +182,97 @@
     "pde_only_fixed_grid_accepts": true,
     "pde_only_max_residual": 0.0,
     "pdecert": {
+      "aggregation_policy_version": 1,
       "decision_evidence": "EMPIRICAL",
+      "evidence_events": [
+        {
+          "bound": null,
+          "checker": "domain",
+          "detail": "symbolic singularity analysis found no enumerated point in the domain",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "domain:candidate[0]:x",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "domain",
+          "detail": "symbolic singularity analysis found no enumerated point in the domain",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "domain:candidate[0]:t",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:0",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic simplification did not decide",
+          "kind": "ABSTENTION",
+          "level": null,
+          "obligation_id": "constraint:1",
+          "outcome": "ABSTAINED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:2",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic check found a nonzero constant but this stage did not emit a replayable witness",
+          "kind": "ABSTENTION",
+          "level": null,
+          "obligation_id": "constraint:3",
+          "outcome": "ABSTAINED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "off_grid_counterexample",
+          "detail": "deterministic samples did not exceed tolerance; finite sampling cannot discharge the obligation (maximum 0)",
+          "kind": "EMPIRICAL_PASS",
+          "level": "EMPIRICAL",
+          "obligation_id": "constraint:0",
+          "outcome": "OBSERVED_PASS",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "off_grid_counterexample",
+          "detail": "deterministic sampling exceeded tolerance 1e-09",
+          "kind": "EMPIRICAL_COUNTEREXAMPLE",
+          "level": "EMPIRICAL",
+          "obligation_id": "constraint:1",
+          "outcome": "REFUTED",
+          "witness": {
+            "constraint": "initial condition",
+            "point": {
+              "x": 0.113
+            },
+            "reason": "off-grid evaluation found a violated obligation",
+            "residual": 0.011300000000000001
+          }
+        }
+      ],
       "exact_checks": {
         "heat PDE": "identity",
         "initial condition": "unknown",
@@ -62,9 +280,11 @@
         "right boundary": "nonzero"
       },
       "incomplete_reasons": {
-        "initial condition": "symbolic simplification did not decide"
+        "initial condition": "symbolic simplification did not decide",
+        "right boundary": "symbolic check found a nonzero constant but this stage did not emit a replayable witness"
       },
       "max_sampled_residual": 0.011300000000000001,
+      "report_version": 1,
       "status": "REFUTED",
       "witness": {
         "constraint": "initial condition",
@@ -86,7 +306,88 @@
     "pde_only_fixed_grid_accepts": true,
     "pde_only_max_residual": 0.0,
     "pdecert": {
+      "aggregation_policy_version": 1,
       "decision_evidence": "EMPIRICAL",
+      "evidence_events": [
+        {
+          "bound": null,
+          "checker": "domain",
+          "detail": "symbolic singularity analysis found no enumerated point in the domain",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "domain:candidate[0]:x",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "domain",
+          "detail": "symbolic singularity analysis found no enumerated point in the domain",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "domain:candidate[0]:t",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic simplification did not decide",
+          "kind": "ABSTENTION",
+          "level": null,
+          "obligation_id": "constraint:0",
+          "outcome": "ABSTAINED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:1",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:2",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:3",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "off_grid_counterexample",
+          "detail": "deterministic sampling exceeded tolerance 1e-09",
+          "kind": "EMPIRICAL_COUNTEREXAMPLE",
+          "level": "EMPIRICAL",
+          "obligation_id": "constraint:0",
+          "outcome": "REFUTED",
+          "witness": {
+            "constraint": "heat PDE",
+            "point": {
+              "t": 0.113,
+              "x": 0.113
+            },
+            "reason": "off-grid evaluation found a violated obligation",
+            "residual": 0.014570794765862793
+          }
+        }
+      ],
       "exact_checks": {
         "heat PDE": "unknown",
         "initial condition": "identity",
@@ -97,6 +398,7 @@
         "heat PDE": "symbolic simplification did not decide"
       },
       "max_sampled_residual": 0.014570794765862793,
+      "report_version": 1,
       "status": "REFUTED",
       "witness": {
         "constraint": "heat PDE",
@@ -119,10 +421,31 @@
     "pde_only_fixed_grid_accepts": true,
     "pde_only_max_residual": 0.0,
     "pdecert": {
+      "aggregation_policy_version": 1,
       "decision_evidence": "EXACT",
+      "evidence_events": [
+        {
+          "bound": null,
+          "checker": "domain",
+          "detail": "symbolic singularity analysis located a point in the domain",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "domain:candidate[0]:x",
+          "outcome": "REFUTED",
+          "witness": {
+            "constraint": "candidate[0] domain",
+            "point": {
+              "x": 0.3333333333333333
+            },
+            "reason": "candidate[0] has a singularity at x=1/3",
+            "residual": "undefined"
+          }
+        }
+      ],
       "exact_checks": {},
       "incomplete_reasons": {},
       "max_sampled_residual": 0.0,
+      "report_version": 1,
       "status": "REFUTED",
       "witness": {
         "constraint": "candidate[0] domain",
@@ -144,7 +467,99 @@
     "pde_only_fixed_grid_accepts": true,
     "pde_only_max_residual": 0.0,
     "pdecert": {
+      "aggregation_policy_version": 1,
       "decision_evidence": "EMPIRICAL",
+      "evidence_events": [
+        {
+          "bound": null,
+          "checker": "domain",
+          "detail": "symbolic singularity analysis found no enumerated point in the domain",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "domain:candidate[0]:x",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "domain",
+          "detail": "symbolic singularity analysis found no enumerated point in the domain",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "domain:candidate[0]:t",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "domain",
+          "detail": "symbolic singularity analysis found no enumerated point in the domain",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "domain:candidate[0]:k",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic simplification did not decide",
+          "kind": "ABSTENTION",
+          "level": null,
+          "obligation_id": "constraint:0",
+          "outcome": "ABSTAINED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:1",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:2",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:3",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "off_grid_counterexample",
+          "detail": "deterministic sampling exceeded tolerance 1e-09",
+          "kind": "EMPIRICAL_COUNTEREXAMPLE",
+          "level": "EMPIRICAL",
+          "obligation_id": "constraint:0",
+          "outcome": "REFUTED",
+          "witness": {
+            "constraint": "parametric heat PDE",
+            "point": {
+              "k": 0.2,
+              "t": 0.113,
+              "x": 0.113
+            },
+            "reason": "off-grid evaluation found a violated obligation",
+            "residual": 0.8997127239761694
+          }
+        }
+      ],
       "exact_checks": {
         "initial condition": "identity",
         "left boundary": "identity",
@@ -155,6 +570,7 @@
         "parametric heat PDE": "symbolic simplification did not decide"
       },
       "max_sampled_residual": 0.8997127239761694,
+      "report_version": 1,
       "status": "REFUTED",
       "witness": {
         "constraint": "parametric heat PDE",
@@ -178,7 +594,110 @@
     "pde_only_fixed_grid_accepts": true,
     "pde_only_max_residual": 2.25e-14,
     "pdecert": {
+      "aggregation_policy_version": 1,
       "decision_evidence": null,
+      "evidence_events": [
+        {
+          "bound": null,
+          "checker": "domain",
+          "detail": "symbolic singularity analysis found no enumerated point in the domain",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "domain:candidate[0]:x",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "domain",
+          "detail": "symbolic singularity analysis found no enumerated point in the domain",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "domain:candidate[0]:t",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic simplification did not decide",
+          "kind": "ABSTENTION",
+          "level": null,
+          "obligation_id": "constraint:0",
+          "outcome": "ABSTAINED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:1",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:2",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "exact_identity",
+          "detail": "symbolic zero-equivalence check established an identity",
+          "kind": "EXACT_CERTIFICATE",
+          "level": "EXACT",
+          "obligation_id": "constraint:3",
+          "outcome": "DISCHARGED",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "off_grid_counterexample",
+          "detail": "deterministic samples did not exceed tolerance; finite sampling cannot discharge the obligation (maximum 1.81744e-14)",
+          "kind": "EMPIRICAL_PASS",
+          "level": "EMPIRICAL",
+          "obligation_id": "constraint:0",
+          "outcome": "OBSERVED_PASS",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "off_grid_counterexample",
+          "detail": "deterministic samples did not exceed tolerance; finite sampling cannot discharge the obligation (maximum 0)",
+          "kind": "EMPIRICAL_PASS",
+          "level": "EMPIRICAL",
+          "obligation_id": "constraint:1",
+          "outcome": "OBSERVED_PASS",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "off_grid_counterexample",
+          "detail": "deterministic samples did not exceed tolerance; finite sampling cannot discharge the obligation (maximum 0)",
+          "kind": "EMPIRICAL_PASS",
+          "level": "EMPIRICAL",
+          "obligation_id": "constraint:2",
+          "outcome": "OBSERVED_PASS",
+          "witness": null
+        },
+        {
+          "bound": null,
+          "checker": "off_grid_counterexample",
+          "detail": "deterministic samples did not exceed tolerance; finite sampling cannot discharge the obligation (maximum 0)",
+          "kind": "EMPIRICAL_PASS",
+          "level": "EMPIRICAL",
+          "obligation_id": "constraint:3",
+          "outcome": "OBSERVED_PASS",
+          "witness": null
+        }
+      ],
       "exact_checks": {
         "heat PDE": "unknown",
         "initial condition": "identity",
@@ -189,6 +708,7 @@
         "heat PDE": "symbolic simplification did not decide"
       },
       "max_sampled_residual": 1.817439e-14,
+      "report_version": 1,
       "status": "INCONCLUSIVE",
       "witness": null
     },

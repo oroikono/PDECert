@@ -61,7 +61,9 @@ be copied into new modules.
 
 | Module | Responsibility | Extension rule |
 | --- | --- | --- |
-| `core.py` | Conservative statuses, symbolic problem types, witnesses, reports, and legacy verification entry point | Keep small. Changes affect every backend and require soundness-focused tests. |
+| `core.py` | Conservative statuses, symbolic problem types, report summary, and legacy verification entry point | Keep small. Changes affect every backend and require soundness-focused tests. |
+| `evidence.py` | Typed obligation evidence, witnesses, and rigorous-bound scope | Keep evidence kinds scientifically distinct and strict-JSON serializable. |
+| `reports.py` | Strict loading and deterministic dumping of versioned evidence reports | Reject unknown versions and inconsistent evidence; preserve conservative summaries. |
 | `artifacts.py` | Representation-neutral candidate identity plus concrete artifact types | Add an artifact only after its native evaluation semantics are understood. |
 | `checks.py` | Symbolic checker protocol, registry, built-in checks, and evidence aggregation | New symbolic methods implement `Checker`; they do not add branches to the orchestrator. |
 | `autodiff.py` | Callable problem description and PyTorch residual evaluation | Keep PyTorch optional and sampled success inconclusive. |
@@ -231,3 +233,5 @@ The preferred sequence is:
   problem templates are serialized independently from candidate artifacts.
 - [`ADR-0008`](docs/adr/0008-digest-bound-run-manifests.md): evaluation runs
   bind problem, candidate, evaluator, and report bytes without upgrading evidence.
+- [`ADR-0009`](docs/adr/0009-versioned-evidence-reports.md): reports expose
+  versioned, obligation-level evidence while retaining compatibility summaries.

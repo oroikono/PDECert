@@ -46,9 +46,10 @@ from .checks import (
 )
 from .compiler import OperatorCompileError, compile_autodiff_problem
 from .core import (
+    AGGREGATION_POLICY_VERSION,
     PARAMETER_ASSUMPTIONS,
+    REPORT_VERSION,
     Constraint,
-    EvidenceLevel,
     Problem,
     Report,
     Status,
@@ -56,6 +57,21 @@ from .core import (
     fixed_collocation_check,
     verify,
     verify_artifact,
+)
+from .evidence import (
+    BoundEvidence,
+    BoundType,
+    EvidenceEvent,
+    EvidenceKind,
+    EvidenceLevel,
+    EvidenceOutcome,
+)
+from .reports import (
+    ReportSchemaError,
+    dump_report,
+    evidence_event_from_dict,
+    load_report,
+    report_from_dict,
 )
 from .corpus import (
     ANNOTATION_STATUSES,
@@ -139,6 +155,7 @@ from .templates import (
 )
 
 __all__ = [
+    "AGGREGATION_POLICY_VERSION",
     "AGENT_TOOL_VERSION",
     "ANNOTATION_STATUSES",
     "ARTIFACT_TYPES",
@@ -152,6 +169,8 @@ __all__ = [
     "ATLAS_VERSION",
     "BENCHMARK_VERSION",
     "BenchmarkError",
+    "BoundEvidence",
+    "BoundType",
     "CallableCandidate",
     "CandidateReference",
     "CLASSICAL_STRONG",
@@ -165,6 +184,9 @@ __all__ = [
     "Constraint",
     "CorpusError",
     "EvidenceLevel",
+    "EvidenceEvent",
+    "EvidenceKind",
+    "EvidenceOutcome",
     "EvaluatorReference",
     "FAILURE_MODES",
     "FileReference",
@@ -189,8 +211,10 @@ __all__ = [
     "ProgramSandbox",
     "REVIEW_VERSION",
     "RELEASE_VERSION",
+    "REPORT_VERSION",
     "RUN_MANIFEST_VERSION",
     "Report",
+    "ReportSchemaError",
     "ReviewError",
     "RunManifest",
     "RunManifestError",
@@ -223,6 +247,7 @@ __all__ = [
     "build_release_bundle",
     "build_run_manifest",
     "dump_case",
+    "dump_report",
     "dump_run_manifest",
     "dump_template",
     "dump_atlas",
@@ -235,6 +260,7 @@ __all__ = [
     "default_autodiff_checker_registry",
     "fixed_collocation_check",
     "load_case",
+    "load_report",
     "load_run_manifest",
     "load_template",
     "load_atlas",
@@ -248,6 +274,8 @@ __all__ = [
     "run_checks",
     "run_manifest_sha256",
     "summarize_agent_runs",
+    "evidence_event_from_dict",
+    "report_from_dict",
     "template_from_case",
     "template_from_dict",
     "template_to_dict",

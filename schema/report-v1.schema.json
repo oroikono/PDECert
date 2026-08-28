@@ -1,0 +1,245 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/oroikono/PDECert/blob/main/schema/report-v1.schema.json",
+  "title": "PDECert decision report version 1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "report_version",
+    "aggregation_policy_version",
+    "status",
+    "decision_evidence",
+    "exact_checks",
+    "incomplete_reasons",
+    "witness",
+    "max_sampled_residual",
+    "evidence_events"
+  ],
+  "properties": {
+    "report_version": {"const": 1},
+    "aggregation_policy_version": {"const": 1},
+    "status": {"enum": ["PROVED", "REFUTED", "INCONCLUSIVE"]},
+    "decision_evidence": {
+      "type": ["string", "null"],
+      "enum": ["EXACT", "RIGOROUS_BOUND", "EMPIRICAL", null]
+    },
+    "exact_checks": {
+      "type": "object",
+      "additionalProperties": {"type": "string", "minLength": 1}
+    },
+    "incomplete_reasons": {
+      "type": "object",
+      "additionalProperties": {"type": "string", "minLength": 1}
+    },
+    "witness": {
+      "oneOf": [
+        {"$ref": "#/$defs/witness"},
+        {"type": "null"}
+      ]
+    },
+    "max_sampled_residual": {
+      "oneOf": [
+        {"type": "number", "minimum": 0},
+        {"const": "infinity"}
+      ]
+    },
+    "evidence_events": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/evidence_event"}
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "PROVED"}}},
+      "then": {
+        "properties": {
+          "decision_evidence": {"enum": ["EXACT", "RIGOROUS_BOUND"]},
+          "witness": {"type": "null"},
+          "evidence_events": {
+            "contains": {
+              "type": "object",
+              "properties": {"outcome": {"const": "DISCHARGED"}},
+              "required": ["outcome"]
+            },
+            "minContains": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "REFUTED"}}},
+      "then": {
+        "properties": {
+          "decision_evidence": {"enum": ["EXACT", "EMPIRICAL"]},
+          "witness": {"$ref": "#/$defs/witness"},
+          "evidence_events": {
+            "contains": {
+              "type": "object",
+              "properties": {"outcome": {"const": "REFUTED"}},
+              "required": ["outcome"]
+            },
+            "minContains": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "INCONCLUSIVE"}}},
+      "then": {
+        "properties": {
+          "decision_evidence": {"type": "null"},
+          "witness": {"type": "null"}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "witness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["constraint", "point", "residual", "reason"],
+      "properties": {
+        "constraint": {"type": "string", "minLength": 1},
+        "point": {
+          "type": "object",
+          "additionalProperties": {"type": ["number", "string"]}
+        },
+        "residual": {"type": ["number", "string"]},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    },
+    "bound": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bound_type",
+        "quantity",
+        "upper_bound",
+        "norm",
+        "scope",
+        "assumptions",
+        "constants"
+      ],
+      "properties": {
+        "bound_type": {
+          "enum": ["UNIFORM_RESIDUAL", "BOUNDARY_TRACE", "SOLUTION_ERROR", "OTHER"]
+        },
+        "quantity": {"type": "string", "minLength": 1},
+        "upper_bound": {"type": "number", "minimum": 0},
+        "norm": {"type": "string", "minLength": 1},
+        "scope": {"type": "string", "minLength": 1},
+        "assumptions": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "constants": {
+          "type": "object",
+          "additionalProperties": {"type": ["number", "string"]}
+        }
+      }
+    },
+    "evidence_event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "obligation_id",
+        "checker",
+        "kind",
+        "outcome",
+        "level",
+        "detail",
+        "witness",
+        "bound"
+      ],
+      "properties": {
+        "obligation_id": {"type": "string", "minLength": 1},
+        "checker": {"type": "string", "minLength": 1},
+        "kind": {
+          "enum": [
+            "EXACT_CERTIFICATE",
+            "RIGOROUS_BOUND",
+            "EMPIRICAL_COUNTEREXAMPLE",
+            "EMPIRICAL_PASS",
+            "ABSTENTION"
+          ]
+        },
+        "outcome": {
+          "enum": ["DISCHARGED", "REFUTED", "OBSERVED_PASS", "ABSTAINED"]
+        },
+        "level": {
+          "type": ["string", "null"],
+          "enum": ["EXACT", "RIGOROUS_BOUND", "EMPIRICAL", null]
+        },
+        "detail": {"type": "string", "minLength": 1},
+        "witness": {
+          "oneOf": [
+            {"$ref": "#/$defs/witness"},
+            {"type": "null"}
+          ]
+        },
+        "bound": {
+          "oneOf": [
+            {"$ref": "#/$defs/bound"},
+            {"type": "null"}
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "EXACT_CERTIFICATE"}}},
+          "then": {
+            "properties": {
+              "level": {"const": "EXACT"},
+              "outcome": {"enum": ["DISCHARGED", "REFUTED"]},
+              "bound": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"kind": {"const": "RIGOROUS_BOUND"}}},
+          "then": {
+            "properties": {
+              "level": {"const": "RIGOROUS_BOUND"},
+              "outcome": {"const": "DISCHARGED"},
+              "witness": {"type": "null"},
+              "bound": {"$ref": "#/$defs/bound"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"kind": {"const": "EMPIRICAL_COUNTEREXAMPLE"}}},
+          "then": {
+            "properties": {
+              "level": {"const": "EMPIRICAL"},
+              "outcome": {"const": "REFUTED"},
+              "witness": {"$ref": "#/$defs/witness"},
+              "bound": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"kind": {"const": "EMPIRICAL_PASS"}}},
+          "then": {
+            "properties": {
+              "level": {"const": "EMPIRICAL"},
+              "outcome": {"const": "OBSERVED_PASS"},
+              "witness": {"type": "null"},
+              "bound": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"kind": {"const": "ABSTENTION"}}},
+          "then": {
+            "properties": {
+              "level": {"type": "null"},
+              "outcome": {"const": "ABSTAINED"},
+              "witness": {"type": "null"},
+              "bound": {"type": "null"}
+            }
+          }
+        }
+      ]
+    }
+  }
+}

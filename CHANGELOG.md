@@ -8,9 +8,14 @@ All notable changes to PDECert are documented here.
 
 - Runtime version reporting now comes from installed package metadata, keeping
   `pdecert.__version__` aligned with wheel and source-distribution versions.
+- Exact third-party checkers retain compatibility through synthesized evidence
+  events, while rigorous-bound claims now require machine-readable quantity,
+  scope, assumptions, and constants.
 
 ### Added
 
+- A versioned decision-report contract with obligation-level exact, rigorous,
+  empirical, and abstention events, strict JSON loading, and a canonical schema.
 - A restricted compiler from retained version 3 operator sources to PyTorch
   automatic-differentiation problems, with explicit parameter and boundary
   limitations, composite-expression derivatives, tests, and a single-source

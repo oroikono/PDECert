@@ -10,7 +10,8 @@ from typing import ClassVar
 
 from .artifacts import CallableCandidate
 from .checks import CheckResult, CheckerRegistry, run_checks
-from .core import EvidenceLevel, Report, Witness
+from .core import Report
+from .evidence import EvidenceEvent, EvidenceKind, EvidenceLevel, EvidenceOutcome, Witness
 
 
 @dataclass(frozen=True)
@@ -192,8 +193,10 @@ class AutodiffResidualChecker:
         dtype, device = _resolve_tensor_options(torch, context.artifact)
         max_residual = 0.0
         incomplete: dict[str, str] = {}
+        evidence: list[EvidenceEvent] = []
 
-        for constraint in context.constraints:
+        for constraint_index, constraint in enumerate(context.constraints):
+            obligation_id = f"constraint:{constraint_index}"
             try:
                 points = _sample_points(
                     torch,
@@ -223,47 +226,96 @@ class AutodiffResidualChecker:
                 finite = torch.isfinite(absolute)
                 if not bool(torch.all(finite)):
                     index = int(torch.nonzero(~finite, as_tuple=False)[0, 0])
+                    witness = _witness(
+                        context.problem,
+                        constraint,
+                        points,
+                        index,
+                        "undefined",
+                        "automatic differentiation produced a non-finite residual",
+                    )
+                    evidence.append(
+                        EvidenceEvent(
+                            obligation_id=obligation_id,
+                            checker=self.name,
+                            kind=EvidenceKind.EMPIRICAL_COUNTEREXAMPLE,
+                            outcome=EvidenceOutcome.REFUTED,
+                            level=EvidenceLevel.EMPIRICAL,
+                            detail="sampled automatic differentiation produced a non-finite value",
+                            witness=witness,
+                        )
+                    )
                     return CheckResult(
-                        witness=_witness(
-                            context.problem,
-                            constraint,
-                            points,
-                            index,
-                            "undefined",
-                            "automatic differentiation produced a non-finite residual",
-                        ),
+                        witness=witness,
                         witness_level=EvidenceLevel.EMPIRICAL,
                         max_sampled_residual=float("inf"),
+                        evidence_events=tuple(evidence),
                     )
                 value, index_tensor = torch.max(absolute.reshape(-1), dim=0)
                 sampled_max = float(value.item())
                 index = int(index_tensor.item())
                 max_residual = max(max_residual, sampled_max)
                 if sampled_max > context.tolerance:
+                    witness = _witness(
+                        context.problem,
+                        constraint,
+                        points,
+                        index,
+                        sampled_max,
+                        "automatic differentiation found a violated obligation",
+                    )
+                    evidence.append(
+                        EvidenceEvent(
+                            obligation_id=obligation_id,
+                            checker=self.name,
+                            kind=EvidenceKind.EMPIRICAL_COUNTEREXAMPLE,
+                            outcome=EvidenceOutcome.REFUTED,
+                            level=EvidenceLevel.EMPIRICAL,
+                            detail=(
+                                f"sampled autodiff residual exceeded tolerance {context.tolerance:g}"
+                            ),
+                            witness=witness,
+                        )
+                    )
                     return CheckResult(
-                        witness=_witness(
-                            context.problem,
-                            constraint,
-                            points,
-                            index,
-                            sampled_max,
-                            "automatic differentiation found a violated obligation",
-                        ),
+                        witness=witness,
                         witness_level=EvidenceLevel.EMPIRICAL,
                         max_sampled_residual=max_residual,
+                        evidence_events=tuple(evidence),
                     )
-                incomplete[constraint.name] = (
+                reason = (
                     "automatic-differentiation samples passed; finite sampling cannot prove "
                     "the obligation"
                 )
+                incomplete[constraint.name] = reason
+                evidence.append(
+                    EvidenceEvent(
+                        obligation_id=obligation_id,
+                        checker=self.name,
+                        kind=EvidenceKind.EMPIRICAL_PASS,
+                        outcome=EvidenceOutcome.OBSERVED_PASS,
+                        level=EvidenceLevel.EMPIRICAL,
+                        detail=f"{reason} (maximum {sampled_max:g})",
+                    )
+                )
             except Exception as error:
-                incomplete[constraint.name] = (
-                    f"automatic-differentiation check raised {type(error).__name__}: {error}"
+                reason = f"automatic-differentiation check raised {type(error).__name__}: {error}"
+                incomplete[constraint.name] = reason
+                evidence.append(
+                    EvidenceEvent(
+                        obligation_id=obligation_id,
+                        checker=self.name,
+                        kind=EvidenceKind.ABSTENTION,
+                        outcome=EvidenceOutcome.ABSTAINED,
+                        level=None,
+                        detail=reason,
+                    )
                 )
 
         return CheckResult(
             incomplete_reasons=incomplete,
             max_sampled_residual=max_residual,
+            evidence_events=tuple(evidence),
         )
 
 

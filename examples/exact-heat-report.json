@@ -1,7 +1,70 @@
 {
   "problem": "heat equation",
   "report": {
+    "aggregation_policy_version": 1,
     "decision_evidence": "EXACT",
+    "evidence_events": [
+      {
+        "bound": null,
+        "checker": "domain",
+        "detail": "symbolic singularity analysis found no enumerated point in the domain",
+        "kind": "EXACT_CERTIFICATE",
+        "level": "EXACT",
+        "obligation_id": "domain:u:x",
+        "outcome": "DISCHARGED",
+        "witness": null
+      },
+      {
+        "bound": null,
+        "checker": "domain",
+        "detail": "symbolic singularity analysis found no enumerated point in the domain",
+        "kind": "EXACT_CERTIFICATE",
+        "level": "EXACT",
+        "obligation_id": "domain:u:t",
+        "outcome": "DISCHARGED",
+        "witness": null
+      },
+      {
+        "bound": null,
+        "checker": "exact_identity",
+        "detail": "symbolic zero-equivalence check established an identity",
+        "kind": "EXACT_CERTIFICATE",
+        "level": "EXACT",
+        "obligation_id": "constraint:0",
+        "outcome": "DISCHARGED",
+        "witness": null
+      },
+      {
+        "bound": null,
+        "checker": "exact_identity",
+        "detail": "symbolic zero-equivalence check established an identity",
+        "kind": "EXACT_CERTIFICATE",
+        "level": "EXACT",
+        "obligation_id": "constraint:1",
+        "outcome": "DISCHARGED",
+        "witness": null
+      },
+      {
+        "bound": null,
+        "checker": "exact_identity",
+        "detail": "symbolic zero-equivalence check established an identity",
+        "kind": "EXACT_CERTIFICATE",
+        "level": "EXACT",
+        "obligation_id": "constraint:2",
+        "outcome": "DISCHARGED",
+        "witness": null
+      },
+      {
+        "bound": null,
+        "checker": "exact_identity",
+        "detail": "symbolic zero-equivalence check established an identity",
+        "kind": "EXACT_CERTIFICATE",
+        "level": "EXACT",
+        "obligation_id": "constraint:3",
+        "outcome": "DISCHARGED",
+        "witness": null
+      }
+    ],
     "exact_checks": {
       "heat PDE": "identity",
       "initial condition": "identity",
@@ -10,6 +73,7 @@
     },
     "incomplete_reasons": {},
     "max_sampled_residual": 0.0,
+    "report_version": 1,
     "status": "PROVED",
     "witness": null
   }

@@ -4,11 +4,16 @@ import sympy as sp
 
 from examples.polynomial_checker import ExpandedPolynomialChecker
 from pdecert import (
+    BoundEvidence,
+    BoundType,
     CheckResult,
     CheckerError,
     CheckerRegistry,
     Constraint,
+    EvidenceEvent,
+    EvidenceKind,
     EvidenceLevel,
+    EvidenceOutcome,
     Problem,
     Status,
     Witness,
@@ -57,9 +62,49 @@ class RigorousBoundChecker:
     name = "rigorous_bound"
 
     def check(self, context):
+        evidence = tuple(
+            EvidenceEvent(
+                obligation_id=obligation,
+                checker=self.name,
+                kind=EvidenceKind.RIGOROUS_BOUND,
+                outcome=EvidenceOutcome.DISCHARGED,
+                level=EvidenceLevel.RIGOROUS_BOUND,
+                detail="test enclosure covers the declared obligation scope",
+                bound=BoundEvidence(
+                    bound_type=BoundType.OTHER,
+                    quantity="absolute obligation residual",
+                    upper_bound=0.0,
+                    norm="L_inf",
+                    scope="declared test domain",
+                    assumptions=("test checker supplies an exact zero enclosure",),
+                ),
+            )
+            for obligation in sorted(context.obligations)
+        )
         return CheckResult(
             proved_obligations=context.obligations,
             proof_level=EvidenceLevel.RIGOROUS_BOUND,
+            evidence_events=evidence,
+        )
+
+
+class BareRigorousBoundChecker:
+    name = "bare_rigorous_bound"
+
+    def check(self, context):
+        return CheckResult(
+            proved_obligations=context.obligations,
+            proof_level=EvidenceLevel.RIGOROUS_BOUND,
+        )
+
+
+class LegacyExactChecker:
+    name = "legacy_exact"
+
+    def check(self, context):
+        return CheckResult(
+            proved_obligations=context.obligations,
+            proof_level=EvidenceLevel.EXACT,
         )
 
 
@@ -151,6 +196,27 @@ class CheckerRegistryTests(unittest.TestCase):
         )
         self.assertEqual(report.status, Status.PROVED)
         self.assertEqual(report.decision_evidence, EvidenceLevel.RIGOROUS_BOUND)
+        self.assertTrue(report.evidence_events)
+        self.assertTrue(all(event.bound is not None for event in report.evidence_events))
+
+    def test_bare_rigorous_bound_is_rejected(self):
+        with self.assertRaisesRegex(CheckerError, "structured bound evidence"):
+            verify(
+                self.problem,
+                (self.x,),
+                checker_registry=CheckerRegistry((BareRigorousBoundChecker(),)),
+            )
+
+    def test_legacy_exact_checker_receives_compatibility_events(self):
+        report = verify(
+            self.problem,
+            (self.x,),
+            checker_registry=CheckerRegistry((LegacyExactChecker(),)),
+        )
+
+        self.assertIs(report.status, Status.PROVED)
+        self.assertEqual(len(report.evidence_events), len(self.problem.variables) + 1)
+        self.assertTrue(all("legacy checker" in event.detail for event in report.evidence_events))
 
     def test_witness_requires_an_evidence_level(self):
         with self.assertRaisesRegex(CheckerError, "witness without evidence level"):
@@ -181,6 +247,13 @@ class CheckerRegistryTests(unittest.TestCase):
         report = verify(problem, (self.x,), checker_registry=registry)
         self.assertEqual(report.status, Status.PROVED)
         self.assertEqual(report.exact_checks["expanded identity"], "identity")
+        self.assertTrue(
+            any(
+                event.checker == "expanded_polynomial_identity"
+                and event.kind is EvidenceKind.EXACT_CERTIFICATE
+                for event in report.evidence_events
+            )
+        )
 
     def test_checker_cannot_prove_an_unknown_obligation(self):
         registry = CheckerRegistry((UnknownObligationChecker(),))
