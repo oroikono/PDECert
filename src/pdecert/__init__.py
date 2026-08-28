@@ -42,6 +42,7 @@ from .checks import (
     default_checker_registry,
     run_checks,
 )
+from .compiler import OperatorCompileError, compile_autodiff_problem
 from .core import (
     PARAMETER_ASSUMPTIONS,
     Constraint,
@@ -138,6 +139,7 @@ __all__ = [
     "MatchedCase",
     "MatchedReport",
     "ORIGIN_KINDS",
+    "OperatorCompileError",
     "PARAMETER_ASSUMPTIONS",
     "PROGRAM_SOURCE_MAX_BYTES",
     "Problem",
@@ -172,6 +174,7 @@ __all__ = [
     "case_from_dict",
     "case_to_dict",
     "corpus_sha256",
+    "compile_autodiff_problem",
     "apply_review",
     "build_release_bundle",
     "dump_case",

@@ -108,6 +108,8 @@ Next:
   obligation scope;
 - a general solution-artifact protocol with symbolic and PyTorch-callable
   implementations;
+- a restricted compiler that reuses one trusted operator source for symbolic
+  and PyTorch-callable evaluation without combining their evidence;
 - automatic-differentiation residual, initial-condition, and boundary-condition
   checks that conservatively abstain after sampled success;
 - adapters for common SymPy and symbolic-regression workflows;

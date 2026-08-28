@@ -217,6 +217,28 @@ and a perturbed field that is refuted with a concrete point. See
 [`examples/autodiff_heat.py`](examples/autodiff_heat.py) and
 [`ADR-0002`](docs/adr/0002-general-solution-artifacts.md).
 
+### One operator source for symbolic and callable candidates
+
+Version 3 constraint expressions can also be compiled into an
+`AutodiffProblem`. This removes the handwritten duplicate between a trusted
+symbolic PDE specification and its callable residual operators:
+
+```python
+from pdecert import compile_autodiff_problem, load_case
+
+case = load_case("examples/exact_heat.json")
+callable_problem = compile_autodiff_problem(case)
+```
+
+The compiler translates the trusted operators, not the saved symbolic
+candidate. A separately trained PINN or other pointwise PyTorch field is still
+required. Its sampled success remains `INCONCLUSIVE`; exact evidence from the
+symbolic lane is never transferred to the callable artifact. The initial
+lowering is parameter-free and classical, and rejects ambiguous boundary
+surfaces or unsupported functions before model evaluation. See the
+[`portable operator lowering`](docs/operator-compiler.md) guide and
+[`examples/compiled_heat.py`](examples/compiled_heat.py).
+
 To evaluate multiple representations of the same mathematical problem without
 combining their evidence, use a [`MatchedCase`](docs/matched-cases.md). The
 [`matched heat example`](examples/matched_heat.py) keeps exact symbolic and
