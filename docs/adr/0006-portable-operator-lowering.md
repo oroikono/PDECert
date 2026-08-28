@@ -86,8 +86,8 @@ portable.
 2. [x] Support derivatives of composite pointwise expressions.
 3. [x] Test valid, refuted, and unsupported cases.
 4. [x] Publish one single-source symbolic/callable example.
-5. [ ] Add a stable, candidate-free problem-template serialization after two
-   independent integrations exercise the contract.
+5. [x] Add a stable, candidate-free problem-template serialization with
+   explicit symbolic binding and direct callable lowering.
 6. [ ] Evaluate a UFL import adapter for a narrow classical/variational subset.
 7. [ ] Define batched parameter semantics before lowering parameterized cases.
 

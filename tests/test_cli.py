@@ -97,6 +97,30 @@ class CommandLineTests(unittest.TestCase):
         self.assertEqual(exit_code, INPUT_ERROR)
         self.assertIn("does-not-exist.json", errors.getvalue())
 
+    def test_template_validate_prints_contract_summary(self):
+        output = io.StringIO()
+        with redirect_stdout(output):
+            exit_code = main(["template", "validate", "examples/heat-template.json"])
+
+        summary = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(summary["template_version"], 1)
+        self.assertEqual(summary["solution_semantics"], "classical_strong")
+        self.assertEqual(summary["field_names"], ["u"])
+        self.assertEqual(summary["pde_residuals"], 1)
+        self.assertEqual(summary["conditions"], 3)
+
+    def test_template_validate_returns_input_error_for_invalid_template(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "invalid-template.json"
+            path.write_text("{}")
+            errors = io.StringIO()
+            with redirect_stderr(errors):
+                exit_code = main(["template", "validate", str(path)])
+
+        self.assertEqual(exit_code, INPUT_ERROR)
+        self.assertIn("missing field", errors.getvalue())
+
     def test_non_finite_tolerance_is_rejected_by_argument_parser(self):
         errors = io.StringIO()
         with redirect_stderr(errors), self.assertRaises(SystemExit):

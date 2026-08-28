@@ -110,6 +110,8 @@ Next:
   implementations;
 - a restricted compiler that reuses one trusted operator source for symbolic
   and PyTorch-callable evaluation without combining their evidence;
+- a versioned, candidate-free problem template with explicit symbolic binding,
+  callable lowering, CLI validation, and unchanged case-schema compatibility;
 - automatic-differentiation residual, initial-condition, and boundary-condition
   checks that conservatively abstain after sampled success;
 - adapters for common SymPy and symbolic-regression workflows;

@@ -13,6 +13,7 @@ from pathlib import Path
 from .corpus import CorpusError, load_atlas_coverage, load_corpus_source
 from .core import Status, verify
 from .schema import SCHEMA_VERSION, SchemaError, load_case
+from .templates import TEMPLATE_VERSION, TemplateError, load_template
 
 
 EXIT_CODES = {
@@ -40,7 +41,7 @@ def _positive_integer(value: str) -> int:
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="pdecert",
-        description="Check a symbolic PDE candidate without treating sampling as proof.",
+        description="Evaluate PDE solution artifacts without treating sampling as proof.",
     )
     subcommands = parser.add_subparsers(dest="command", required=True)
     verify_parser = subcommands.add_parser("verify", help="verify one JSON case")
@@ -81,6 +82,14 @@ def _build_parser() -> argparse.ArgumentParser:
         type=Path,
         help="path to a corpus JSON file or modular atlas directory",
     )
+    template_parser = subcommands.add_parser(
+        "template", help="inspect candidate-free PDE problem templates"
+    )
+    template_commands = template_parser.add_subparsers(dest="template_command", required=True)
+    template_validate = template_commands.add_parser(
+        "validate", help="validate a versioned problem template"
+    )
+    template_validate.add_argument("template", type=Path, help="path to a template JSON file")
     return parser
 
 
@@ -172,6 +181,26 @@ def _run_corpus_validate(arguments: argparse.Namespace) -> int:
     return 0
 
 
+def _run_template_validate(arguments: argparse.Namespace) -> int:
+    try:
+        template = load_template(arguments.template)
+    except (OSError, TemplateError) as error:
+        print(f"pdecert: {error}", file=sys.stderr)
+        return INPUT_ERROR
+    summary = {
+        "conditions": len(template.conditions),
+        "field_names": list(template.field_names),
+        "name": template.name,
+        "parameters": {name: sorted(values) for name, values in template.parameters.items()},
+        "pde_residuals": len(template.pde_residuals),
+        "solution_semantics": template.solution_semantics,
+        "template_version": TEMPLATE_VERSION,
+        "variables": list(template.variables),
+    }
+    print(json.dumps(summary, indent=2, sort_keys=True))
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the command-line interface and return a process exit code."""
 
@@ -181,6 +210,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run_verify(arguments)
     if arguments.command == "corpus" and arguments.corpus_command == "validate":
         return _run_corpus_validate(arguments)
+    if arguments.command == "template" and arguments.template_command == "validate":
+        return _run_template_validate(arguments)
     parser.error(f"unknown command: {arguments.command}")
     return INPUT_ERROR
 
