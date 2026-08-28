@@ -121,6 +121,38 @@ class CommandLineTests(unittest.TestCase):
         self.assertEqual(exit_code, INPUT_ERROR)
         self.assertIn("missing field", errors.getvalue())
 
+    def test_run_validate_checks_the_complete_example_bundle(self):
+        output = io.StringIO()
+        with redirect_stdout(output):
+            exit_code = main(["run", "validate", "examples/heat-run-manifest.json"])
+
+        summary = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(summary["manifest_version"], 1)
+        self.assertEqual(summary["integrity_scope"], "content_identity_only")
+        self.assertEqual(summary["artifact_kind"], "symbolic")
+        self.assertEqual(summary["problem_id"], "heat-classical-01")
+        self.assertEqual(len(summary["manifest_sha256"]), 64)
+
+    def test_run_validate_returns_input_error_for_tampered_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in (
+                "heat-template.json",
+                "exact-heat-candidate.json",
+                "exact-heat-report.json",
+                "heat-run-manifest.json",
+            ):
+                (root / name).write_bytes((Path("examples") / name).read_bytes())
+            candidate = root / "exact-heat-candidate.json"
+            candidate.write_text(candidate.read_text().replace("sin(pi*x)", "0"))
+            errors = io.StringIO()
+            with redirect_stderr(errors):
+                exit_code = main(["run", "validate", str(root / "heat-run-manifest.json")])
+
+        self.assertEqual(exit_code, INPUT_ERROR)
+        self.assertIn("digest mismatch", errors.getvalue())
+
     def test_non_finite_tolerance_is_rejected_by_argument_parser(self):
         errors = io.StringIO()
         with redirect_stderr(errors), self.assertRaises(SystemExit):

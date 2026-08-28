@@ -1,0 +1,47 @@
+{
+  "candidate": {
+    "artifact_id": "exact-heat-expression-01",
+    "field_names": [
+      "u"
+    ],
+    "file": {
+      "path": "exact-heat-candidate.json",
+      "sha256": "4bcbc36a3f86a454365449efeea2ed8555b6acfc6c1893145fa51a688df34b24"
+    },
+    "kind": "symbolic",
+    "provenance": {
+      "method": "closed-form expression",
+      "producer": "PDECert maintainers",
+      "revision": "examples-v1"
+    }
+  },
+  "evaluator": {
+    "configuration": {
+      "max_expression_ops": 10000,
+      "samples_per_axis": 5,
+      "symbolic_timeout_seconds": 2.0,
+      "tolerance": 1e-09
+    },
+    "environment": {
+      "pdecert": "0.1.1rc1",
+      "python": "3.12",
+      "sympy": "1.14.0"
+    },
+    "name": "pdecert.symbolic",
+    "version": "0.1.1rc1"
+  },
+  "integrity_scope": "content_identity_only",
+  "manifest_version": 1,
+  "problem": {
+    "problem_id": "heat-classical-01",
+    "template": {
+      "path": "heat-template.json",
+      "sha256": "bcf7bd0828c50eed779d0c6bd553746f3d773a6025afb99c35bb1679b423709f"
+    }
+  },
+  "report": {
+    "path": "exact-heat-report.json",
+    "sha256": "1b4891a141aa031ef423c3fc013a2d273530361d8f3ecce8c1dbf080ce17136b"
+  },
+  "run_id": "heat-exact-symbolic-01"
+}

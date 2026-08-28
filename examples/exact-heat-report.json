@@ -1,0 +1,16 @@
+{
+  "problem": "heat equation",
+  "report": {
+    "decision_evidence": "EXACT",
+    "exact_checks": {
+      "heat PDE": "identity",
+      "initial condition": "identity",
+      "left boundary": "identity",
+      "right boundary": "identity"
+    },
+    "incomplete_reasons": {},
+    "max_sampled_residual": 0.0,
+    "status": "PROVED",
+    "witness": null
+  }
+}

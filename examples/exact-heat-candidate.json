@@ -1,0 +1,7 @@
+{
+  "artifact_version": 1,
+  "fields": {
+    "u": "exp(-pi**2*t)*sin(pi*x)"
+  },
+  "kind": "symbolic"
+}

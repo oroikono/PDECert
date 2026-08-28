@@ -72,6 +72,7 @@ be copied into new modules.
 | `labeling.py` | Blind review and guarded label import | Machine proposals are never represented as independent human ground truth. |
 | `benchmark.py` | Evaluator comparisons and aggregate metrics | Report abstention and failure, not only accuracy. |
 | `release.py` | Digest-bound public artifacts | Releases must rebuild deterministically from committed inputs. |
+| `manifests.py` | Digest-bound identity for one problem, candidate, evaluator, and report | Treat hashes as content integrity only; never infer correctness, authorship, or trusted execution. |
 | `cli.py` | Stable command behavior and machine-readable output | CLI exit codes and report fields are public contracts. |
 
 ## Public and experimental surfaces
@@ -228,3 +229,5 @@ The preferred sequence is:
   of trusted operator sources can drive symbolic and callable lanes.
 - [`ADR-0007`](docs/adr/0007-candidate-free-problem-templates.md): trusted
   problem templates are serialized independently from candidate artifacts.
+- [`ADR-0008`](docs/adr/0008-digest-bound-run-manifests.md): evaluation runs
+  bind problem, candidate, evaluator, and report bytes without upgrading evidence.

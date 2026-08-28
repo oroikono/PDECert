@@ -127,6 +127,13 @@ outputs separately. A new template-semantics value requires a faithful backend
 and its own architectural review. Do not label weak, entropy, or distributional
 problems as `classical_strong` to make them pass version-1 validation.
 
+Published evaluation runs should use the digest-bound contract in
+[`ADR-0008`](docs/adr/0008-digest-bound-run-manifests.md). Keep raw candidate
+artifacts, reports, and templates as separate files; do not edit a candidate to
+make its digest agree with a desired outcome. A digest establishes content
+identity only, so descriptions must not present manifest validation as proof,
+authorship, or trusted execution.
+
 ## Local setup
 
 ```bash
