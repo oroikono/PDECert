@@ -4,6 +4,11 @@ All notable changes to PDECert are documented here.
 
 ## Unreleased
 
+### Changed
+
+- Runtime version reporting now comes from installed package metadata, keeping
+  `pdecert.__version__` aligned with wheel and source-distribution versions.
+
 ### Added
 
 - A restricted compiler from retained version 3 operator sources to PyTorch
