@@ -65,6 +65,7 @@ include = [
   "/CITATION.cff",
   "/CONTRIBUTING.md",
   "/LICENSE",
+  "/LIMITATIONS_AND_THREATS_TO_VALIDITY.md",
   "/README.md",
   "/RELEASE.md",
   "/ROADMAP.md",

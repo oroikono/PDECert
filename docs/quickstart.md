@@ -35,4 +35,7 @@ as a release or installation smoke test.
 
 This command demonstrates the evidence contract, not broad PDE coverage or
 model quality. The exact result applies only to the represented classical
-strong-form obligations. The sampled pass is explicitly not a certificate.
+strong-form obligations. The sampled pass is explicitly not a certificate. See
+the project-wide
+[limitations and threats-to-validity statement](../LIMITATIONS_AND_THREATS_TO_VALIDITY.md)
+before using a report in an evaluation or publication.

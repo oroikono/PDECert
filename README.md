@@ -40,6 +40,12 @@ empirical counterexamples, sampled passes, and abstentions. See the
 > undecided obligation and returns `INCONCLUSIVE` unless another checker finds a
 > witness. See [ADR-0003](docs/adr/0003-decision-evidence-levels.md).
 
+The complete
+[limitations and threats-to-validity statement](LIMITATIONS_AND_THREATS_TO_VALIDITY.md)
+defines what each status establishes, unsupported mathematical semantics,
+security boundaries, and the claims that must not be inferred from the current
+pilot or trained fixture.
+
 ## Five-minute quickstart
 
 Install the release candidate and run the complete offline demonstration:
@@ -539,13 +545,14 @@ not a production sandbox backend. See the
 
 ## Current limits
 
-The prototype does not yet define weak or viscosity solution semantics. The CLI
-has a structural input-operation budget, but intermediate symbolic expressions
-still need enforceable memory limits. Stronger multivariate domain analysis,
-interval arithmetic, and supported a posteriori error bounds are also missing.
-Real-time symbolic deadlines are currently available only from the main thread
-on platforms that provide interval timers. When a check is incomplete, the
-intended behavior is `INCONCLUSIVE`.
+The prototype does not yet define weak or viscosity solution semantics. It has
+no built-in validated numerical backend, and callable sampled passes remain
+`INCONCLUSIVE`. The CLI has a structural input-operation budget, but
+intermediate symbolic expressions still need enforceable memory limits.
+Stronger multivariate domain analysis and supported a posteriori solution-error
+bounds are also missing. Read the full
+[limitations and threats-to-validity statement](LIMITATIONS_AND_THREATS_TO_VALIDITY.md)
+before interpreting a verifier or benchmark result.
 
 The next milestones are tracked in [ROADMAP.md](ROADMAP.md). The
 [architecture map](ARCHITECTURE.md) explains the package layers and contributor

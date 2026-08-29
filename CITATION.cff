@@ -6,7 +6,7 @@ authors:
   - family-names: "Oikonomou"
     given-names: "Orestis"
 version: 0.1.1rc2
-date-released: 2026-08-28
+date-released: 2026-08-29
 repository-code: "https://github.com/oroikono/PDECert"
 url: "https://github.com/oroikono/PDECert"
 license: MIT
