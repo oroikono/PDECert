@@ -4,7 +4,7 @@ All notable changes to PDECert are documented here.
 
 ## Unreleased
 
-## 0.1.1rc2 - 2026-08-29
+## 0.1.1rc2 - 2026-09-01
 
 ### Changed
 

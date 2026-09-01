@@ -4,10 +4,10 @@
 
 <h1 align="center">PDECert</h1>
 
-<p align="center"><strong>Proof-carrying PDE solutions.</strong></p>
+<p align="center"><strong>Evidence-carrying PDE solution artifacts.</strong></p>
 
-Machine-generated PDE solutions should come with a certificate or a concrete
-counterexample.
+Machine-generated PDE solution artifacts should come with explicit evidence, a
+concrete counterexample, or an honest abstention.
 
 PDECert is an extensible verification framework for symbolic expressions and
 differentiable callable fields. It checks the PDE residual together with initial

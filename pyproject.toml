@@ -13,7 +13,15 @@ license-files = ["LICENSE"]
 authors = [
   { name = "Orestis Oikonomou", email = "ooikonomou@ethz.ch" },
 ]
-keywords = ["partial-differential-equations", "scientific-machine-learning", "verification"]
+keywords = [
+  "ai-agents",
+  "large-language-models",
+  "partial-differential-equations",
+  "physics-informed-neural-networks",
+  "scientific-machine-learning",
+  "symbolic-computation",
+  "verification",
+]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",

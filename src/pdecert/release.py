@@ -327,6 +327,16 @@ from datasets import load_dataset
 pilot = load_dataset("oroikono/pdecert-pilot", split="test")
 ```
 
+## Relationship to the PDECert library
+
+This dataset is the frozen symbolic-only pilot released with PDECert 0.1.0.
+The current library also has separate differentiable callable/PINN and agent-
+trace paths, but those artifact types are not represented by these 20 rows and
+their evidence must not be inferred from this benchmark. Install the latest
+prerelease with `python -m pip install --pre pdecert` and read the
+[evidence contract](https://github.com/oroikono/PDECert/blob/main/LIMITATIONS_AND_THREATS_TO_VALIDITY.md)
+before interpreting a result.
+
 ## Benchmark
 
 | Method | Accuracy | False accept | False reject | Inconclusive | Invalid witness | Runtime |
