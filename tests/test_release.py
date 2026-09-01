@@ -93,6 +93,8 @@ class ReleaseTests(unittest.TestCase):
         self.assertIn("path: data/pilot.jsonl", card)
         self.assertIn("not a random or representative sample", card)
         self.assertIn("does not by itself settle every right", card)
+        self.assertIn("frozen symbolic-only pilot", card)
+        self.assertIn("LIMITATIONS_AND_THREATS_TO_VALIDITY.md", card)
         self.assertIn("| PDECert |", card)
         self.assertEqual(manifest["record_count"], 20)
         self.assertEqual(manifest["verdict_counts"], {"invalid": 10, "valid": 10})
