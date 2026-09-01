@@ -45,6 +45,12 @@ Before opening a pull request:
 4. Run `pytest` and `ruff check .` locally.
 5. State what the result proves, and what it does not prove.
 
+Update
+[`LIMITATIONS_AND_THREATS_TO_VALIDITY.md`](LIMITATIONS_AND_THREATS_TO_VALIDITY.md)
+when a change alters an accepted solution semantics, evidence level, security
+boundary, reproduction requirement, or benchmark claim. Adding a roadmap item
+does not make it a supported capability.
+
 ### Definition of done
 
 A behavior-changing pull request is complete when it includes:

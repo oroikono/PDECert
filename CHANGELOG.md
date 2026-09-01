@@ -4,7 +4,7 @@ All notable changes to PDECert are documented here.
 
 ## Unreleased
 
-## 0.1.1rc2 - 2026-08-28
+## 0.1.1rc2 - 2026-08-29
 
 ### Changed
 
@@ -16,6 +16,9 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- An explicit limitations and threats-to-validity contract covering decision
+  scope, unsupported mathematics, numerical and security boundaries, benchmark
+  validity, and publication requirements.
 - A deterministic `pdecert quickstart` command that demonstrates exact proof,
   empirical refutation, conservative abstention, and a recorded agent repair
   trace from clean wheel and source-distribution installs.
