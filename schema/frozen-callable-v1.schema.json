@@ -1,0 +1,208 @@
+{
+  "$id": "https://pdecert.org/schema/frozen-callable-v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Portable, non-executing CPU float64 dense-tanh callable artifact. Runtime validation additionally enforces architecture-dependent tensor names and shapes.",
+  "properties": {
+    "architecture": {
+      "additionalProperties": false,
+      "properties": {
+        "activation": {
+          "const": "tanh"
+        },
+        "dtype": {
+          "const": "float64"
+        },
+        "hidden_widths": {
+          "items": {
+            "maximum": 128,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "type": "array"
+        },
+        "input_names": {
+          "items": {
+            "$ref": "#/$defs/identifier"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "output_names": {
+          "items": {
+            "$ref": "#/$defs/identifier"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "type": {
+          "const": "dense_mlp"
+        }
+      },
+      "required": [
+        "activation",
+        "dtype",
+        "hidden_widths",
+        "input_names",
+        "output_names",
+        "type"
+      ],
+      "type": "object"
+    },
+    "artifact_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "trained_callable"
+    },
+    "problem_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "state_dict": {
+      "additionalProperties": false,
+      "maxProperties": 10,
+      "minProperties": 4,
+      "patternProperties": {
+        "^(0|2|4|6|8)\\.(bias|weight)$": {
+          "$ref": "#/$defs/tensor"
+        }
+      },
+      "type": "object"
+    },
+    "training": {
+      "additionalProperties": false,
+      "properties": {
+        "collocation": {
+          "type": "object"
+        },
+        "device": {
+          "const": "cpu"
+        },
+        "final_losses": {
+          "type": "object"
+        },
+        "generated_at": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "learning_rate": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "loss_weights": {
+          "type": "object"
+        },
+        "method": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "optimizer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "script": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "script_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "seed": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "steps": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "torch_version": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "collocation",
+        "device",
+        "final_losses",
+        "generated_at",
+        "learning_rate",
+        "loss_weights",
+        "method",
+        "optimizer",
+        "script",
+        "script_sha256",
+        "seed",
+        "steps",
+        "torch_version"
+      ],
+      "type": "object"
+    },
+    "weights_sha256": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "required": [
+    "architecture",
+    "artifact_id",
+    "artifact_kind",
+    "problem_id",
+    "schema_version",
+    "state_dict",
+    "training",
+    "weights_sha256"
+  ],
+  "title": "PDECert frozen callable artifact v1",
+  "type": "object",
+  "$defs": {
+    "identifier": {
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+      "type": "string"
+    },
+    "matrix": {
+      "items": {
+        "items": {
+          "type": "number"
+        },
+        "maxItems": 128,
+        "minItems": 1,
+        "type": "array"
+      },
+      "maxItems": 128,
+      "minItems": 1,
+      "type": "array"
+    },
+    "sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "tensor": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/vector"
+        },
+        {
+          "$ref": "#/$defs/matrix"
+        }
+      ]
+    },
+    "vector": {
+      "items": {
+        "type": "number"
+      },
+      "maxItems": 128,
+      "minItems": 1,
+      "type": "array"
+    }
+  }
+}

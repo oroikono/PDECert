@@ -136,12 +136,16 @@ pip install -e ".[dev,autodiff]"
 python -m examples.autodiff_heat
 python -m experiments.mixed_artifact_smoke
 python -m experiments.trained_burgers_pair
+python -m experiments.trained_fisher_kpp_pair
 ```
 
-The trained Burgers example pairs an exact symbolic traveling wave with a
-separately trained, frozen PINN stored as architecture-restricted JSON. Exact
-evidence remains confined to the symbolic lane; sampled callable checks can
-refute or abstain, never prove. See
+The trained Burgers and Fisher--KPP examples pair exact symbolic traveling waves
+with separately trained, frozen PINNs stored as architecture-restricted JSON.
+The Fisher--KPP run is intentionally informative: a low training loss does not
+prevent a held-out automatic-differentiation check from finding a concrete PDE
+violation. Exact evidence remains confined to each symbolic lane; sampled
+callable checks can refute or abstain, never prove. See the
+[`frozen-callable format`](docs/frozen-callables.md) and
 [`docs/trained-callable-pairs.md`](docs/trained-callable-pairs.md).
 
 The installed command accepts one versioned JSON case and prints a stable JSON

@@ -4,6 +4,17 @@ All notable changes to PDECert are documented here.
 
 ## Unreleased
 
+### Added
+
+- A portable versioned JSON contract for frozen CPU float64 dense-tanh
+  callables, including strict structural validation, immutable loading,
+  resource-bounded decoding, evaluation-only PyTorch materialization, portable
+  integrity records, schemas, tests, and contributor documentation.
+- A Fisher--KPP matched evaluation that preserves a Qwen3 symbolic proposal,
+  trains a separate PINN from PDE and trace targets, digest-binds the resulting
+  artifact and sources, and records the held-out empirical counterexample
+  without transferring exact symbolic evidence to the callable lane.
+
 ## 0.1.1rc2 - 2026-09-01
 
 ### Changed

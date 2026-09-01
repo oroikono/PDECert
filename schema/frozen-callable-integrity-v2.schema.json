@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdecert.org/schema/frozen-callable-integrity-v2.schema.json",
+  "title": "PDECert frozen callable integrity record v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_path",
+    "artifact_sha256",
+    "base_revision",
+    "configuration_sha256",
+    "training_run",
+    "source_files_sha256",
+    "weights_sha256"
+  ],
+  "properties": {
+    "schema_version": { "const": 2 },
+    "artifact_path": { "type": "string", "minLength": 1 },
+    "artifact_sha256": { "$ref": "#/$defs/sha256" },
+    "base_revision": { "type": "string", "minLength": 1 },
+    "configuration_sha256": { "$ref": "#/$defs/sha256" },
+    "training_run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["executor", "run_id"],
+      "properties": {
+        "executor": { "type": "string", "minLength": 1 },
+        "run_id": { "type": "string", "minLength": 1 }
+      }
+    },
+    "source_files_sha256": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 64,
+      "additionalProperties": { "$ref": "#/$defs/sha256" }
+    },
+    "weights_sha256": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

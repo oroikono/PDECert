@@ -1,0 +1,259 @@
+{
+  "evaluation": {
+    "callable_tolerance": 0.001,
+    "samples_per_axis": 6
+  },
+  "evidence_note": "Exact evidence applies only to the raw symbolic candidate after restricted binding. Callable sampling can refute the frozen PINN or remain inconclusive; it cannot prove a continuous-domain claim.",
+  "fixture": {
+    "artifact_id": "fisher-kpp-pinn-seed-20260901",
+    "configuration_sha256": "2919e8167296b8c92b840ec236ca589681c625e8f9251803c78709ee0f2a39bb",
+    "path": "benchmarks/matched/fisher-kpp-classical-01/pinn.json",
+    "sha256": "a76c387c7269b91088c0a1d1024fc7379311a2114da76a90c0146713871d9f9b",
+    "source_files_sha256": {
+      "benchmarks/matched/fisher-kpp-classical-01/template.json": "8d6248c31072d4bc7e109f697ce2637c00420683a68edab7ae99624bc1f6d4a6",
+      "corpus/community/records/qwen3-fisher-kpp-01/case.json": "44b91d46af6a5d723b56e60dbd88d8d4f81d560008d4d732731cea066cb5d12e",
+      "corpus/community/records/qwen3-fisher-kpp-01/raw-output.txt": "fd4496138199cf29b9b0d3a829fd7ffd7a986711664b19ac01788e3911653ef1",
+      "corpus/community/records/qwen3-fisher-kpp-01/record.json": "d326cb6de1d119ecbc3ba6ed57b8cffdd46391e6ca8d7d904ad7bed88a897d53",
+      "experiments/train_fisher_kpp_pinn.py": "9a397b413f8a3b160a46fee10151edf9ecfe1b971e348046ebbe7d93d95d586f",
+      "experiments/trained_fisher_kpp_pair.py": "e4f294824ce82854062d356f147185bb86e6411b3add46a21ef98bcf1d3d8ee0",
+      "schema/frozen-callable-integrity-v2.schema.json": "80722ac173fec9003448a4ad83772c1848d907ec1f658a7f2e72864116a206fe",
+      "schema/frozen-callable-v1.schema.json": "2b67b826442cc1e89ef2860d8678a148e4213fe5f0448547c41a7f9f217c9d67",
+      "src/pdecert/artifacts.py": "7fb4d000e1b63d6735334d931c38c900a99f63d6ce86a380db6801ca31dccc5d",
+      "src/pdecert/autodiff.py": "1df0767400cd5f4dc74f8dc96e1e5682c14097dd662eae4b33a526d9e24a77f7",
+      "src/pdecert/checks.py": "b7d0f3964eb8a3f957fa97cb039125f073a118ffb71358ee5ea2f220a4ca1d96",
+      "src/pdecert/compiler.py": "6f13df8ab355a1ce8978249715420f73531d6fb30a79684e22967ab739035138",
+      "src/pdecert/core.py": "5440d47c28d15838a8c89418da259bab2381ba7d947e517dec4318575fd61b72",
+      "src/pdecert/evidence.py": "2650c88b9e39d7eaa1a82ac552137520362117eb9f08aecfaef7adc619b9c1b8",
+      "src/pdecert/frozen_callable.py": "6dc5d65b89de37870f0052479b86b00f998511e95726ae2dd6ae9a2c566e5452",
+      "src/pdecert/matched.py": "affac12ddf92b9e84f8789f5955240257b116de489af9549757bbde1a8ca2f5e",
+      "src/pdecert/schema.py": "71d6aa1c219b62d04ef137422bc5cbf0f50e0c1ce6606ea892f89e2a64efe533",
+      "src/pdecert/templates.py": "ff17fcfc8084319f4155322dd8c2565bbdef42aa2bcfcf7bf2f9028818144978"
+    },
+    "training": {
+      "collocation": {
+        "initial_points": 33,
+        "interior_exact_values": false,
+        "pde_grid": {
+          "t_points": 17,
+          "x_points": 17
+        },
+        "points_per_boundary": 33,
+        "targets": [
+          "pde",
+          "initial",
+          "left_boundary",
+          "right_boundary"
+        ]
+      },
+      "device": "cpu",
+      "final_losses": {
+        "boundary_mse": 5.485389619365647e-07,
+        "initial_mse": 5.569838543575174e-07,
+        "pde_mse": 1.6716761366198346e-05,
+        "weighted_total": 2.7771989529139166e-05
+      },
+      "generated_at": "2026-09-01T05:27:19.559159+00:00",
+      "learning_rate": 0.003,
+      "loss_weights": {
+        "boundary": 10.0,
+        "initial": 10.0,
+        "pde": 1.0
+      },
+      "method": "physics_informed_collocation",
+      "optimizer": "Adam",
+      "script": "experiments/train_fisher_kpp_pinn.py",
+      "script_sha256": "9a397b413f8a3b160a46fee10151edf9ecfe1b971e348046ebbe7d93d95d586f",
+      "seed": 20260901,
+      "steps": 3000,
+      "torch_version": "2.13.0"
+    },
+    "weights_sha256": "c9fba1de62e5be56b1e6da6c4823cf3f800aac61968e89f44b208aa29c896320"
+  },
+  "matched_report": {
+    "case_id": "fisher-kpp-classical-01",
+    "coordinate_names": [
+      "x",
+      "t"
+    ],
+    "field_names": [
+      "u"
+    ],
+    "lanes": [
+      {
+        "artifact_kind": "symbolic",
+        "name": "symbolic-qwen3",
+        "report": {
+          "aggregation_policy_version": 1,
+          "decision_evidence": "EXACT",
+          "evidence_events": [
+            {
+              "bound": null,
+              "checker": "domain",
+              "detail": "symbolic singularity analysis found no enumerated point in the domain",
+              "kind": "EXACT_CERTIFICATE",
+              "level": "EXACT",
+              "obligation_id": "domain:u:x",
+              "outcome": "DISCHARGED",
+              "witness": null
+            },
+            {
+              "bound": null,
+              "checker": "domain",
+              "detail": "symbolic singularity analysis found no enumerated point in the domain",
+              "kind": "EXACT_CERTIFICATE",
+              "level": "EXACT",
+              "obligation_id": "domain:u:t",
+              "outcome": "DISCHARGED",
+              "witness": null
+            },
+            {
+              "bound": null,
+              "checker": "exact_identity",
+              "detail": "symbolic zero-equivalence check established an identity",
+              "kind": "EXACT_CERTIFICATE",
+              "level": "EXACT",
+              "obligation_id": "constraint:0",
+              "outcome": "DISCHARGED",
+              "witness": null
+            },
+            {
+              "bound": null,
+              "checker": "exact_identity",
+              "detail": "symbolic zero-equivalence check established an identity",
+              "kind": "EXACT_CERTIFICATE",
+              "level": "EXACT",
+              "obligation_id": "constraint:1",
+              "outcome": "DISCHARGED",
+              "witness": null
+            },
+            {
+              "bound": null,
+              "checker": "exact_identity",
+              "detail": "symbolic zero-equivalence check established an identity",
+              "kind": "EXACT_CERTIFICATE",
+              "level": "EXACT",
+              "obligation_id": "constraint:2",
+              "outcome": "DISCHARGED",
+              "witness": null
+            },
+            {
+              "bound": null,
+              "checker": "exact_identity",
+              "detail": "symbolic zero-equivalence check established an identity",
+              "kind": "EXACT_CERTIFICATE",
+              "level": "EXACT",
+              "obligation_id": "constraint:3",
+              "outcome": "DISCHARGED",
+              "witness": null
+            }
+          ],
+          "exact_checks": {
+            "Fisher KPP PDE": "identity",
+            "initial condition": "identity",
+            "left boundary": "identity",
+            "right boundary": "identity"
+          },
+          "incomplete_reasons": {},
+          "max_sampled_residual": 0.0,
+          "report_version": 1,
+          "status": "PROVED",
+          "witness": null
+        }
+      },
+      {
+        "artifact_kind": "callable",
+        "name": "trained-pinn",
+        "report": {
+          "aggregation_policy_version": 1,
+          "decision_evidence": "EMPIRICAL",
+          "evidence_events": [
+            {
+              "bound": null,
+              "checker": "autodiff_residual",
+              "detail": "sampled autodiff residual exceeded tolerance 0.001",
+              "kind": "EMPIRICAL_COUNTEREXAMPLE",
+              "level": "EMPIRICAL",
+              "obligation_id": "constraint:0",
+              "outcome": "REFUTED",
+              "witness": {
+                "constraint": "Fisher KPP PDE",
+                "point": {
+                  "t": 0.226,
+                  "x": -2.7479999999999998
+                },
+                "reason": "automatic differentiation found a violated obligation",
+                "residual": 0.009120915755252007
+              }
+            }
+          ],
+          "exact_checks": {},
+          "incomplete_reasons": {},
+          "max_sampled_residual": 0.009120915755252007,
+          "report_version": 1,
+          "status": "REFUTED",
+          "witness": {
+            "constraint": "Fisher KPP PDE",
+            "point": {
+              "t": 0.226,
+              "x": -2.7479999999999998
+            },
+            "reason": "automatic differentiation found a violated obligation",
+            "residual": 0.009120915755252007
+          }
+        }
+      }
+    ],
+    "solution_semantics": "classical_strong"
+  },
+  "runtime": {
+    "pdecert_version": "0.1.1rc2",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "python_version": "3.12.13",
+    "sympy_version": "1.14.0",
+    "torch_version": "2.13.0"
+  },
+  "scope": "Classical strong-form obligations on x in [-6, 6], t in [0, 2].",
+  "suite": "trained-fisher-kpp-pair-v1",
+  "symbolic_proposal": {
+    "annotation": {
+      "annotators": [],
+      "failure_modes": [],
+      "rationale": null,
+      "status": "pending",
+      "verdict": null
+    },
+    "candidate_expression": "(1 + exp(x/sqrt(6) - 5*t/6))**(-2)",
+    "files": {
+      "case": {
+        "path": "corpus/community/records/qwen3-fisher-kpp-01/case.json",
+        "sha256": "44b91d46af6a5d723b56e60dbd88d8d4f81d560008d4d732731cea066cb5d12e"
+      },
+      "raw_output": {
+        "path": "corpus/community/records/qwen3-fisher-kpp-01/raw-output.txt",
+        "sha256": "fd4496138199cf29b9b0d3a829fd7ffd7a986711664b19ac01788e3911653ef1"
+      },
+      "record": {
+        "path": "corpus/community/records/qwen3-fisher-kpp-01/record.json",
+        "sha256": "d326cb6de1d119ecbc3ba6ed57b8cffdd46391e6ca8d7d904ad7bed88a897d53"
+      }
+    },
+    "origin": {
+      "generated_at": "2026-08-24T16:29:27.855591+00:00",
+      "identifier": "Qwen/Qwen3-1.7B",
+      "input": "{\"generation\": {\"do_sample\": false, \"max_new_tokens\": 160}, \"prompt\": \"Solve u_t=u_xx+u*(1-u) for x in [-6,6], t in [0,2], with u(x,0)=(1+exp(x/sqrt(6)))**(-2) and boundary traces obtained by substituting x=-6 and x=6 into (1+exp(x/sqrt(6)-5*t/6))**(-2).\\n\\nReturn one explicit candidate expression for every requested field. Use Python/SymPy syntax with variables x, t. You may use pi, E, sin, cos, sinh, cosh, tanh, exp, log, sqrt, Abs, +, -, *, /, **, and parentheses. Do not return an implicit equation, arbitrary function, derivative, integral, code block, or explanation. End with exactly:\\nFINAL u: <expression>\"}",
+      "kind": "open_model",
+      "license": "Apache-2.0",
+      "producer": "Qwen via Transformers",
+      "revision": "70d244cc86ccca08cf5af4e1e306ecf908b1ad5e",
+      "source_url": "https://huggingface.co/Qwen/Qwen3-1.7B",
+      "version": "4.55.4"
+    },
+    "record_id": "qwen3-fisher-kpp-01"
+  },
+  "unsupported": [
+    "weak or generalized solution semantics",
+    "traveling-front stability or uniqueness",
+    "solution-error certification from residual size",
+    "architectures other than the declared dense tanh network"
+  ]
+}
