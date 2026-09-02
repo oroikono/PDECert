@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdecert.org/schema/atlas-v2-record-v1.schema.json",
+  "title": "PDECert typed Atlas record metadata v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "record_version",
+    "id",
+    "problem_id",
+    "artifact_type",
+    "files",
+    "origin",
+    "annotation"
+  ],
+  "properties": {
+    "record_version": { "const": 1 },
+    "id": { "$ref": "#/$defs/slug" },
+    "problem_id": { "$ref": "#/$defs/slug" },
+    "artifact_type": { "enum": ["symbolic_expression", "callable_model"] },
+    "files": { "type": "object" },
+    "origin": { "$ref": "#/$defs/origin" },
+    "annotation": { "$ref": "#/$defs/annotation" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "artifact_type": { "const": "symbolic_expression" } } },
+      "then": {
+        "properties": {
+          "files": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["problem", "artifact", "raw_output"],
+            "properties": {
+              "problem": { "$ref": "#/$defs/templateFile" },
+              "artifact": { "$ref": "#/$defs/artifactFile" },
+              "raw_output": { "$ref": "#/$defs/rawOutputFile" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "artifact_type": { "const": "callable_model" } } },
+      "then": {
+        "properties": {
+          "files": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["problem", "artifact", "integrity"],
+            "properties": {
+              "problem": { "$ref": "#/$defs/templateFile" },
+              "artifact": { "$ref": "#/$defs/artifactFile" },
+              "integrity": { "$ref": "#/$defs/integrityFile" }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "templateFile": {
+      "allOf": [
+        { "$ref": "#/$defs/file" },
+        { "properties": { "path": { "const": "template.json" } } }
+      ]
+    },
+    "artifactFile": {
+      "allOf": [
+        { "$ref": "#/$defs/file" },
+        { "properties": { "path": { "const": "artifact.json" } } }
+      ]
+    },
+    "rawOutputFile": {
+      "allOf": [
+        { "$ref": "#/$defs/file" },
+        { "properties": { "path": { "const": "raw-output.txt" } } }
+      ]
+    },
+    "integrityFile": {
+      "allOf": [
+        { "$ref": "#/$defs/file" },
+        { "properties": { "path": { "const": "integrity.json" } } }
+      ]
+    },
+    "origin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "producer",
+        "version",
+        "identifier",
+        "revision",
+        "source_url",
+        "license",
+        "generated_at",
+        "input"
+      ],
+      "properties": {
+        "kind": {
+          "enum": ["open_model", "symbolic_solver", "synthetic", "trained_model"]
+        },
+        "producer": { "type": "string", "minLength": 1 },
+        "version": { "type": ["string", "null"], "minLength": 1 },
+        "identifier": { "type": "string", "minLength": 1 },
+        "revision": { "type": ["string", "null"], "minLength": 1 },
+        "source_url": { "type": "string", "format": "uri", "pattern": "^https?://" },
+        "license": { "type": ["string", "null"], "minLength": 1 },
+        "generated_at": { "type": "string", "format": "date-time" },
+        "input": { "type": "string", "minLength": 1 }
+      }
+    },
+    "annotation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "verdict", "failure_modes", "rationale", "annotators"],
+      "properties": {
+        "status": { "enum": ["adjudicated", "labeled", "pending"] },
+        "verdict": { "enum": ["invalid", "unclear", "valid", null] },
+        "failure_modes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "boundary_condition",
+              "domain_singularity",
+              "extraction_error",
+              "initial_condition",
+              "other",
+              "parameter_scope",
+              "pde_residual",
+              "unsupported_semantics"
+            ]
+          }
+        },
+        "rationale": { "type": ["string", "null"], "minLength": 1 },
+        "annotators": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "coverage_version": 1,
+  "records": {
+    "qwen3-fisher-kpp-01": {
+      "artifact_type": "symbolic_expression",
+      "pde_families": ["fisher_kpp"],
+      "spatial_dimension": 1
+    },
+    "trained-fisher-kpp-pinn-01": {
+      "artifact_type": "callable_model",
+      "pde_families": ["fisher_kpp"],
+      "spatial_dimension": 1
+    }
+  }
+}

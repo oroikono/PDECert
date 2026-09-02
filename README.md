@@ -88,7 +88,14 @@ Versioned corpus files can be checked locally before review:
 ```bash
 pdecert corpus validate corpus/pilot.json
 pdecert corpus validate corpus/community
+pdecert corpus validate corpus/matched
 ```
+
+The mixed [`corpus/matched`](corpus/matched/README.md) Atlas v2 preview binds a
+byte-preserved Qwen3 symbolic proposal and a separately trained Fisher--KPP PINN
+to the same candidate-free problem. Validation checks identity and structural
+compatibility without importing PyTorch; it does not evaluate the PDE or create
+a human label.
 
 Open-model batches follow a
 [predeclared, resumable collection protocol](docs/atlas-open-model-collection.md)

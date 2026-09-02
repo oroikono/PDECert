@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdecert.org/schema/atlas-v2.schema.json",
+  "title": "PDECert cross-artifact Atlas manifest v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["atlas_version", "name", "description"],
+  "properties": {
+    "atlas_version": { "const": 2 },
+    "name": { "type": "string", "minLength": 1 },
+    "description": { "type": "string", "minLength": 1 }
+  }
+}

@@ -179,13 +179,21 @@ def _run_corpus_validate(arguments: argparse.Namespace) -> int:
     failure_modes = [mode for record in records for mode in record["annotation"]["failure_modes"]]
     summary = {
         "annotation_statuses": _counts([record["annotation"]["status"] for record in records]),
-        "corpus_version": corpus["corpus_version"],
         "failure_modes": _counts(failure_modes),
         "name": corpus["name"],
         "origin_kinds": _counts([record["origin"]["kind"] for record in records]),
         "records": len(records),
         "verdicts": _counts(verdicts),
     }
+    if "corpus_version" in corpus:
+        summary["corpus_version"] = corpus["corpus_version"]
+    else:
+        summary.update(
+            {
+                "atlas_version": corpus["atlas_version"],
+                "record_versions": _counts([str(record["record_version"]) for record in records]),
+            }
+        )
     coverage_path = arguments.corpus / "coverage.json"
     if arguments.corpus.is_dir() and coverage_path.exists():
         coverage = load_atlas_coverage(
@@ -211,6 +219,8 @@ def _run_corpus_validate(arguments: argparse.Namespace) -> int:
                 ),
             }
         )
+    elif records and "artifact_type" in records[0]:
+        summary["artifact_types"] = _counts([record["artifact_type"] for record in records])
     print(json.dumps(summary, indent=2, sort_keys=True))
     return 0
 

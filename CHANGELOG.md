@@ -6,6 +6,10 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- A typed Atlas v2 record contract for candidate-free symbolic and frozen-
+  callable artifacts, with strict file digests, provenance, representation
+  compatibility checks, public schemas, and a mixed Fisher--KPP corpus that
+  validates without importing PyTorch.
 - A portable versioned JSON contract for frozen CPU float64 dense-tanh
   callables, including strict structural validation, immutable loading,
   resource-bounded decoding, evaluation-only PyTorch materialization, portable

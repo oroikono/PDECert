@@ -1,0 +1,5 @@
+{
+  "atlas_version": 2,
+  "description": "Matched symbolic and trained-callable artifacts under one candidate-free PDE specification.",
+  "name": "PDECert cross-artifact matched cases"
+}
