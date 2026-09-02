@@ -8,7 +8,15 @@ import sys
 from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 
-from pdecert import FAILURE_MODES, CorpusError, load_corpus_source
+from pdecert import (
+    CROSS_ARTIFACT_ATLAS_VERSION,
+    CROSS_ARTIFACT_REVIEW_VERSION,
+    FAILURE_MODES,
+    CorpusError,
+    allowed_review_bases,
+    load_corpus_source,
+    review_source_sha256,
+)
 
 
 InputFunction = Callable[[str], str]
@@ -22,14 +30,12 @@ class ReviewSessionError(ValueError):
 def new_review(corpus: Mapping[str, object]) -> dict[str, object]:
     """Return an empty review document with the corpus record order."""
 
-    if corpus.get("atlas_version") == 2:
-        raise ReviewSessionError(
-            "mixed Atlas v2 review is not implemented; records must remain pending"
-        )
-    return {
-        "review_version": 1,
+    is_cross_artifact = corpus.get("atlas_version") == CROSS_ARTIFACT_ATLAS_VERSION
+    review = {
+        "review_version": CROSS_ARTIFACT_REVIEW_VERSION if is_cross_artifact else 1,
         "records": [
             {
+                **({"basis": None} if is_cross_artifact else {}),
                 "failure_modes": [],
                 "id": record["id"],
                 "rationale": None,
@@ -38,28 +44,47 @@ def new_review(corpus: Mapping[str, object]) -> dict[str, object]:
             for record in corpus["records"]
         ],
     }
+    if is_cross_artifact:
+        review["atlas_sha256"] = review_source_sha256(corpus)
+    return review
 
 
 def _validate_resume(review: object, corpus: Mapping[str, object]) -> dict[str, object]:
-    if not isinstance(review, dict) or set(review) != {"records", "review_version"}:
+    is_cross_artifact = corpus.get("atlas_version") == CROSS_ARTIFACT_ATLAS_VERSION
+    expected_fields = (
+        {"atlas_sha256", "records", "review_version"}
+        if is_cross_artifact
+        else {"records", "review_version"}
+    )
+    if not isinstance(review, dict) or set(review) != expected_fields:
         raise ReviewSessionError("saved review has an unsupported structure")
+    expected_version = CROSS_ARTIFACT_REVIEW_VERSION if is_cross_artifact else 1
     if (
         isinstance(review["review_version"], bool)
-        or review["review_version"] != 1
+        or review["review_version"] != expected_version
         or not isinstance(review["records"], list)
     ):
         raise ReviewSessionError("saved review has an unsupported version")
+    if is_cross_artifact and review["atlas_sha256"] != review_source_sha256(corpus):
+        raise ReviewSessionError("saved review does not match the source Atlas digest")
     expected_ids = [record["id"] for record in corpus["records"]]
     actual_ids = [record.get("id") for record in review["records"] if isinstance(record, dict)]
     if actual_ids != expected_ids or len(actual_ids) != len(review["records"]):
         raise ReviewSessionError("saved review IDs do not match the corpus in order")
     required = {"failure_modes", "id", "rationale", "verdict"}
+    if is_cross_artifact:
+        required.add("basis")
+    artifact_types = {record["id"]: record.get("artifact_type") for record in corpus["records"]}
     for record in review["records"]:
         if set(record) != required:
             raise ReviewSessionError(f"saved decision has unsupported fields: {record['id']}")
         verdict = record["verdict"]
         if verdict is None:
-            if record["failure_modes"] or record["rationale"] is not None:
+            if (
+                record["failure_modes"]
+                or record["rationale"] is not None
+                or (is_cross_artifact and record["basis"] is not None)
+            ):
                 raise ReviewSessionError(f"incomplete saved decision: {record['id']}")
             continue
         if verdict not in {"valid", "invalid", "unclear"}:
@@ -78,6 +103,20 @@ def _validate_resume(review: object, corpus: Mapping[str, object]) -> dict[str, 
             raise ReviewSessionError(f"invalid decision lacks a failure mode: {record['id']}")
         if verdict != "invalid" and modes:
             raise ReviewSessionError(f"non-invalid decision has failure modes: {record['id']}")
+        if is_cross_artifact:
+            basis = record["basis"]
+            if not isinstance(basis, dict) or set(basis) != {"description", "kind"}:
+                raise ReviewSessionError(f"completed decision lacks a basis: {record['id']}")
+            if not isinstance(basis["description"], str) or not basis["description"].strip():
+                raise ReviewSessionError(f"completed decision has an empty basis: {record['id']}")
+            try:
+                allowed = allowed_review_bases(artifact_types[record["id"]], verdict)
+            except ValueError as error:
+                raise ReviewSessionError(str(error)) from error
+            if basis["kind"] not in allowed:
+                raise ReviewSessionError(
+                    f"unsupported review basis for saved decision: {record['id']}"
+                )
     return review
 
 
@@ -110,6 +149,8 @@ def progress_bar(completed: int, total: int, width: int = 20) -> str:
 def render_record(record: Mapping[str, object], position: int, total: int) -> str:
     """Render only source material allowed during the blind pass."""
 
+    if "template" in record:
+        return _render_cross_artifact_record(record, position, total)
     case = record["case"]
     fields = "\n".join(f"  {name} = {expression}" for name, expression in case["fields"].items())
     residuals = "\n".join(
@@ -133,6 +174,57 @@ def render_record(record: Mapping[str, object], position: int, total: int) -> st
         f"PDE residuals:\n{residuals}\n\n"
         f"Conditions:\n{conditions}\n\n"
         f"Unedited generator output:\n{record['raw_output']}\n"
+    )
+
+
+def _render_cross_artifact_record(record: Mapping[str, object], position: int, total: int) -> str:
+    template = record["template"]
+    residuals = "\n".join(
+        f"  - {constraint['name']}: {constraint['expression']}"
+        for constraint in template["pde_residuals"]
+    )
+    conditions = (
+        "\n".join(
+            f"  - {constraint['name']}: {constraint['expression']}"
+            for constraint in template["conditions"]
+        )
+        or "  (none)"
+    )
+    artifact = record["artifact"]
+    if record["artifact_type"] == "symbolic_expression":
+        fields = "\n".join(
+            f"  {name} = {expression}" for name, expression in artifact["fields"].items()
+        )
+        artifact_text = (
+            f"Artifact type: symbolic_expression\n"
+            f"Candidate fields:\n{fields}\n\n"
+            f"Unedited generator output:\n{record['raw_output']}"
+        )
+    else:
+        architecture = artifact["architecture"]
+        artifact_text = (
+            "Artifact type: callable_model\n"
+            f"Artifact ID: {artifact['artifact_id']}\n"
+            f"Architecture: {architecture['type']} "
+            f"{architecture['hidden_widths']} {architecture['activation']} "
+            f"{architecture['dtype']}\n"
+            f"Inputs: {', '.join(architecture['input_names'])}\n"
+            f"Outputs: {', '.join(architecture['output_names'])}\n"
+            f"Weights SHA-256: {artifact['weights_sha256']}\n"
+            "The card intentionally omits training losses and machine-evaluator results. "
+            "Weights alone cannot justify a valid verdict."
+        )
+    return (
+        f"\n{'=' * 72}\n"
+        f"CARD {position}/{total}: {record['id']}\n"
+        f"Problem ID: {record['problem_id']}\n"
+        f"Problem: {template['name']}\n"
+        f"Solution semantics: {template['solution_semantics']}\n"
+        f"Variables: {', '.join(template['variables'])}\n"
+        f"Domains: {json.dumps(template['domains'], sort_keys=True)}\n\n"
+        f"{artifact_text}\n\n"
+        f"PDE residuals:\n{residuals}\n\n"
+        f"Conditions:\n{conditions}\n"
     )
 
 
@@ -177,6 +269,40 @@ def _prompt_rationale(input_fn: InputFunction, output_fn: OutputFunction) -> str
         output_fn("A non-empty rationale is required.")
 
 
+def _prompt_basis(
+    artifact_type: str,
+    verdict: str,
+    input_fn: InputFunction,
+    output_fn: OutputFunction,
+) -> dict[str, str]:
+    bases = allowed_review_bases(artifact_type, verdict)
+    output_fn("Independent review basis:")
+    for index, kind in enumerate(bases, start=1):
+        output_fn(f"  {index}. {kind}")
+    if artifact_type == "callable_model" and verdict == "valid":
+        output_fn(
+            "A callable valid verdict requires a rigorous external certificate; "
+            "finite samples or training loss are insufficient."
+        )
+    while True:
+        answer = input_fn("Select one basis number: ").strip()
+        try:
+            selected = int(answer)
+        except ValueError:
+            selected = 0
+        if 1 <= selected <= len(bases):
+            kind = bases[selected - 1]
+            break
+        output_fn("Choose one number from the list.")
+    while True:
+        description = input_fn(
+            "Describe the independent derivation, witness, or reference: "
+        ).strip()
+        if description:
+            return {"description": description, "kind": kind}
+        output_fn("A non-empty review-basis description is required.")
+
+
 def run_session(
     corpus: Mapping[str, object],
     review: dict[str, object],
@@ -203,6 +329,16 @@ def run_session(
             failure_modes = (
                 _prompt_failure_modes(input_fn, output_fn) if verdict == "invalid" else []
             )
+            basis = (
+                _prompt_basis(
+                    record["artifact_type"],
+                    verdict,
+                    input_fn,
+                    output_fn,
+                )
+                if "artifact_type" in record and verdict not in {"q", "s"}
+                else None
+            )
             rationale = (
                 _prompt_rationale(input_fn, output_fn) if verdict not in {"q", "s"} else None
             )
@@ -220,6 +356,7 @@ def run_session(
             verdict=verdict,
             failure_modes=failure_modes,
             rationale=rationale,
+            **({"basis": basis} if "basis" in decision else {}),
         )
         completed += 1
         save_review(output_path, review)

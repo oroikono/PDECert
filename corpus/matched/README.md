@@ -17,6 +17,18 @@ Validate the mixed corpus without installing PyTorch:
 pdecert corpus validate corpus/matched
 ```
 
+Start a digest-bound blind review without exposing machine outcomes:
+
+```bash
+python -m experiments.review_corpus corpus/matched \
+  --output private-reviews/matched-review.json
+```
+
+The typed protocol requires an explicit independent basis for every decision.
+In particular, neither the frozen weights nor sampled callable success can
+justify a valid label. See [`../LABELING.md`](../LABELING.md). No completed
+review is committed here.
+
 Reproduce the existing lane-specific evaluation with the optional autodiff
 environment:
 

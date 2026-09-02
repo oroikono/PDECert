@@ -150,6 +150,22 @@
           "type": "array",
           "uniqueItems": true,
           "items": { "type": "string", "minLength": 1 }
+        },
+        "review_basis": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "description"],
+          "properties": {
+            "kind": {
+              "enum": [
+                "independent_counterexample",
+                "manual_derivation",
+                "rigorous_external_certificate",
+                "scope_assessment"
+              ]
+            },
+            "description": { "type": "string", "minLength": 1 }
+          }
         }
       }
     }

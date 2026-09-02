@@ -94,8 +94,9 @@ offline without the optional autodiff dependency.
   diagnostics before any model is materialized.
 - The version-2 contract is intentionally not generic over arbitrary model
   formats; new lanes require their own representation and threat model.
-- Blind review, adjudication, baseline evaluation, and immutable release tooling
-  for mixed records remain later benchmark-science slices.
+- Digest-bound blind review and guarded annotation import are available.
+  Independent labels, adjudication, baseline evaluation, and immutable release
+  tooling for mixed records remain later benchmark-science slices.
 - Duplicated artifact bytes are acceptable in the small preview because they
   make the bundle self-contained; larger artifact transport needs a separate
   content-addressed storage decision.
@@ -105,5 +106,5 @@ offline without the optional autodiff dependency.
 1. [x] Add Atlas v2, record, and symbolic-artifact schemas.
 2. [x] Add no-execution validation for symbolic and frozen-callable bundles.
 3. [x] Add a digest-bound Fisher--KPP symbolic/PINN matched corpus.
-4. [ ] Extend independent review and annotation import to typed records.
+4. [x] Extend independent review and annotation import to typed records.
 5. [ ] Define immutable mixed-corpus release and report manifests.

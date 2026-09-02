@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdecert.org/schema/atlas-review-v2.schema.json",
+  "title": "PDECert typed Atlas independent review v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["review_version", "atlas_sha256", "records"],
+  "properties": {
+    "review_version": { "const": 2 },
+    "atlas_sha256": { "$ref": "#/$defs/sha256" },
+    "records": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/decision" }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "verdict", "failure_modes", "rationale", "basis"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "verdict": { "enum": ["invalid", "unclear", "valid", null] },
+        "failure_modes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "boundary_condition",
+              "domain_singularity",
+              "extraction_error",
+              "initial_condition",
+              "other",
+              "parameter_scope",
+              "pde_residual",
+              "unsupported_semantics"
+            ]
+          }
+        },
+        "rationale": { "type": ["string", "null"], "minLength": 1 },
+        "basis": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["kind", "description"],
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "independent_counterexample",
+                    "manual_derivation",
+                    "rigorous_external_certificate",
+                    "scope_assessment"
+                  ]
+                },
+                "description": { "type": "string", "minLength": 1 }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

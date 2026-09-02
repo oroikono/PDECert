@@ -135,8 +135,9 @@ identity.
 - Atlas v2 transport validation checks that a frozen callable is consistent
   with its declared artifact, configuration, weight, and source-file digests.
   It does not prove that the referenced training run occurred. Full repository
-  reproduction is a separate check, and mixed-record blind review and immutable
-  release tooling are not yet implemented.
+  reproduction is a separate check. Artifact-aware blind review and guarded
+  annotation import are available, but the current mixed records are still
+  pending and immutable mixed-release tooling is not implemented.
 - A symbolic Atlas artifact records parsed field expressions beside a bound raw
   response. Structural validation does not establish that the parser or human
   transcription preserved the intended semantics of that response.
@@ -176,6 +177,12 @@ independent labels. Benchmark claims require the published blind-review and
 disagreement-adjudication protocol. Numerical reference fields also carry
 discretization, solver, and convergence uncertainty and must not be presented
 as exact truth without justification.
+
+For typed callable records, training loss, architecture inspection, and finite
+sampled success cannot support a `valid` label. The review contract permits a
+positive callable label only when the reviewer identifies a rigorous external
+certificate with matching scope. An independently reproduced counterexample can
+support an invalid label; otherwise the conservative verdict is `unclear`.
 
 ### Agent and hosted-model reproducibility
 

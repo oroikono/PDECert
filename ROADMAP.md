@@ -52,10 +52,11 @@ portable frozen-callable contract and exposes a held-out residual failure even
 after low training loss. Atlas v2 now binds the Fisher--KPP symbolic and frozen
 callable artifacts as first-class, digest-checked records under one candidate-
 free problem ID. The open-model prompt substantially cues the expected
-traveling front, both mixed records remain pending, and the mixed-record review,
-baseline, and immutable release paths are not complete. The gate therefore
-remains incomplete pending independent review and broader documented coverage
-across more than one natural matched problem.
+traveling front, and both mixed records remain pending. A digest-bound,
+artifact-aware blind-review and guarded annotation-import path is available, but
+no independent mixed label, baseline, or immutable release has been completed.
+The gate therefore remains incomplete pending independent review and broader
+documented coverage across more than one natural matched problem.
 
 ## v0.1: dependable verification interface
 

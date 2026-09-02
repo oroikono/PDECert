@@ -8,8 +8,10 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from pdecert import (
+    CROSS_ARTIFACT_ATLAS_VERSION,
     apply_review,
     dump_atlas,
+    dump_cross_artifact_atlas,
     dump_corpus,
     load_atlas_coverage,
     load_corpus_source,
@@ -33,7 +35,10 @@ def main(argv: Sequence[str] | None = None) -> None:
         annotator=arguments.annotator,
         confirmed_independent_review=arguments.confirm_independent_review,
     )
-    if arguments.corpus.is_dir():
+    if corpus.get("atlas_version") == CROSS_ARTIFACT_ATLAS_VERSION:
+        dump_cross_artifact_atlas(labeled, arguments.corpus, arguments.output)
+        kind = "typed atlas"
+    elif arguments.corpus.is_dir():
         coverage_path = arguments.corpus / "coverage.json"
         coverage = (
             load_atlas_coverage(
