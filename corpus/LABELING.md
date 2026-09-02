@@ -37,6 +37,39 @@ Alternatively, copy `review-template.json` to a private working file.
 7. Do not inspect `results/provisional-review.json`, PDECert output, or baseline
    results until this pass is complete.
 
+## Typed Atlas v2 review
+
+Run the same blind workflow on symbolic/callable bundles with a private output:
+
+```bash
+python -m experiments.review_corpus corpus/matched \
+  --output private-reviews/matched-review.json
+```
+
+The version 2 review binds itself to a canonical SHA-256 digest of the loaded
+Atlas records and their digest-bound problem and artifact contents. The digest
+intentionally excludes `README.md` and `coverage.json`: neither is shown during
+review or used as a correctness label. The runner omits coverage labels,
+training losses, PDECert reports, and baseline outcomes.
+
+Allowed bases are deliberately conservative:
+
+- `manual_derivation` may support a symbolic decision when the reviewer checks
+  the represented identities directly;
+- `independent_counterexample` may support an invalid decision when the
+  rationale gives a replayable violation obtained independently of PDECert;
+- `rigorous_external_certificate` may support a decision only when its artifact,
+  obligations, domain, norm, assumptions, and constants match this record; and
+- `scope_assessment` supports `unclear` when the available semantics or evidence
+  cannot justify a binary decision.
+
+A callable `valid` verdict requires a matching rigorous external certificate.
+Architecture inspection, low training loss, agreement with a finite reference
+grid, or a passing autodiff sample cannot prove that a callable satisfies every
+classical strong-form obligation. If no independent counterexample or rigorous
+certificate is available, use `unclear`; do not copy the existing PDECert result
+into the human annotation.
+
 ## Comparison and disagreement
 
 After the blind pass, compare the review with the provisional file and PDECert
@@ -72,6 +105,11 @@ python -m experiments.apply_review private-reviews/community-review.json \
 The modular importer writes a complete new Atlas atomically and refuses an
 existing destination. It does not alter the source Atlas or the stored raw
 generator outputs.
+
+For Atlas v2, the importer also verifies the source digest, retains the declared
+review basis in each annotation, and copies every template, artifact, raw output,
+integrity record, coverage file, and README byte unchanged. Only `record.json`
+annotations are rewritten in the new directory.
 
 Review the resulting file or directory before making it canonical. The importer
 never overwrites the source corpus or Atlas implicitly.

@@ -95,7 +95,23 @@ The mixed [`corpus/matched`](corpus/matched/README.md) Atlas v2 preview binds a
 byte-preserved Qwen3 symbolic proposal and a separately trained Fisher--KPP PINN
 to the same candidate-free problem. Validation checks identity and structural
 compatibility without importing PyTorch; it does not evaluate the PDE or create
-a human label.
+a human label. Its guarded review path binds a private review to the exact loaded
+Atlas and records whether a decision rests on a manual derivation, independent
+counterexample, rigorous external certificate, or scope assessment. Callable
+sampled passes and training loss cannot support a `valid` label.
+
+```bash
+python -m experiments.review_corpus corpus/matched \
+  --output private-reviews/matched-review.json
+python -m experiments.apply_review private-reviews/matched-review.json \
+  --corpus corpus/matched \
+  --annotator YOUR_PUBLIC_ID \
+  --confirm-independent-review \
+  --output private-reviews/matched-labeled
+```
+
+The committed matched records remain `pending`; these commands provide a review
+and import protocol, not precomputed ground truth.
 
 Open-model batches follow a
 [predeclared, resumable collection protocol](docs/atlas-open-model-collection.md)

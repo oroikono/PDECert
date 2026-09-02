@@ -14,8 +14,6 @@ from pdecert import (
     CROSS_ARTIFACT_ATLAS_VERSION,
     CROSS_ARTIFACT_RECORD_VERSION,
     CorpusError,
-    ReviewError,
-    apply_review,
     evaluate_corpus,
     load_corpus_source,
     load_cross_artifact_atlas,
@@ -23,7 +21,7 @@ from pdecert import (
     validate_frozen_callable_integrity,
 )
 from pdecert.cli import main
-from experiments.review_corpus import ReviewSessionError, new_review
+from experiments.review_corpus import new_review
 
 
 ATLAS = Path("corpus/matched")
@@ -73,17 +71,11 @@ class CrossArtifactAtlasTests(unittest.TestCase):
         self.assertEqual(atlas["atlas_version"], CROSS_ARTIFACT_ATLAS_VERSION)
         self.assertNotIn("corpus_version", atlas)
 
-    def test_unimplemented_review_and_baseline_paths_fail_explicitly(self):
+    def test_review_template_is_available_but_baseline_remains_explicitly_unsupported(self):
         atlas = load_cross_artifact_atlas(ATLAS)
-        with self.assertRaisesRegex(ReviewSessionError, "remain pending"):
-            new_review(atlas)
-        with self.assertRaisesRegex(ReviewError, "not implemented"):
-            apply_review(
-                atlas,
-                {},
-                annotator="reviewer",
-                confirmed_independent_review=True,
-            )
+        review = new_review(atlas)
+        self.assertEqual(review["review_version"], 2)
+        self.assertTrue(all(record["basis"] is None for record in review["records"]))
         with self.assertRaisesRegex(BenchmarkError, "does not evaluate"):
             evaluate_corpus(atlas)
 
@@ -241,6 +233,7 @@ class CrossArtifactAtlasTests(unittest.TestCase):
         for path in (
             Path("schema/atlas-v2.schema.json"),
             Path("schema/atlas-v2-record-v1.schema.json"),
+            Path("schema/atlas-review-v2.schema.json"),
             Path("schema/symbolic-artifact-v1.schema.json"),
         ):
             self.assertIsInstance(json.loads(path.read_text()), dict)

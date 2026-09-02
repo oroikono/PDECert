@@ -42,11 +42,11 @@ one Qwen3/Fisher--KPP symbolic artifact and one separately trained PINN under th
 same problem ID. Core validation does not import PyTorch or execute either
 artifact.
 
-Version 2 is currently an intake and representation contract. Its mixed records
-remain `pending`, and the version-1 blind-review and release pipeline has not
-yet been generalized to callable models. Numerical fields and generated solver
-programs likewise need explicit formats and security boundaries before they
-enter a release.
+Version 2 is an intake, representation, and guarded independent-review contract.
+Its mixed records remain `pending`, and the baseline and immutable-release
+pipeline has not yet been generalized to callable models. Numerical fields and
+generated solver programs likewise need explicit formats and security
+boundaries before they enter a release.
 
 Until those formats exist:
 
@@ -106,7 +106,8 @@ content identity only; they do not prove provenance claims or PDE correctness.
 The public contracts are
 [`atlas-v2.schema.json`](../schema/atlas-v2.schema.json),
 [`atlas-v2-record-v1.schema.json`](../schema/atlas-v2-record-v1.schema.json),
-and [`symbolic-artifact-v1.schema.json`](../schema/symbolic-artifact-v1.schema.json).
+[`atlas-review-v2.schema.json`](../schema/atlas-review-v2.schema.json), and
+[`symbolic-artifact-v1.schema.json`](../schema/symbolic-artifact-v1.schema.json).
 See [ADR-0010](../docs/adr/0010-typed-cross-artifact-atlas-records.md).
 
 ## Record lifecycle
@@ -122,6 +123,17 @@ See [ADR-0010](../docs/adr/0010-typed-cross-artifact-atlas-records.md).
 
 PDECert output is comparison evidence, not the human ground truth. A sampled
 pass is never promoted to a proof.
+
+Atlas v2 review files are bound to a canonical digest of the exact loaded Atlas.
+That digest covers the manifest fields and loaded records, including their bound
+problem and artifact contents; review-neutral README and coverage bytes are
+excluded. The importer still preserves those files byte-for-byte.
+Their decision basis is artifact-aware: symbolic records may use a direct manual
+derivation; an invalid callable needs an independent counterexample or rigorous
+external certificate; a valid callable needs a rigorous external certificate;
+and an undecidable scope should remain `unclear`. Import creates a new Atlas,
+adds the declared review basis to each completed annotation, and preserves every
+problem, artifact, raw-output, integrity, coverage, and README byte.
 
 ## Contributing a case
 

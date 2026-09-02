@@ -83,6 +83,13 @@ Do not import `results/provisional-review.json` as a human review. Complete the
 blind pass in `corpus/LABELING.md` first, use a public reviewer identifier, and
 retain disagreement notes when a second reviewer is needed.
 
+For Atlas v2 callables, model weights, training loss, or a finite sampled pass
+cannot justify `valid`. A typed review must declare its independent basis. Use a
+replayable counterexample for an invalid callable, a genuinely rigorous external
+certificate for a valid callable, or `unclear` when neither is available. The
+review runner enforces these choices and binds the review to the exact loaded
+Atlas digest.
+
 For soundness-sensitive changes, a new check must not turn finite numerical
 sampling into a `PROVED` result. If the reasoning is incomplete, return
 `INCONCLUSIVE` and record why.

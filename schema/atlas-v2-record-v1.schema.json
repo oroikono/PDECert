@@ -56,6 +56,119 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "annotation": {
+            "properties": { "status": { "enum": ["labeled", "adjudicated"] } }
+          }
+        }
+      },
+      "then": {
+        "properties": { "annotation": { "required": ["review_basis"] } },
+        "oneOf": [
+          {
+            "properties": {
+              "artifact_type": { "const": "symbolic_expression" },
+              "annotation": {
+                "properties": {
+                  "verdict": { "const": "valid" },
+                  "review_basis": {
+                    "properties": {
+                      "kind": {
+                        "enum": ["manual_derivation", "rigorous_external_certificate"]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "properties": {
+              "artifact_type": { "const": "symbolic_expression" },
+              "annotation": {
+                "properties": {
+                  "verdict": { "const": "invalid" },
+                  "review_basis": {
+                    "properties": {
+                      "kind": {
+                        "enum": [
+                          "independent_counterexample",
+                          "manual_derivation",
+                          "rigorous_external_certificate"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "properties": {
+              "artifact_type": { "const": "symbolic_expression" },
+              "annotation": {
+                "properties": {
+                  "verdict": { "const": "unclear" },
+                  "review_basis": {
+                    "properties": { "kind": { "const": "scope_assessment" } }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "properties": {
+              "artifact_type": { "const": "callable_model" },
+              "annotation": {
+                "properties": {
+                  "verdict": { "const": "valid" },
+                  "review_basis": {
+                    "properties": {
+                      "kind": { "const": "rigorous_external_certificate" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "properties": {
+              "artifact_type": { "const": "callable_model" },
+              "annotation": {
+                "properties": {
+                  "verdict": { "const": "invalid" },
+                  "review_basis": {
+                    "properties": {
+                      "kind": {
+                        "enum": [
+                          "independent_counterexample",
+                          "rigorous_external_certificate"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "properties": {
+              "artifact_type": { "const": "callable_model" },
+              "annotation": {
+                "properties": {
+                  "verdict": { "const": "unclear" },
+                  "review_basis": {
+                    "properties": { "kind": { "const": "scope_assessment" } }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
     }
   ],
   "$defs": {
@@ -150,6 +263,22 @@
           "type": "array",
           "uniqueItems": true,
           "items": { "type": "string", "minLength": 1 }
+        },
+        "review_basis": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "description"],
+          "properties": {
+            "kind": {
+              "enum": [
+                "independent_counterexample",
+                "manual_derivation",
+                "rigorous_external_certificate",
+                "scope_assessment"
+              ]
+            },
+            "description": { "type": "string", "minLength": 1 }
+          }
         }
       }
     }

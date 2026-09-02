@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import re
+import shutil
 import tempfile
 from collections.abc import Mapping
 from datetime import datetime
@@ -47,6 +49,30 @@ FAILURE_MODES = frozenset(
 )
 ANNOTATION_STATUSES = frozenset({"adjudicated", "labeled", "pending"})
 VERDICTS = frozenset({"invalid", "unclear", "valid"})
+REVIEW_BASIS_KINDS = frozenset(
+    {
+        "independent_counterexample",
+        "manual_derivation",
+        "rigorous_external_certificate",
+        "scope_assessment",
+    }
+)
+_REVIEW_BASES_BY_DECISION = {
+    "symbolic_expression": {
+        "valid": {"manual_derivation", "rigorous_external_certificate"},
+        "invalid": {
+            "independent_counterexample",
+            "manual_derivation",
+            "rigorous_external_certificate",
+        },
+        "unclear": {"scope_assessment"},
+    },
+    "callable_model": {
+        "valid": {"rigorous_external_certificate"},
+        "invalid": {"independent_counterexample", "rigorous_external_certificate"},
+        "unclear": {"scope_assessment"},
+    },
+}
 _RECORD_ID = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 _TAXONOMY_SLUG = re.compile(r"^[a-z0-9][a-z0-9_]*$")
 _SHA256 = re.compile(r"^[a-f0-9]{64}$")
@@ -106,6 +132,12 @@ def _file_sha256(path: Path) -> str:
 
 def _error(path: str, message: str) -> CorpusError:
     return CorpusError(f"{path}: {message}")
+
+
+def typed_review_bases(artifact_type: str, verdict: str) -> tuple[str, ...]:
+    """Return review bases accepted for one typed artifact decision."""
+
+    return tuple(sorted(_REVIEW_BASES_BY_DECISION.get(artifact_type, {}).get(verdict, ())))
 
 
 def _object(value: object, path: str) -> Mapping[str, object]:
@@ -185,10 +217,24 @@ def _validate_origin(
     _validate_timestamp(origin["generated_at"], f"{path}.generated_at")
 
 
-def _validate_annotation(value: object, path: str) -> None:
+def _validate_annotation(
+    value: object,
+    path: str,
+    *,
+    allow_review_basis: bool = False,
+    artifact_type: str | None = None,
+) -> None:
     annotation = _object(value, path)
     fields = {"annotators", "failure_modes", "rationale", "status", "verdict"}
-    _exact_keys(annotation, fields, path)
+    if allow_review_basis:
+        missing = sorted(fields - set(annotation))
+        unknown = sorted(set(annotation) - fields - {"review_basis"})
+        if missing:
+            raise _error(path, f"missing field(s): {', '.join(missing)}")
+        if unknown:
+            raise _error(path, f"unknown field(s): {', '.join(unknown)}")
+    else:
+        _exact_keys(annotation, fields, path)
     status = _text(annotation["status"], f"{path}.status")
     if status not in ANNOTATION_STATUSES:
         raise _error(
@@ -224,12 +270,41 @@ def _validate_annotation(value: object, path: str) -> None:
     if len(set(failure_modes)) != len(failure_modes):
         raise _error(f"{path}.failure_modes", "failure modes must be unique")
 
+    review_basis = annotation.get("review_basis")
+    if review_basis is not None:
+        basis = _object(review_basis, f"{path}.review_basis")
+        _exact_keys(basis, {"description", "kind"}, f"{path}.review_basis")
+        kind = _text(basis["kind"], f"{path}.review_basis.kind")
+        if kind not in REVIEW_BASIS_KINDS:
+            raise _error(
+                f"{path}.review_basis.kind",
+                f"expected one of: {', '.join(sorted(REVIEW_BASIS_KINDS))}",
+            )
+        _text(basis["description"], f"{path}.review_basis.description")
+
     if status == "pending":
-        if verdict is not None or rationale is not None or annotators or failure_modes:
+        if (
+            verdict is not None
+            or rationale is not None
+            or annotators
+            or failure_modes
+            or review_basis is not None
+        ):
             raise _error(path, "pending annotations must not contain a label")
         return
     if verdict is None or rationale is None or not annotators:
         raise _error(path, "completed annotations require verdict, rationale, and annotator")
+    if allow_review_basis and review_basis is None:
+        raise _error(path, "completed typed annotations require a review basis")
+    if artifact_type is not None:
+        allowed = typed_review_bases(artifact_type, verdict)
+        kind = review_basis["kind"]
+        if kind not in allowed:
+            raise _error(
+                f"{path}.review_basis.kind",
+                f"{kind!r} cannot support {verdict!r} for {artifact_type}; "
+                f"expected one of: {', '.join(allowed)}",
+            )
     if status == "adjudicated" and len(annotators) < 2:
         raise _error(path, "adjudicated annotations require at least two annotators")
     if verdict == "invalid" and not failure_modes:
@@ -638,7 +713,12 @@ def load_cross_artifact_record_bundle(path: str | Path) -> dict[str, Any]:
             "Atlas v2 currently supports callable_model and symbolic_expression",
         )
     _validate_origin(metadata["origin"], "$.origin", allowed_kinds=_CROSS_ORIGIN_KINDS)
-    _validate_annotation(metadata["annotation"], "$.annotation")
+    _validate_annotation(
+        metadata["annotation"],
+        "$.annotation",
+        allow_review_basis=True,
+        artifact_type=artifact_type,
+    )
 
     expected_files = {
         "artifact": "artifact.json",
@@ -866,5 +946,78 @@ def dump_atlas(
 
         load_atlas(staged)
         if destination.exists():
+            raise CorpusError(f"{destination}: refusing to overwrite an existing path")
+        staged.replace(destination)
+
+
+def dump_cross_artifact_atlas(
+    value: object,
+    source_path: str | Path,
+    path: str | Path,
+) -> None:
+    """Atomically copy an Atlas v2 tree and replace only its annotations.
+
+    The source is fully validated before copying. Every problem, artifact, raw
+    output, integrity, coverage, and README byte is preserved; only each
+    ``record.json`` annotation is rewritten in the destination.
+    """
+
+    source = Path(source_path)
+    original = load_cross_artifact_atlas(source)
+    atlas = _object(value, "$")
+    if atlas.get("atlas_version") != CROSS_ARTIFACT_ATLAS_VERSION:
+        raise _error("$.atlas_version", f"expected {CROSS_ARTIFACT_ATLAS_VERSION}")
+    if set(atlas) != {"atlas_version", "description", "name", "records"}:
+        raise _error("$", "expected atlas_version, description, name, and records")
+    records = atlas["records"]
+    if not isinstance(records, list):
+        raise _error("$.records", "expected a list")
+    for index, record in enumerate(records):
+        record_value = _object(record, f"$.records[{index}]")
+        if "annotation" not in record_value:
+            raise _error(f"$.records[{index}]", "missing field(s): annotation")
+        _validate_annotation(
+            record_value["annotation"],
+            f"$.records[{index}].annotation",
+            allow_review_basis=True,
+            artifact_type=record_value.get("artifact_type"),
+        )
+
+    original_without_annotations = copy.deepcopy(original)
+    requested_without_annotations = copy.deepcopy(dict(atlas))
+    for record in original_without_annotations["records"]:
+        record.pop("annotation")
+    for record in requested_without_annotations["records"]:
+        record.pop("annotation")
+    if requested_without_annotations != original_without_annotations:
+        raise CorpusError("labeled Atlas may differ from its source only in annotations")
+
+    destination = Path(path)
+    if destination.exists() or destination.is_symlink():
+        raise CorpusError(f"{destination}: refusing to overwrite an existing path")
+    source_resolved = source.resolve()
+    destination_resolved = destination.resolve()
+    if destination_resolved.is_relative_to(source_resolved):
+        raise CorpusError("destination must not be inside the source Atlas")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+
+    with tempfile.TemporaryDirectory(
+        dir=destination.parent,
+        prefix=f".{destination.name}-",
+    ) as temporary:
+        staged = Path(temporary) / destination.name
+        shutil.copytree(source, staged)
+        decisions = {record["id"]: record["annotation"] for record in records}
+        for record_id, annotation in decisions.items():
+            metadata_path = staged / "records" / record_id / "record.json"
+            metadata = _object(_load_cross_artifact_json(metadata_path), "$")
+            metadata = dict(metadata)
+            metadata["annotation"] = annotation
+            metadata_path.write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n")
+
+        loaded = load_cross_artifact_atlas(staged)
+        if loaded != atlas:
+            raise CorpusError("written Atlas does not match the requested labeled Atlas")
+        if destination.exists() or destination.is_symlink():
             raise CorpusError(f"{destination}: refusing to overwrite an existing path")
         staged.replace(destination)
