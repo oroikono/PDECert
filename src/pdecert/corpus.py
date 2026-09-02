@@ -57,6 +57,22 @@ REVIEW_BASIS_KINDS = frozenset(
         "scope_assessment",
     }
 )
+_REVIEW_BASES_BY_DECISION = {
+    "symbolic_expression": {
+        "valid": {"manual_derivation", "rigorous_external_certificate"},
+        "invalid": {
+            "independent_counterexample",
+            "manual_derivation",
+            "rigorous_external_certificate",
+        },
+        "unclear": {"scope_assessment"},
+    },
+    "callable_model": {
+        "valid": {"rigorous_external_certificate"},
+        "invalid": {"independent_counterexample", "rigorous_external_certificate"},
+        "unclear": {"scope_assessment"},
+    },
+}
 _RECORD_ID = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 _TAXONOMY_SLUG = re.compile(r"^[a-z0-9][a-z0-9_]*$")
 _SHA256 = re.compile(r"^[a-f0-9]{64}$")
@@ -116,6 +132,12 @@ def _file_sha256(path: Path) -> str:
 
 def _error(path: str, message: str) -> CorpusError:
     return CorpusError(f"{path}: {message}")
+
+
+def typed_review_bases(artifact_type: str, verdict: str) -> tuple[str, ...]:
+    """Return review bases accepted for one typed artifact decision."""
+
+    return tuple(sorted(_REVIEW_BASES_BY_DECISION.get(artifact_type, {}).get(verdict, ())))
 
 
 def _object(value: object, path: str) -> Mapping[str, object]:
@@ -200,6 +222,7 @@ def _validate_annotation(
     path: str,
     *,
     allow_review_basis: bool = False,
+    artifact_type: str | None = None,
 ) -> None:
     annotation = _object(value, path)
     fields = {"annotators", "failure_modes", "rationale", "status", "verdict"}
@@ -273,6 +296,15 @@ def _validate_annotation(
         raise _error(path, "completed annotations require verdict, rationale, and annotator")
     if allow_review_basis and review_basis is None:
         raise _error(path, "completed typed annotations require a review basis")
+    if artifact_type is not None:
+        allowed = typed_review_bases(artifact_type, verdict)
+        kind = review_basis["kind"]
+        if kind not in allowed:
+            raise _error(
+                f"{path}.review_basis.kind",
+                f"{kind!r} cannot support {verdict!r} for {artifact_type}; "
+                f"expected one of: {', '.join(allowed)}",
+            )
     if status == "adjudicated" and len(annotators) < 2:
         raise _error(path, "adjudicated annotations require at least two annotators")
     if verdict == "invalid" and not failure_modes:
@@ -685,6 +717,7 @@ def load_cross_artifact_record_bundle(path: str | Path) -> dict[str, Any]:
         metadata["annotation"],
         "$.annotation",
         allow_review_basis=True,
+        artifact_type=artifact_type,
     )
 
     expected_files = {
@@ -947,6 +980,7 @@ def dump_cross_artifact_atlas(
             record_value["annotation"],
             f"$.records[{index}].annotation",
             allow_review_basis=True,
+            artifact_type=record_value.get("artifact_type"),
         )
 
     original_without_annotations = copy.deepcopy(original)

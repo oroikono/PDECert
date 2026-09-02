@@ -47,8 +47,10 @@ python -m experiments.review_corpus corpus/matched \
 ```
 
 The version 2 review binds itself to a canonical SHA-256 digest of the loaded
-Atlas and adds an explicit basis to every completed decision. The runner omits
-coverage labels, training losses, PDECert reports, and baseline outcomes.
+Atlas records and their digest-bound problem and artifact contents. The digest
+intentionally excludes `README.md` and `coverage.json`: neither is shown during
+review or used as a correctness label. The runner omits coverage labels,
+training losses, PDECert reports, and baseline outcomes.
 
 Allowed bases are deliberately conservative:
 

@@ -125,6 +125,9 @@ PDECert output is comparison evidence, not the human ground truth. A sampled
 pass is never promoted to a proof.
 
 Atlas v2 review files are bound to a canonical digest of the exact loaded Atlas.
+That digest covers the manifest fields and loaded records, including their bound
+problem and artifact contents; review-neutral README and coverage bytes are
+excluded. The importer still preserves those files byte-for-byte.
 Their decision basis is artifact-aware: symbolic records may use a direct manual
 derivation; an invalid callable needs an independent counterexample or rigorous
 external certificate; a valid callable needs a rigorous external certificate;

@@ -12,28 +12,13 @@ from .corpus import (
     FAILURE_MODES,
     REVIEW_BASIS_KINDS,
     VERDICTS,
+    typed_review_bases,
     validate_corpus,
 )
 
 
 REVIEW_VERSION = 1
 CROSS_ARTIFACT_REVIEW_VERSION = 2
-_BASES_BY_DECISION = {
-    "symbolic_expression": {
-        "valid": {"manual_derivation", "rigorous_external_certificate"},
-        "invalid": {
-            "independent_counterexample",
-            "manual_derivation",
-            "rigorous_external_certificate",
-        },
-        "unclear": {"scope_assessment"},
-    },
-    "callable_model": {
-        "valid": {"rigorous_external_certificate"},
-        "invalid": {"independent_counterexample", "rigorous_external_certificate"},
-        "unclear": {"scope_assessment"},
-    },
-}
 
 
 class ReviewError(ValueError):
@@ -54,12 +39,10 @@ def review_source_sha256(source: object) -> str:
 def allowed_review_bases(artifact_type: str, verdict: str) -> tuple[str, ...]:
     """Return review bases that can support one typed-record decision."""
 
-    try:
-        return tuple(sorted(_BASES_BY_DECISION[artifact_type][verdict]))
-    except KeyError as error:
-        raise ReviewError(
-            f"unsupported typed review decision: {artifact_type}/{verdict}"
-        ) from error
+    allowed = typed_review_bases(artifact_type, verdict)
+    if not allowed:
+        raise ReviewError(f"unsupported typed review decision: {artifact_type}/{verdict}")
+    return allowed
 
 
 def _validate_decision(

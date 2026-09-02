@@ -7,7 +7,8 @@ All notable changes to PDECert are documented here.
 ### Added
 
 - A digest-bound Atlas v2 blind-review contract with artifact-aware review
-  bases and atomic annotation import that preserves candidate and problem bytes.
+  bases enforced by the importer, loader, writer, and public schema, plus atomic
+  annotation import that preserves candidate and problem bytes.
 - A typed Atlas v2 record contract for candidate-free symbolic and frozen-
   callable artifacts, with strict file digests, provenance, representation
   compatibility checks, public schemas, and a mixed Fisher--KPP corpus that

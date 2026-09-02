@@ -1,6 +1,7 @@
 import copy
 import hashlib
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -13,8 +14,10 @@ from experiments.review_corpus import (
     run_session,
 )
 from pdecert import (
+    CorpusError,
     ReviewError,
     apply_review,
+    dump_cross_artifact_atlas,
     load_cross_artifact_atlas,
     review_source_sha256,
 )
@@ -145,6 +148,51 @@ class CrossArtifactReviewTests(unittest.TestCase):
                 annotator="test-reviewer",
                 confirmed_independent_review=True,
             )
+
+    def test_low_level_writer_cannot_bypass_callable_review_basis_rules(self):
+        atlas = load_cross_artifact_atlas(ATLAS)
+        labeled = copy.deepcopy(atlas)
+        record = next(record for record in labeled["records"] if record["id"] == CALLABLE_ID)
+        record["annotation"] = {
+            "annotators": ["test-reviewer"],
+            "failure_modes": [],
+            "rationale": "Low training loss and passing samples.",
+            "review_basis": {
+                "description": "Low training loss and passing samples.",
+                "kind": "manual_derivation",
+            },
+            "status": "labeled",
+            "verdict": "valid",
+        }
+
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "labeled-atlas"
+            with self.assertRaisesRegex(CorpusError, "cannot support.*callable_model"):
+                dump_cross_artifact_atlas(labeled, ATLAS, output)
+
+        self.assertFalse(output.exists())
+
+    def test_loader_rejects_an_incompatible_callable_review_basis(self):
+        with tempfile.TemporaryDirectory() as directory:
+            copied = Path(directory) / "atlas"
+            shutil.copytree(ATLAS, copied)
+            record_path = copied / "records" / CALLABLE_ID / "record.json"
+            record = json.loads(record_path.read_text())
+            record["annotation"] = {
+                "annotators": ["test-reviewer"],
+                "failure_modes": [],
+                "rationale": "Low training loss and passing samples.",
+                "review_basis": {
+                    "description": "Low training loss and passing samples.",
+                    "kind": "manual_derivation",
+                },
+                "status": "labeled",
+                "verdict": "valid",
+            }
+            record_path.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")
+
+            with self.assertRaisesRegex(CorpusError, "cannot support.*callable_model"):
+                load_cross_artifact_atlas(copied)
 
     def test_completed_review_is_imported_without_changing_artifact_bytes(self):
         atlas = load_cross_artifact_atlas(ATLAS)
