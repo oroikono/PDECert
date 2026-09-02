@@ -79,6 +79,15 @@ pdecert corpus validate path/to/corpus.json
 pdecert corpus validate path/to/atlas-directory
 ```
 
+For an Atlas v2 symbolic or restricted frozen-callable contribution, also run
+the compatible per-record evaluator when the optional dependencies are
+available. Report the exact options and inspect every record status; command
+success is not a proof result:
+
+```bash
+pdecert corpus evaluate path/to/atlas-directory --record RECORD_ID
+```
+
 Do not import `results/provisional-review.json` as a human review. Complete the
 blind pass in `corpus/LABELING.md` first, use a public reviewer identifier, and
 retain disagreement notes when a second reviewer is needed.

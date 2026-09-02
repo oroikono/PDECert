@@ -220,6 +220,34 @@ class CommandLineTests(unittest.TestCase):
         self.assertEqual(summary["pde_families"]["poisson"], 1)
         self.assertEqual(summary["spatial_dimensions"], {"1": 11, "2": 2})
 
+    def test_corpus_evaluate_runs_one_symbolic_atlas_record(self):
+        output = io.StringIO()
+        with redirect_stdout(output):
+            exit_code = main(
+                [
+                    "corpus",
+                    "evaluate",
+                    "corpus/matched",
+                    "--record",
+                    "qwen3-fisher-kpp-01",
+                ]
+            )
+
+        payload = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(payload["evaluation_version"], 1)
+        self.assertEqual(payload["evidence_policy"], "per_record_no_aggregation")
+        self.assertEqual(payload["records"][0]["report"]["status"], "PROVED")
+        self.assertNotIn("status", payload)
+
+    def test_corpus_evaluate_rejects_an_atlas_v1_source(self):
+        errors = io.StringIO()
+        with redirect_stderr(errors):
+            exit_code = main(["corpus", "evaluate", "corpus/community"])
+
+        self.assertEqual(exit_code, INPUT_ERROR)
+        self.assertIn("expected 2", errors.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()

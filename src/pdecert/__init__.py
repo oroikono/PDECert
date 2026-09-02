@@ -19,6 +19,12 @@ from .agent_runtime import (
     summarize_agent_runs,
 )
 from .benchmark import BENCHMARK_VERSION, BenchmarkError, corpus_sha256, evaluate_corpus
+from .atlas_evaluation import (
+    ATLAS_EVALUATION_VERSION,
+    AtlasEvaluationError,
+    AtlasEvaluationOptions,
+    evaluate_cross_artifact_atlas,
+)
 from .artifacts import (
     PROGRAM_SOURCE_MAX_BYTES,
     CallableCandidate,
@@ -105,6 +111,7 @@ from .corpus import (
     REVIEW_BASIS_KINDS,
     VERDICTS,
     CorpusError,
+    cross_artifact_atlas_sha256,
     dump_atlas,
     dump_cross_artifact_atlas,
     dump_corpus,
@@ -199,6 +206,9 @@ __all__ = [
     "AgentToolCall",
     "AgentTrace",
     "ATLAS_VERSION",
+    "ATLAS_EVALUATION_VERSION",
+    "AtlasEvaluationError",
+    "AtlasEvaluationOptions",
     "BENCHMARK_VERSION",
     "BenchmarkError",
     "BoundEvidence",
@@ -289,6 +299,7 @@ __all__ = [
     "canonical_frozen_weights_sha256",
     "bind_symbolic_candidate",
     "corpus_sha256",
+    "cross_artifact_atlas_sha256",
     "compile_autodiff_problem",
     "apply_review",
     "allowed_review_bases",
@@ -303,6 +314,7 @@ __all__ = [
     "dump_corpus",
     "DisabledProgramSandbox",
     "evaluate_corpus",
+    "evaluate_cross_artifact_atlas",
     "evaluate_agent_proposal",
     "execute_program_candidate",
     "default_checker_registry",

@@ -10,6 +10,11 @@ from collections import Counter
 from collections.abc import Sequence
 from pathlib import Path
 
+from .atlas_evaluation import (
+    AtlasEvaluationError,
+    AtlasEvaluationOptions,
+    evaluate_cross_artifact_atlas,
+)
 from .corpus import CorpusError, load_atlas_coverage, load_corpus_source
 from .core import Status, verify
 from .manifests import (
@@ -44,6 +49,13 @@ def _positive_integer(value: str) -> int:
     parsed = int(value)
     if parsed < 1:
         raise argparse.ArgumentTypeError("must be at least one")
+    return parsed
+
+
+def _integer_at_least_two(value: str) -> int:
+    parsed = int(value)
+    if parsed < 2:
+        raise argparse.ArgumentTypeError("must be at least two")
     return parsed
 
 
@@ -100,6 +112,48 @@ def _build_parser() -> argparse.ArgumentParser:
         "corpus",
         type=Path,
         help="path to a corpus JSON file or modular atlas directory",
+    )
+    evaluate_parser = corpus_commands.add_parser(
+        "evaluate",
+        help="evaluate selected symbolic and frozen-callable Atlas v2 records",
+    )
+    evaluate_parser.add_argument("corpus", type=Path, help="path to an Atlas v2 directory")
+    evaluate_parser.add_argument(
+        "--record",
+        action="append",
+        dest="record_ids",
+        help="record ID to evaluate; repeat to select multiple records (default: all)",
+    )
+    evaluate_parser.add_argument("-o", "--output", type=Path, help="write the JSON report")
+    evaluate_parser.add_argument(
+        "--symbolic-tolerance",
+        type=_positive_float,
+        default=1e-9,
+        help="symbolic counterexample threshold (default: 1e-9)",
+    )
+    evaluate_parser.add_argument(
+        "--callable-tolerance",
+        type=_positive_float,
+        default=1e-6,
+        help="callable counterexample threshold (default: 1e-6)",
+    )
+    evaluate_parser.add_argument(
+        "--samples-per-axis",
+        type=_integer_at_least_two,
+        default=5,
+        help="deterministic samples per coordinate axis (default: 5)",
+    )
+    evaluate_parser.add_argument(
+        "--symbolic-timeout",
+        type=_positive_float,
+        default=2.0,
+        help="seconds allowed for each symbolic check (default: 2)",
+    )
+    evaluate_parser.add_argument(
+        "--max-expression-ops",
+        type=_positive_integer,
+        default=10_000,
+        help="maximum input operations admitted to a symbolic check (default: 10000)",
     )
     template_parser = subcommands.add_parser(
         "template", help="inspect candidate-free PDE problem templates"
@@ -225,6 +279,35 @@ def _run_corpus_validate(arguments: argparse.Namespace) -> int:
     return 0
 
 
+def _run_corpus_evaluate(arguments: argparse.Namespace) -> int:
+    try:
+        payload = evaluate_cross_artifact_atlas(
+            arguments.corpus,
+            record_ids=arguments.record_ids,
+            options=AtlasEvaluationOptions(
+                symbolic_tolerance=arguments.symbolic_tolerance,
+                callable_tolerance=arguments.callable_tolerance,
+                samples_per_axis=arguments.samples_per_axis,
+                symbolic_timeout=arguments.symbolic_timeout,
+                max_expression_ops=arguments.max_expression_ops,
+            ),
+        )
+    except (AtlasEvaluationError, OSError, ValueError) as error:
+        print(f"pdecert: {error}", file=sys.stderr)
+        return INPUT_ERROR
+
+    rendered = json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    if arguments.output is None:
+        print(rendered, end="")
+    else:
+        try:
+            arguments.output.write_text(rendered)
+        except OSError as error:
+            print(f"pdecert: {error}", file=sys.stderr)
+            return INPUT_ERROR
+    return 0
+
+
 def _run_template_validate(arguments: argparse.Namespace) -> int:
     try:
         template = load_template(arguments.template)
@@ -276,6 +359,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run_verify(arguments)
     if arguments.command == "corpus" and arguments.corpus_command == "validate":
         return _run_corpus_validate(arguments)
+    if arguments.command == "corpus" and arguments.corpus_command == "evaluate":
+        return _run_corpus_evaluate(arguments)
     if arguments.command == "template" and arguments.template_command == "validate":
         return _run_template_validate(arguments)
     if arguments.command == "run" and arguments.run_command == "validate":

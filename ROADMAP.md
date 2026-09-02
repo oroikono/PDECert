@@ -54,9 +54,12 @@ callable artifacts as first-class, digest-checked records under one candidate-
 free problem ID. The open-model prompt substantially cues the expected
 traveling front, and both mixed records remain pending. A digest-bound,
 artifact-aware blind-review and guarded annotation-import path is available, but
-no independent mixed label, baseline, or immutable release has been completed.
-The gate therefore remains incomplete pending independent review and broader
-documented coverage across more than one natural matched problem.
+no independent mixed label, comparative baseline, or immutable release has been
+completed. A versioned runner now evaluates selected typed records through their
+compatible symbolic or callable backend while retaining separate evidence and
+reproduction settings. The gate therefore remains incomplete pending
+independent review and broader documented coverage across more than one natural
+matched problem.
 
 ## v0.1: dependable verification interface
 

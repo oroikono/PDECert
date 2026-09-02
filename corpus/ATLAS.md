@@ -42,9 +42,11 @@ one Qwen3/Fisher--KPP symbolic artifact and one separately trained PINN under th
 same problem ID. Core validation does not import PyTorch or execute either
 artifact.
 
-Version 2 is an intake, representation, and guarded independent-review contract.
-Its mixed records remain `pending`, and the baseline and immutable-release
-pipeline has not yet been generalized to callable models. Numerical fields and
+Version 2 is an intake, representation, guarded independent-review, and
+per-record evaluation contract. Its mixed records remain `pending`. The
+versioned evaluator can run symbolic and restricted frozen-callable records
+without combining their evidence, but baseline comparison and immutable-release
+tooling have not yet been generalized to mixed records. Numerical fields and
 generated solver programs likewise need explicit formats and security
 boundaries before they enter a release.
 
@@ -156,6 +158,18 @@ also validates template/artifact compatibility, every bundle digest, and the
 transported frozen-callable integrity claim. It then prints a compact coverage
 summary. Validation neither evaluates the PDE nor establishes that a human
 label is correct.
+
+Evaluate compatible version-2 records separately after validation:
+
+```bash
+pdecert corpus evaluate corpus/matched \
+  --callable-tolerance 0.001 \
+  --samples-per-axis 6
+```
+
+The output is bound to the loaded Atlas digest and contains one complete report
+per record with no aggregate status. See
+[`docs/atlas-evaluation.md`](../docs/atlas-evaluation.md).
 
 ## Explicit coverage taxonomy
 

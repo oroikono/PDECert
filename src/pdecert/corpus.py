@@ -871,6 +871,30 @@ def load_cross_artifact_atlas(path: str | Path) -> dict[str, Any]:
     }
 
 
+def cross_artifact_atlas_sha256(value: object) -> str:
+    """Hash the canonical loaded Atlas v2 content used by reviews and evaluations.
+
+    The input is the validated, in-memory Atlas representation returned by
+    :func:`load_cross_artifact_atlas`. Review-neutral files such as ``README.md``
+    and ``coverage.json`` are not part of that representation. Candidate,
+    problem, provenance, annotation, and digest-bound artifact contents are.
+    """
+
+    atlas = _object(value, "$")
+    if atlas.get("atlas_version") != CROSS_ARTIFACT_ATLAS_VERSION:
+        raise _error("$.atlas_version", f"expected {CROSS_ARTIFACT_ATLAS_VERSION}")
+    try:
+        encoded = json.dumps(
+            atlas,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode()
+    except (TypeError, ValueError) as error:
+        raise CorpusError(f"Atlas v2 cannot be hashed as strict JSON: {error}") from error
+    return hashlib.sha256(encoded).hexdigest()
+
+
 def load_corpus_source(path: str | Path) -> dict[str, Any]:
     """Load either a monolithic corpus file or a modular atlas directory."""
 
