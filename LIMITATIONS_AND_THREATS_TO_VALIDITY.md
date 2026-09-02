@@ -132,6 +132,14 @@ identity.
   but do not prove platform-independent optimization or evaluation.
 - Content digests establish byte identity, not scientific correctness,
   reproducibility of stochastic training, or equivalence of two artifacts.
+- Atlas v2 transport validation checks that a frozen callable is consistent
+  with its declared artifact, configuration, weight, and source-file digests.
+  It does not prove that the referenced training run occurred. Full repository
+  reproduction is a separate check, and mixed-record blind review and immutable
+  release tooling are not yet implemented.
+- A symbolic Atlas artifact records parsed field expressions beside a bound raw
+  response. Structural validation does not establish that the parser or human
+  transcription preserved the intended semantics of that response.
 
 Restricted parsing reduces the attack surface for symbolic inputs, but complex
 valid expressions may still consume substantial CPU or memory. Do not expose

@@ -1,0 +1,10 @@
+{
+  "artifact_id": "qwen3-fisher-kpp-01",
+  "artifact_kind": "symbolic_expression",
+  "artifact_version": 1,
+  "fields": {
+    "u": "(1 + exp(x/sqrt(6) - 5*t/6))**(-2)"
+  },
+  "problem_id": "fisher-kpp-classical-01",
+  "raw_output_sha256": "fd4496138199cf29b9b0d3a829fd7ffd7a986711664b19ac01788e3911653ef1"
+}

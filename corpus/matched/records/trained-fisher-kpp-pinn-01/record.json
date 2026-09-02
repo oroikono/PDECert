@@ -1,0 +1,38 @@
+{
+  "annotation": {
+    "annotators": [],
+    "failure_modes": [],
+    "rationale": null,
+    "status": "pending",
+    "verdict": null
+  },
+  "artifact_type": "callable_model",
+  "files": {
+    "artifact": {
+      "path": "artifact.json",
+      "sha256": "a76c387c7269b91088c0a1d1024fc7379311a2114da76a90c0146713871d9f9b"
+    },
+    "integrity": {
+      "path": "integrity.json",
+      "sha256": "9866c7c6b01cb212f75e1136e344319d3dfb18f2c117cf8144d12f8223537f93"
+    },
+    "problem": {
+      "path": "template.json",
+      "sha256": "8d6248c31072d4bc7e109f697ce2637c00420683a68edab7ae99624bc1f6d4a6"
+    }
+  },
+  "id": "trained-fisher-kpp-pinn-01",
+  "origin": {
+    "generated_at": "2026-09-01T05:27:19.559159+00:00",
+    "identifier": "fisher-kpp-pinn-seed-20260901",
+    "input": "{\"method\":\"physics_informed_collocation\",\"seed\":20260901,\"steps\":3000,\"optimizer\":\"Adam\",\"learning_rate\":0.003}",
+    "kind": "trained_model",
+    "license": "MIT",
+    "producer": "PDECert PyTorch training fixture",
+    "revision": "9e0cf579a302e1c8a43f433efb15c20db8c09f03",
+    "source_url": "https://github.com/oroikono/PDECert",
+    "version": "torch-2.13.0"
+  },
+  "problem_id": "fisher-kpp-classical-01",
+  "record_version": 1
+}

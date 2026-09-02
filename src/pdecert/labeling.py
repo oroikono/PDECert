@@ -32,6 +32,8 @@ def apply_review(
         raise ReviewError("independent human review must be explicitly confirmed")
     if not isinstance(annotator, str) or not annotator.strip():
         raise ReviewError("annotator must be a non-empty identifier")
+    if isinstance(corpus, Mapping) and corpus.get("atlas_version") == 2:
+        raise ReviewError("mixed Atlas v2 review import is not implemented")
     validate_corpus(corpus)
     if not isinstance(corpus, Mapping):
         raise ReviewError("corpus must be an object")

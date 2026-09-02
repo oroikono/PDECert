@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdecert.org/schema/symbolic-artifact-v1.schema.json",
+  "title": "PDECert symbolic solution artifact v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact_version",
+    "artifact_id",
+    "artifact_kind",
+    "problem_id",
+    "fields",
+    "raw_output_sha256"
+  ],
+  "properties": {
+    "artifact_version": { "const": 1 },
+    "artifact_id": { "type": "string", "minLength": 1 },
+    "artifact_kind": { "const": "symbolic_expression" },
+    "problem_id": { "type": "string", "minLength": 1 },
+    "fields": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    },
+    "raw_output_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

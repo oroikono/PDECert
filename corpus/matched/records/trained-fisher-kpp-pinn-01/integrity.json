@@ -1,0 +1,32 @@
+{
+  "artifact_path": "corpus/matched/records/trained-fisher-kpp-pinn-01/artifact.json",
+  "artifact_sha256": "a76c387c7269b91088c0a1d1024fc7379311a2114da76a90c0146713871d9f9b",
+  "base_revision": "9e0cf579a302e1c8a43f433efb15c20db8c09f03",
+  "configuration_sha256": "2919e8167296b8c92b840ec236ca589681c625e8f9251803c78709ee0f2a39bb",
+  "schema_version": 2,
+  "source_files_sha256": {
+    "benchmarks/matched/fisher-kpp-classical-01/template.json": "8d6248c31072d4bc7e109f697ce2637c00420683a68edab7ae99624bc1f6d4a6",
+    "corpus/community/records/qwen3-fisher-kpp-01/case.json": "44b91d46af6a5d723b56e60dbd88d8d4f81d560008d4d732731cea066cb5d12e",
+    "corpus/community/records/qwen3-fisher-kpp-01/raw-output.txt": "fd4496138199cf29b9b0d3a829fd7ffd7a986711664b19ac01788e3911653ef1",
+    "corpus/community/records/qwen3-fisher-kpp-01/record.json": "d326cb6de1d119ecbc3ba6ed57b8cffdd46391e6ca8d7d904ad7bed88a897d53",
+    "experiments/train_fisher_kpp_pinn.py": "9a397b413f8a3b160a46fee10151edf9ecfe1b971e348046ebbe7d93d95d586f",
+    "experiments/trained_fisher_kpp_pair.py": "e4f294824ce82854062d356f147185bb86e6411b3add46a21ef98bcf1d3d8ee0",
+    "schema/frozen-callable-integrity-v2.schema.json": "80722ac173fec9003448a4ad83772c1848d907ec1f658a7f2e72864116a206fe",
+    "schema/frozen-callable-v1.schema.json": "2b67b826442cc1e89ef2860d8678a148e4213fe5f0448547c41a7f9f217c9d67",
+    "src/pdecert/artifacts.py": "7fb4d000e1b63d6735334d931c38c900a99f63d6ce86a380db6801ca31dccc5d",
+    "src/pdecert/autodiff.py": "1df0767400cd5f4dc74f8dc96e1e5682c14097dd662eae4b33a526d9e24a77f7",
+    "src/pdecert/checks.py": "b7d0f3964eb8a3f957fa97cb039125f073a118ffb71358ee5ea2f220a4ca1d96",
+    "src/pdecert/compiler.py": "6f13df8ab355a1ce8978249715420f73531d6fb30a79684e22967ab739035138",
+    "src/pdecert/core.py": "5440d47c28d15838a8c89418da259bab2381ba7d947e517dec4318575fd61b72",
+    "src/pdecert/evidence.py": "2650c88b9e39d7eaa1a82ac552137520362117eb9f08aecfaef7adc619b9c1b8",
+    "src/pdecert/frozen_callable.py": "6dc5d65b89de37870f0052479b86b00f998511e95726ae2dd6ae9a2c566e5452",
+    "src/pdecert/matched.py": "affac12ddf92b9e84f8789f5955240257b116de489af9549757bbde1a8ca2f5e",
+    "src/pdecert/schema.py": "71d6aa1c219b62d04ef137422bc5cbf0f50e0c1ce6606ea892f89e2a64efe533",
+    "src/pdecert/templates.py": "ff17fcfc8084319f4155322dd8c2565bbdef42aa2bcfcf7bf2f9028818144978"
+  },
+  "training_run": {
+    "executor": "local-cpu",
+    "run_id": "fisher-kpp-seed-20260901"
+  },
+  "weights_sha256": "c9fba1de62e5be56b1e6da6c4823cf3f800aac61968e89f44b208aa29c896320"
+}

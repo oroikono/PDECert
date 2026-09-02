@@ -22,6 +22,10 @@ class ReviewSessionError(ValueError):
 def new_review(corpus: Mapping[str, object]) -> dict[str, object]:
     """Return an empty review document with the corpus record order."""
 
+    if corpus.get("atlas_version") == 2:
+        raise ReviewSessionError(
+            "mixed Atlas v2 review is not implemented; records must remain pending"
+        )
     return {
         "review_version": 1,
         "records": [

@@ -95,6 +95,12 @@ that are not the digest-bound inputs, binds the decision-relevant evaluator
 sources, and records Python, platform, PDECert, SymPy, and PyTorch versions in
 the result.
 
+The same Fisher--KPP artifacts also form the first typed
+[`corpus/matched`](../corpus/matched/README.md) Atlas v2 pair. The symbolic and
+callable records share `problem_id: fisher-kpp-classical-01`, while retaining
+separate artifact bytes, origins, and pending annotations. This is a corpus
+representation milestone, not an additional verification result.
+
 ## Reproduce
 
 Install the optional backend and evaluate both committed pairs:

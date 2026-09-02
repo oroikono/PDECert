@@ -236,3 +236,6 @@ The preferred sequence is:
   bind problem, candidate, evaluator, and report bytes without upgrading evidence.
 - [`ADR-0009`](docs/adr/0009-versioned-evidence-reports.md): reports expose
   versioned, obligation-level evidence while retaining compatibility summaries.
+- [`ADR-0010`](docs/adr/0010-typed-cross-artifact-atlas-records.md): typed Atlas
+  bundles bind candidate-free problems to symbolic or frozen-callable artifacts
+  without turning content identity into verification evidence.

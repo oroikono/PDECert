@@ -33,21 +33,27 @@ real use.
 
 ## Current and planned artifact lanes
 
-The version 1 corpus currently serializes symbolic expressions from open
+The version 1 community corpus serializes symbolic expressions from open
 models, symbolic solvers, and explicitly identified synthetic constructions.
-The repository now has a portable, non-executing frozen-callable format for one
-bounded dense-tanh network class. It preserves model identity and can be
-materialized explicitly for empirical automatic-differentiation checks. The
-version 1 corpus schema still cannot bind that artifact, its integrity record,
-and its candidate-free operator template as one reviewed record. Numerical
-fields and generated solver programs likewise need explicit formats and
-security boundaries before they enter a release.
+Atlas version 2 adds typed bundles that bind a candidate-free problem template
+to either a symbolic expression artifact or the portable, non-executing frozen
+callable format. The initial [`corpus/matched`](matched/README.md) preview holds
+one Qwen3/Fisher--KPP symbolic artifact and one separately trained PINN under the
+same problem ID. Core validation does not import PyTorch or execute either
+artifact.
+
+Version 2 is currently an intake and representation contract. Its mixed records
+remain `pending`, and the version-1 blind-review and release pipeline has not
+yet been generalized to callable models. Numerical fields and generated solver
+programs likewise need explicit formats and security boundaries before they
+enter a release.
 
 Until those formats exist:
 
 - submit symbolic records as corpus data;
 - submit callable and PINN cases through the failure-case issue form so a
-  maintainer can determine whether the restricted frozen format applies;
+  maintainer can determine whether the restricted frozen format and Atlas v2
+  record apply;
 - submit neural-operator, numerical, or generated-program cases through the same
   issue form until their representation contracts exist;
 - do not convert an unsupported artifact into a symbolic expression and present
@@ -55,8 +61,8 @@ Until those formats exist:
 
 ## Modular record bundles
 
-The community atlas stores one contribution per directory so unrelated pull
-requests do not edit the same large JSON document:
+Both Atlas versions store one contribution per directory so unrelated pull
+requests do not edit the same large JSON document. Version 1 uses:
 
 ~~~text
 community-atlas/
@@ -75,6 +81,33 @@ files or symlinked record directories are rejected.
 
 The monolithic corpus format remains supported for immutable releases and
 backward compatibility.
+
+Version 2 separates the problem from the candidate and digest-binds each file:
+
+~~~text
+matched-atlas/
+├── atlas.json
+├── coverage.json
+└── records/
+    └── <record-id>/
+        ├── record.json
+        ├── template.json
+        ├── artifact.json
+        ├── raw-output.txt  # symbolic records only
+        └── integrity.json  # frozen callables only
+~~~
+
+The shared `problem_id` groups unlike artifacts without combining their
+reports. The symbolic artifact records parsed fields beside the exact raw-
+output digest; validation does not prove that the extraction was semantically
+correct. A callable record binds the restricted frozen model to its
+configuration, weights, and source-digest inventory. File digests establish
+content identity only; they do not prove provenance claims or PDE correctness.
+The public contracts are
+[`atlas-v2.schema.json`](../schema/atlas-v2.schema.json),
+[`atlas-v2-record-v1.schema.json`](../schema/atlas-v2-record-v1.schema.json),
+and [`symbolic-artifact-v1.schema.json`](../schema/symbolic-artifact-v1.schema.json).
+See [ADR-0010](../docs/adr/0010-typed-cross-artifact-atlas-records.md).
 
 ## Record lifecycle
 
@@ -102,11 +135,15 @@ When contributing a versioned corpus file, validate it locally:
 ```bash
 pdecert corpus validate path/to/corpus.json
 pdecert corpus validate path/to/modular-atlas
+pdecert corpus validate corpus/matched
 ```
 
-The command validates every embedded case, origin record, raw-output digest,
-annotation state, and record identifier. It then prints a compact coverage
-summary. Validation does not establish that a human label is correct.
+For version 1, the command validates every embedded case, origin record,
+raw-output digest, annotation state, and record identifier. For version 2, it
+also validates template/artifact compatibility, every bundle digest, and the
+transported frozen-callable integrity claim. It then prints a compact coverage
+summary. Validation neither evaluates the PDE nor establishes that a human
+label is correct.
 
 ## Explicit coverage taxonomy
 

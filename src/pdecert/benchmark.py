@@ -187,6 +187,8 @@ def evaluate_corpus(
 ) -> dict[str, Any]:
     """Evaluate three checkers, refusing any corpus with pending annotations."""
 
+    if isinstance(corpus, Mapping) and corpus.get("atlas_version") == 2:
+        raise BenchmarkError("the symbolic benchmark does not evaluate mixed Atlas v2 records")
     validate_corpus(corpus)
     if not isinstance(corpus, Mapping):
         raise BenchmarkError("corpus must be an object")

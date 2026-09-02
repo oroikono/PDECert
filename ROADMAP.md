@@ -49,11 +49,13 @@ Two nonlinear symbolic/trained-callable fixtures now exercise this gate: a
 viscous Burgers traveling wave and a Fisher--KPP traveling front. The latter
 binds a preserved open-model response to a separately trained PINN through the
 portable frozen-callable contract and exposes a held-out residual failure even
-after low training loss. The open-model prompt substantially cues the expected
-traveling front, its human annotation remains pending, and the corpus still
-cannot bind the frozen model as a first-class record. The gate therefore remains
-incomplete pending a reviewed callable-corpus contract and broader documented
-coverage.
+after low training loss. Atlas v2 now binds the Fisher--KPP symbolic and frozen
+callable artifacts as first-class, digest-checked records under one candidate-
+free problem ID. The open-model prompt substantially cues the expected
+traveling front, both mixed records remain pending, and the mixed-record review,
+baseline, and immutable release paths are not complete. The gate therefore
+remains incomplete pending independent review and broader documented coverage
+across more than one natural matched problem.
 
 ## v0.1: dependable verification interface
 
