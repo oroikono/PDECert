@@ -128,8 +128,8 @@ identity.
 - Domain singularity enumeration is conservative but incomplete. Failure to
   enumerate a singularity is not a global regularity theorem.
 - PyTorch results can vary with device, dtype, kernels, compiler settings, and
-  version. The frozen Burgers fixture records its environment but does not prove
-  platform-independent optimization or evaluation.
+  version. The frozen Burgers and Fisher--KPP fixtures record their environments
+  but do not prove platform-independent optimization or evaluation.
 - Content digests establish byte identity, not scientific correctness,
   reproducibility of stochastic training, or equivalence of two artifacts.
 
@@ -155,9 +155,11 @@ Every public audit must publish its coverage matrix and unresolved blind spots.
 
 Exact solutions and injected perturbations provide controlled tests, but can
 make verification look easier than naturally generated failures. The trained
-Burgers fixture is one small network, one problem, and one training setup. It is
-an end-to-end artifact-contract test, not a claim of state-of-the-art PINN
-evaluation.
+Burgers and Fisher--KPP fixtures are two small networks and two training setups.
+The Fisher--KPP prompt exposes the expected traveling-front form through its
+declared traces, and the preserved open-model proposal still awaits independent
+human review. These fixtures test artifact and evidence contracts; they are not
+claims of state-of-the-art PINN evaluation or representative LLM reasoning.
 
 ### Labels and reference uncertainty
 

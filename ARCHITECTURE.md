@@ -65,6 +65,7 @@ be copied into new modules.
 | `evidence.py` | Typed obligation evidence, witnesses, and rigorous-bound scope | Keep evidence kinds scientifically distinct and strict-JSON serializable. |
 | `reports.py` | Strict loading and deterministic dumping of versioned evidence reports | Reject unknown versions and inconsistent evidence; preserve conservative summaries. |
 | `artifacts.py` | Representation-neutral candidate identity plus concrete artifact types | Add an artifact only after its native evaluation semantics are understood. |
+| `frozen_callable.py` | Strict non-executing JSON identity, integrity validation, and explicit materialization for a bounded dense-MLP callable class | Keep loading PyTorch-free; hashes establish identity only, and materialized sampled success remains inconclusive. |
 | `checks.py` | Symbolic checker protocol, registry, built-in checks, and evidence aggregation | New symbolic methods implement `Checker`; they do not add branches to the orchestrator. |
 | `autodiff.py` | Callable problem description and PyTorch residual evaluation | Keep PyTorch optional and sampled success inconclusive. |
 | `compiler.py` | Restricted lowering from retained operator sources to callable residuals | Reject unsupported semantics before evaluation; do not transfer evidence between artifacts. |

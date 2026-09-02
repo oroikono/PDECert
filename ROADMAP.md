@@ -45,10 +45,15 @@ These gates replace a raw 100-record target as the primary research milestone.
 Corpus growth still matters, but only together with artifact, family, origin,
 and evaluator-disagreement coverage.
 
-The first nonlinear symbolic/trained-callable fixture now exercises this gate
-for one viscous Burgers problem. The gate remains incomplete until multiple
-independently generated and trained pairs are represented in the corpus with
-documented coverage.
+Two nonlinear symbolic/trained-callable fixtures now exercise this gate: a
+viscous Burgers traveling wave and a Fisher--KPP traveling front. The latter
+binds a preserved open-model response to a separately trained PINN through the
+portable frozen-callable contract and exposes a held-out residual failure even
+after low training loss. The open-model prompt substantially cues the expected
+traveling front, its human annotation remains pending, and the corpus still
+cannot bind the frozen model as a first-class record. The gate therefore remains
+incomplete pending a reviewed callable-corpus contract and broader documented
+coverage.
 
 ## v0.1: dependable verification interface
 
@@ -116,6 +121,8 @@ Next:
   environment, and report identity across symbolic, callable, and agent lanes;
 - automatic-differentiation residual, initial-condition, and boundary-condition
   checks that conservatively abstain after sampled success;
+- a portable, non-executing frozen dense-MLP artifact with strict shape,
+  finite-value, and content-integrity validation;
 - adapters for common SymPy and symbolic-regression workflows;
 - a small agent tool that returns a certificate, counterexample, or inconclusive result;
 - a provider-backed smolagents runner with complete proposal, rejection, and

@@ -35,17 +35,21 @@ real use.
 
 The version 1 corpus currently serializes symbolic expressions from open
 models, symbolic solvers, and explicitly identified synthetic constructions.
-The repository can already check PyTorch callables in
-memory, but it does not yet define a portable corpus representation for model
-weights and executable residual operators. Numerical fields and generated
-solver programs likewise need explicit formats and security boundaries before
-they enter a release.
+The repository now has a portable, non-executing frozen-callable format for one
+bounded dense-tanh network class. It preserves model identity and can be
+materialized explicitly for empirical automatic-differentiation checks. The
+version 1 corpus schema still cannot bind that artifact, its integrity record,
+and its candidate-free operator template as one reviewed record. Numerical
+fields and generated solver programs likewise need explicit formats and
+security boundaries before they enter a release.
 
 Until those formats exist:
 
 - submit symbolic records as corpus data;
-- submit callable, PINN, neural-operator, numerical, or generated-program cases
-  through the failure-case issue form;
+- submit callable and PINN cases through the failure-case issue form so a
+  maintainer can determine whether the restricted frozen format applies;
+- submit neural-operator, numerical, or generated-program cases through the same
+  issue form until their representation contracts exist;
 - do not convert an unsupported artifact into a symbolic expression and present
   it as the original output.
 
