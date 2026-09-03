@@ -113,6 +113,22 @@ python -m experiments.apply_review private-reviews/matched-review.json \
 The committed matched records remain `pending`; these commands provide a review
 and import protocol, not precomputed ground truth.
 
+Evaluate either record—or both—through the compatible backend without combining
+their evidence:
+
+```bash
+pip install -e ".[autodiff]"
+pdecert corpus evaluate corpus/matched \
+  --callable-tolerance 0.001 \
+  --samples-per-axis 6 \
+  --output matched-evaluation.json
+```
+
+The versioned output has no overall status: exact symbolic evidence and sampled
+callable evidence remain attached to their own records. A symbolic-only
+`--record qwen3-fisher-kpp-01` run works without PyTorch. See the
+[`typed Atlas evaluation contract`](docs/atlas-evaluation.md).
+
 Open-model batches follow a
 [predeclared, resumable collection protocol](docs/atlas-open-model-collection.md)
 that retains raw responses and accounts for outputs that cannot be materialized.

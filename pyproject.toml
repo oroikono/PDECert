@@ -54,6 +54,7 @@ agents = [
   "smolagents>=1.26,<2",
 ]
 dev = [
+  "jsonschema>=4.23,<5",
   "pytest>=8",
   "ruff==0.12.5",
 ]

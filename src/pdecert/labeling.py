@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import copy
-import hashlib
-import json
 from collections.abc import Mapping
 
 from .corpus import (
@@ -12,6 +10,7 @@ from .corpus import (
     FAILURE_MODES,
     REVIEW_BASIS_KINDS,
     VERDICTS,
+    cross_artifact_atlas_sha256,
     typed_review_bases,
     validate_corpus,
 )
@@ -32,8 +31,7 @@ def _error(path: str, message: str) -> ReviewError:
 def review_source_sha256(source: object) -> str:
     """Return the canonical digest that binds a review to loaded source data."""
 
-    encoded = json.dumps(source, sort_keys=True, separators=(",", ":")).encode()
-    return hashlib.sha256(encoded).hexdigest()
+    return cross_artifact_atlas_sha256(source)
 
 
 def allowed_review_bases(artifact_type: str, verdict: str) -> tuple[str, ...]:

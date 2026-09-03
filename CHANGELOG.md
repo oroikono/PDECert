@@ -6,6 +6,9 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- A versioned Atlas v2 evaluator and CLI for symbolic and restricted frozen-
+  callable records, with exact content binding, explicit reproduction options,
+  complete per-record reports, and no cross-artifact status aggregation.
 - A digest-bound Atlas v2 blind-review contract with artifact-aware review
   bases enforced by the importer, loader, writer, and public schema, plus atomic
   annotation import that preserves candidate and problem bytes.

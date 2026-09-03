@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/oroikono/PDECert/blob/main/schema/atlas-evaluation-v1.schema.json",
+  "title": "PDECert Atlas evaluation report version 1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "atlas",
+    "evaluation_version",
+    "evidence_policy",
+    "options",
+    "records",
+    "runtime"
+  ],
+  "properties": {
+    "atlas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["atlas_version", "name", "sha256"],
+      "properties": {
+        "atlas_version": {"const": 2},
+        "name": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "evaluation_version": {"const": 1},
+    "evidence_policy": {"const": "per_record_no_aggregation"},
+    "options": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "callable_tolerance",
+        "max_expression_ops",
+        "samples_per_axis",
+        "symbolic_timeout",
+        "symbolic_tolerance"
+      ],
+      "properties": {
+        "callable_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "max_expression_ops": {"type": "integer", "minimum": 1},
+        "samples_per_axis": {"type": "integer", "minimum": 2},
+        "symbolic_timeout": {"type": "number", "exclusiveMinimum": 0},
+        "symbolic_tolerance": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "records": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "artifact_id",
+          "artifact_type",
+          "evaluator",
+          "problem_id",
+          "record_id",
+          "report"
+        ],
+        "properties": {
+          "artifact_id": {"type": "string", "minLength": 1},
+          "artifact_type": {"enum": ["symbolic_expression", "callable_model"]},
+          "evaluator": {"enum": ["pdecert_symbolic", "pdecert_autodiff"]},
+          "problem_id": {"type": "string", "minLength": 1},
+          "record_id": {"type": "string", "minLength": 1},
+          "report": {"$ref": "report-v1.schema.json"}
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {"artifact_type": {"const": "symbolic_expression"}},
+              "required": ["artifact_type"]
+            },
+            "then": {
+              "properties": {"evaluator": {"const": "pdecert_symbolic"}}
+            }
+          },
+          {
+            "if": {
+              "properties": {"artifact_type": {"const": "callable_model"}},
+              "required": ["artifact_type"]
+            },
+            "then": {
+              "properties": {
+                "evaluator": {"const": "pdecert_autodiff"},
+                "report": {
+                  "properties": {
+                    "status": {"enum": ["REFUTED", "INCONCLUSIVE"]},
+                    "decision_evidence": {"enum": ["EMPIRICAL", null]},
+                    "evidence_events": {
+                      "items": {
+                        "properties": {
+                          "kind": {
+                            "enum": [
+                              "EMPIRICAL_COUNTEREXAMPLE",
+                              "EMPIRICAL_PASS",
+                              "ABSTENTION"
+                            ]
+                          },
+                          "level": {"enum": ["EMPIRICAL", null]}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pdecert_version", "python_version", "sympy_version"],
+      "properties": {
+        "pdecert_version": {"type": "string", "minLength": 1},
+        "python_version": {"type": "string", "minLength": 1},
+        "sympy_version": {"type": "string", "minLength": 1},
+        "torch_version": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

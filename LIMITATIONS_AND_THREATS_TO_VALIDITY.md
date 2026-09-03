@@ -135,9 +135,10 @@ identity.
 - Atlas v2 transport validation checks that a frozen callable is consistent
   with its declared artifact, configuration, weight, and source-file digests.
   It does not prove that the referenced training run occurred. Full repository
-  reproduction is a separate check. Artifact-aware blind review and guarded
-  annotation import are available, but the current mixed records are still
-  pending and immutable mixed-release tooling is not implemented.
+  reproduction is a separate check. Artifact-aware blind review, guarded
+  annotation import, and per-record symbolic/callable evaluation are available,
+  but the current mixed records are still pending and comparative baseline and
+  immutable mixed-release tooling are not implemented.
 - A symbolic Atlas artifact records parsed field expressions beside a bound raw
   response. Structural validation does not establish that the parser or human
   transcription preserved the intended semantics of that response.
