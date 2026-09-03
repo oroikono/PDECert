@@ -64,7 +64,49 @@
           "problem_id": {"type": "string", "minLength": 1},
           "record_id": {"type": "string", "minLength": 1},
           "report": {"$ref": "report-v1.schema.json"}
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {"artifact_type": {"const": "symbolic_expression"}},
+              "required": ["artifact_type"]
+            },
+            "then": {
+              "properties": {"evaluator": {"const": "pdecert_symbolic"}}
+            }
+          },
+          {
+            "if": {
+              "properties": {"artifact_type": {"const": "callable_model"}},
+              "required": ["artifact_type"]
+            },
+            "then": {
+              "properties": {
+                "evaluator": {"const": "pdecert_autodiff"},
+                "report": {
+                  "properties": {
+                    "status": {"enum": ["REFUTED", "INCONCLUSIVE"]},
+                    "decision_evidence": {"enum": ["EMPIRICAL", null]},
+                    "evidence_events": {
+                      "items": {
+                        "properties": {
+                          "kind": {
+                            "enum": [
+                              "EMPIRICAL_COUNTEREXAMPLE",
+                              "EMPIRICAL_PASS",
+                              "ABSTENTION"
+                            ]
+                          },
+                          "level": {"enum": ["EMPIRICAL", null]}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
       }
     },
     "runtime": {

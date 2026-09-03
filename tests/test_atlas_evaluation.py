@@ -1,7 +1,12 @@
+import copy
 import importlib.util
 import json
+import tempfile
 import unittest
 from pathlib import Path
+
+from jsonschema import Draft202012Validator
+from referencing import Registry, Resource
 
 from pdecert import (
     ATLAS_EVALUATION_VERSION,
@@ -21,6 +26,16 @@ ATLAS = Path("corpus/matched")
 CALLABLE_ID = "trained-fisher-kpp-pinn-01"
 SYMBOLIC_ID = "qwen3-fisher-kpp-01"
 HAS_TORCH = importlib.util.find_spec("torch") is not None
+
+
+def _evaluation_validator() -> Draft202012Validator:
+    evaluation_schema = json.loads(Path("schema/atlas-evaluation-v1.schema.json").read_text())
+    report_schema = json.loads(Path("schema/report-v1.schema.json").read_text())
+    registry = Registry().with_resource(
+        report_schema["$id"],
+        Resource.from_contents(report_schema),
+    )
+    return Draft202012Validator(evaluation_schema, registry=registry)
 
 
 def _zero_callable_record() -> dict[str, object]:
@@ -119,6 +134,22 @@ class AtlasEvaluationTests(unittest.TestCase):
         with self.assertRaisesRegex(AtlasEvaluationError, "expected 2"):
             evaluate_cross_artifact_atlas("corpus/community")
 
+    def test_empty_atlas_is_rejected_before_emitting_an_invalid_report(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "records").mkdir()
+            (root / "atlas.json").write_text(
+                json.dumps(
+                    {
+                        "atlas_version": 2,
+                        "description": "empty test Atlas",
+                        "name": "empty test Atlas",
+                    }
+                )
+            )
+            with self.assertRaisesRegex(AtlasEvaluationError, "no records to evaluate"):
+                evaluate_cross_artifact_atlas(root)
+
     def test_options_reject_non_reproducible_values(self):
         with self.assertRaisesRegex(ValueError, "samples_per_axis"):
             AtlasEvaluationOptions(samples_per_axis=1)
@@ -152,11 +183,30 @@ class AtlasEvaluationTests(unittest.TestCase):
         self.assertIsNone(record["report"]["decision_evidence"])
         self.assertTrue(record["report"]["incomplete_reasons"])
 
-    def test_public_schema_is_well_formed_json(self):
-        self.assertIsInstance(
-            json.loads(Path("schema/atlas-evaluation-v1.schema.json").read_text()),
-            dict,
-        )
+    def test_public_schema_accepts_a_genuine_symbolic_evaluation(self):
+        payload = evaluate_cross_artifact_atlas(ATLAS, record_ids=[SYMBOLIC_ID])
+
+        self.assertEqual(list(_evaluation_validator().iter_errors(payload)), [])
+
+    def test_public_schema_rejects_evidence_transferred_to_a_callable_record(self):
+        symbolic = evaluate_cross_artifact_atlas(ATLAS, record_ids=[SYMBOLIC_ID])
+        tampered = copy.deepcopy(symbolic)
+        tampered["records"][0]["artifact_type"] = "callable_model"
+        tampered["records"][0]["evaluator"] = "pdecert_autodiff"
+
+        errors = list(_evaluation_validator().iter_errors(tampered))
+
+        self.assertTrue(errors)
+        self.assertTrue(any(error.path and error.path[-1] == "status" for error in errors))
+
+    def test_public_schema_rejects_an_evaluator_artifact_mismatch(self):
+        payload = evaluate_cross_artifact_atlas(ATLAS, record_ids=[SYMBOLIC_ID])
+        payload["records"][0]["evaluator"] = "pdecert_autodiff"
+
+        errors = list(_evaluation_validator().iter_errors(payload))
+
+        self.assertTrue(errors)
+        self.assertTrue(any(error.path and error.path[-1] == "evaluator" for error in errors))
 
 
 if __name__ == "__main__":

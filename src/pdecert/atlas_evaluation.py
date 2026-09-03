@@ -195,6 +195,8 @@ def evaluate_cross_artifact_atlas(
     if atlas["atlas_version"] != CROSS_ARTIFACT_ATLAS_VERSION:
         raise AtlasEvaluationError(f"expected Atlas version {CROSS_ARTIFACT_ATLAS_VERSION}")
     records = _select_records(atlas["records"], record_ids)
+    if not records:
+        raise AtlasEvaluationError("Atlas contains no records to evaluate")
 
     evaluations: list[dict[str, object]] = []
     torch_version: str | None = None

@@ -42,6 +42,11 @@ decision-evidence field.
 - Atlas annotations are not copied into the evaluation rows and are not used to
   choose a machine result.
 
+The public schema also binds each artifact type to its evaluator. Callable
+rows reject proof statuses, exact or rigorous decision evidence, and
+non-empirical evidence events. An Atlas with no selected records is rejected
+rather than producing an empty document that looks like a completed run.
+
 Exit code `0` means that the requested records were evaluated and the complete
 document was produced. It does not mean that every record was proved. Invalid
 input, unsupported Atlas versions, missing record IDs, or a missing optional
