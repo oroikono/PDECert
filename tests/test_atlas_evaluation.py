@@ -13,11 +13,15 @@ from pdecert import (
     AtlasEvaluationError,
     AtlasEvaluationOptions,
     Status,
+    atlas_evaluation_sha256,
     canonical_frozen_weights_sha256,
     cross_artifact_atlas_sha256,
     evaluate_cross_artifact_atlas,
+    load_atlas_evaluation,
     load_cross_artifact_atlas,
     review_source_sha256,
+    summarize_atlas_evaluation,
+    validate_atlas_evaluation,
 )
 from pdecert.atlas_evaluation import _evaluate_record
 
@@ -36,6 +40,49 @@ def _evaluation_validator() -> Draft202012Validator:
         Resource.from_contents(report_schema),
     )
     return Draft202012Validator(evaluation_schema, registry=registry)
+
+
+def _summary_validator() -> Draft202012Validator:
+    schema = json.loads(Path("schema/atlas-evaluation-summary-v1.schema.json").read_text())
+    return Draft202012Validator(schema)
+
+
+def _mixed_evaluation_without_torch() -> dict[str, object]:
+    evaluation = evaluate_cross_artifact_atlas(ATLAS, record_ids=[SYMBOLIC_ID])
+    callable_record = copy.deepcopy(evaluation["records"][0])
+    callable_record.update(
+        {
+            "artifact_id": "test-callable",
+            "artifact_type": "callable_model",
+            "evaluator": "pdecert_autodiff",
+            "record_id": "test-callable-01",
+        }
+    )
+    callable_record["report"] = {
+        "aggregation_policy_version": 1,
+        "decision_evidence": None,
+        "evidence_events": [
+            {
+                "bound": None,
+                "checker": "autodiff_residual",
+                "detail": "No sampled violation exceeded tolerance.",
+                "kind": "EMPIRICAL_PASS",
+                "level": "EMPIRICAL",
+                "obligation_id": "pde_residuals[0]",
+                "outcome": "OBSERVED_PASS",
+                "witness": None,
+            }
+        ],
+        "exact_checks": {},
+        "incomplete_reasons": {"pde_residuals[0]": "finite sampled success is not proof"},
+        "max_sampled_residual": 0.0,
+        "report_version": 1,
+        "status": "INCONCLUSIVE",
+        "witness": None,
+    }
+    evaluation["records"].append(callable_record)
+    evaluation["runtime"]["torch_version"] = "test"
+    return evaluation
 
 
 def _zero_callable_record() -> dict[str, object]:
@@ -207,6 +254,98 @@ class AtlasEvaluationTests(unittest.TestCase):
 
         self.assertTrue(errors)
         self.assertTrue(any(error.path and error.path[-1] == "evaluator" for error in errors))
+
+    def test_evaluation_loader_rejects_duplicate_json_keys(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "duplicate.json"
+            path.write_text('{"evaluation_version": 1, "evaluation_version": 1}')
+
+            with self.assertRaisesRegex(AtlasEvaluationError, "duplicate object key"):
+                load_atlas_evaluation(path)
+
+    def test_evaluation_validator_rejects_callable_proof_evidence(self):
+        evaluation = _mixed_evaluation_without_torch()
+        evaluation["records"][1]["report"] = copy.deepcopy(evaluation["records"][0]["report"])
+
+        with self.assertRaisesRegex(AtlasEvaluationError, "cannot be PROVED"):
+            validate_atlas_evaluation(evaluation)
+
+    def test_evaluation_validator_requires_callable_runtime_provenance(self):
+        evaluation = _mixed_evaluation_without_torch()
+        del evaluation["runtime"]["torch_version"]
+
+        with self.assertRaisesRegex(AtlasEvaluationError, "torch_version"):
+            validate_atlas_evaluation(evaluation)
+        self.assertTrue(list(_evaluation_validator().iter_errors(evaluation)))
+
+    def test_evaluation_validator_rejects_exact_checks_on_callable_rows(self):
+        evaluation = _mixed_evaluation_without_torch()
+        evaluation["records"][1]["report"]["exact_checks"] = {"PDE": "zero"}
+
+        with self.assertRaisesRegex(AtlasEvaluationError, "symbolic exact checks"):
+            validate_atlas_evaluation(evaluation)
+        self.assertTrue(list(_evaluation_validator().iter_errors(evaluation)))
+
+    def test_evaluation_validator_wraps_extreme_numeric_values(self):
+        evaluation = evaluate_cross_artifact_atlas(ATLAS, record_ids=[SYMBOLIC_ID])
+        evaluation["records"][0]["report"]["max_sampled_residual"] = 10**4_000
+
+        with self.assertRaisesRegex(AtlasEvaluationError, "report"):
+            validate_atlas_evaluation(evaluation)
+
+        evaluation = evaluate_cross_artifact_atlas(ATLAS, record_ids=[SYMBOLIC_ID])
+        evaluation["options"]["symbolic_tolerance"] = 10**4_000
+        with self.assertRaisesRegex(AtlasEvaluationError, "finite and positive"):
+            validate_atlas_evaluation(evaluation)
+
+    def test_evaluation_digest_normalizes_equivalent_numeric_options(self):
+        integer_options = evaluate_cross_artifact_atlas(ATLAS, record_ids=[SYMBOLIC_ID])
+        integer_options["options"]["symbolic_tolerance"] = 1
+        float_options = copy.deepcopy(integer_options)
+        float_options["options"]["symbolic_tolerance"] = 1.0
+
+        self.assertEqual(
+            atlas_evaluation_sha256(integer_options),
+            atlas_evaluation_sha256(float_options),
+        )
+
+    def test_summary_is_descriptive_digest_bound_and_per_record(self):
+        evaluation = _mixed_evaluation_without_torch()
+
+        summary = summarize_atlas_evaluation(evaluation)
+
+        self.assertEqual(summary["summary_version"], 1)
+        self.assertEqual(
+            summary["evidence_policy"],
+            "descriptive_per_record_no_truth_labels",
+        )
+        self.assertNotIn("status", summary)
+        self.assertNotIn("accuracy", summary)
+        self.assertEqual(
+            summary["source"]["evaluation_sha256"], atlas_evaluation_sha256(evaluation)
+        )
+        self.assertEqual(summary["coverage"]["records"], 2)
+        self.assertEqual(summary["coverage"]["problems"], 1)
+        self.assertEqual(summary["coverage"]["cross_artifact_problems"], 1)
+        self.assertEqual(
+            summary["coverage"]["artifact_types"],
+            {"callable_model": 1, "symbolic_expression": 1},
+        )
+        self.assertEqual(summary["outcomes"]["statuses"], {"INCONCLUSIVE": 1, "PROVED": 1})
+        self.assertEqual(summary["outcomes"]["decision_evidence"], {"EXACT": 1, "NONE": 1})
+        self.assertEqual(
+            [record["record_id"] for record in summary["problems"][0]["records"]],
+            [SYMBOLIC_ID, "test-callable-01"],
+        )
+        self.assertEqual(list(_summary_validator().iter_errors(summary)), [])
+
+    def test_summary_schema_rejects_callable_proof_evidence(self):
+        summary = summarize_atlas_evaluation(_mixed_evaluation_without_torch())
+        callable_record = summary["problems"][0]["records"][1]
+        callable_record["status"] = "PROVED"
+        callable_record["decision_evidence"] = "EXACT"
+
+        self.assertTrue(list(_summary_validator().iter_errors(summary)))
 
 
 if __name__ == "__main__":
