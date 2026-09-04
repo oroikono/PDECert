@@ -87,6 +87,7 @@
                   "properties": {
                     "status": {"enum": ["REFUTED", "INCONCLUSIVE"]},
                     "decision_evidence": {"enum": ["EMPIRICAL", null]},
+                    "exact_checks": {"maxProperties": 0},
                     "evidence_events": {
                       "items": {
                         "properties": {
@@ -120,5 +121,26 @@
         "torch_version": {"type": "string", "minLength": 1}
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "records": {
+            "contains": {
+              "type": "object",
+              "properties": {"artifact_type": {"const": "callable_model"}},
+              "required": ["artifact_type"]
+            }
+          }
+        },
+        "required": ["records"]
+      },
+      "then": {
+        "properties": {
+          "runtime": {"required": ["torch_version"]}
+        }
+      }
+    }
+  ]
 }

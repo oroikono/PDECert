@@ -14,6 +14,8 @@ from .atlas_evaluation import (
     AtlasEvaluationError,
     AtlasEvaluationOptions,
     evaluate_cross_artifact_atlas,
+    load_atlas_evaluation,
+    summarize_atlas_evaluation,
 )
 from .corpus import CorpusError, load_atlas_coverage, load_corpus_source
 from .core import Status, verify
@@ -155,6 +157,16 @@ def _build_parser() -> argparse.ArgumentParser:
         default=10_000,
         help="maximum input operations admitted to a symbolic check (default: 10000)",
     )
+    summarize_parser = corpus_commands.add_parser(
+        "summarize-evaluation",
+        help="summarize a typed Atlas evaluation without aggregating evidence",
+    )
+    summarize_parser.add_argument(
+        "evaluation",
+        type=Path,
+        help="path to a version-1 Atlas evaluation JSON file",
+    )
+    summarize_parser.add_argument("-o", "--output", type=Path, help="write the JSON summary")
     template_parser = subcommands.add_parser(
         "template", help="inspect candidate-free PDE problem templates"
     )
@@ -308,6 +320,25 @@ def _run_corpus_evaluate(arguments: argparse.Namespace) -> int:
     return 0
 
 
+def _run_corpus_summarize_evaluation(arguments: argparse.Namespace) -> int:
+    try:
+        payload = summarize_atlas_evaluation(load_atlas_evaluation(arguments.evaluation))
+    except (AtlasEvaluationError, OSError, ValueError) as error:
+        print(f"pdecert: {error}", file=sys.stderr)
+        return INPUT_ERROR
+
+    rendered = json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    if arguments.output is None:
+        print(rendered, end="")
+    else:
+        try:
+            arguments.output.write_text(rendered)
+        except OSError as error:
+            print(f"pdecert: {error}", file=sys.stderr)
+            return INPUT_ERROR
+    return 0
+
+
 def _run_template_validate(arguments: argparse.Namespace) -> int:
     try:
         template = load_template(arguments.template)
@@ -361,6 +392,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run_corpus_validate(arguments)
     if arguments.command == "corpus" and arguments.corpus_command == "evaluate":
         return _run_corpus_evaluate(arguments)
+    if arguments.command == "corpus" and arguments.corpus_command == "summarize-evaluation":
+        return _run_corpus_summarize_evaluation(arguments)
     if arguments.command == "template" and arguments.template_command == "validate":
         return _run_template_validate(arguments)
     if arguments.command == "run" and arguments.run_command == "validate":

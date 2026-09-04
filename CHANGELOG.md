@@ -6,6 +6,10 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- Strict loading and digest-bound descriptive summaries for typed Atlas
+  evaluations, with per-problem artifact views and no aggregate verdict or
+  truth-label inference.
+
 - A versioned Atlas v2 evaluator and CLI for symbolic and restricted frozen-
   callable records, with exact content binding, explicit reproduction options,
   complete per-record reports, and no cross-artifact status aggregation.

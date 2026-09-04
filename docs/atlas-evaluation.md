@@ -26,6 +26,24 @@ pdecert corpus evaluate corpus/matched \
   --record qwen3-fisher-kpp-01
 ```
 
+Save an evaluation and build a descriptive comparison view with:
+
+```bash
+pdecert corpus evaluate corpus/matched \
+  --callable-tolerance 0.001 \
+  --samples-per-axis 6 \
+  --output matched-evaluation.json
+pdecert corpus summarize-evaluation matched-evaluation.json \
+  --output matched-summary.json
+```
+
+The summary groups records by problem and reports artifact, evaluator, status,
+decision-evidence, and witness counts. It is bound to the complete source
+evaluation by SHA-256. It has no overall status, accuracy, or truth labels and
+is not a substitute for the underlying obligation-level reports. Its public
+shape is
+[`schema/atlas-evaluation-summary-v1.schema.json`](../schema/atlas-evaluation-summary-v1.schema.json).
+
 ## Evidence contract
 
 The version-1 evaluation document has `evidence_policy` set to
@@ -46,6 +64,12 @@ The public schema also binds each artifact type to its evaluator. Callable
 rows reject proof statuses, exact or rigorous decision evidence, and
 non-empirical evidence events. An Atlas with no selected records is rejected
 rather than producing an empty document that looks like a completed run.
+The Python loader enforces the same lane constraints before an evaluation may
+be summarized, including strict JSON, unique record identifiers, and the rule
+that callable evidence cannot carry proof, symbolic exact checks, or
+non-empirical events. A report containing callable records must also retain the
+PyTorch runtime version. The loader rejects oversized files and excessive JSON
+nesting before they can become summary inputs.
 
 Exit code `0` means that the requested records were evaluated and the complete
 document was produced. It does not mean that every record was proved. Invalid

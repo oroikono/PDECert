@@ -6,7 +6,7 @@ from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 from experiments.adversarial_heat import build_cases
-from pdecert import VerificationCase, dump_case
+from pdecert import VerificationCase, dump_case, evaluate_cross_artifact_atlas
 from pdecert.cli import INPUT_ERROR, main
 
 
@@ -247,6 +247,53 @@ class CommandLineTests(unittest.TestCase):
 
         self.assertEqual(exit_code, INPUT_ERROR)
         self.assertIn("expected 2", errors.getvalue())
+
+    def test_corpus_summarize_evaluation_reads_a_saved_report(self):
+        evaluation = evaluate_cross_artifact_atlas(
+            "corpus/matched",
+            record_ids=["qwen3-fisher-kpp-01"],
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "evaluation.json"
+            path.write_text(json.dumps(evaluation))
+            output = io.StringIO()
+            with redirect_stdout(output):
+                exit_code = main(["corpus", "summarize-evaluation", str(path)])
+
+        summary = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(summary["summary_version"], 1)
+        self.assertEqual(summary["coverage"]["records"], 1)
+        self.assertEqual(summary["outcomes"]["statuses"], {"PROVED": 1})
+        self.assertNotIn("status", summary)
+
+    def test_corpus_summarize_evaluation_rejects_invalid_json(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "invalid.json"
+            path.write_text("{")
+            errors = io.StringIO()
+            with redirect_stderr(errors):
+                exit_code = main(["corpus", "summarize-evaluation", str(path)])
+
+        self.assertEqual(exit_code, INPUT_ERROR)
+        self.assertIn("invalid JSON", errors.getvalue())
+
+    def test_corpus_summarize_evaluation_handles_extreme_numbers_as_input_errors(self):
+        evaluation = evaluate_cross_artifact_atlas(
+            "corpus/matched",
+            record_ids=["qwen3-fisher-kpp-01"],
+        )
+        evaluation["records"][0]["report"]["max_sampled_residual"] = 10**4_000
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "extreme.json"
+            path.write_text(json.dumps(evaluation))
+            errors = io.StringIO()
+            with redirect_stderr(errors):
+                exit_code = main(["corpus", "summarize-evaluation", str(path)])
+
+        self.assertEqual(exit_code, INPUT_ERROR)
+        self.assertIn("report", errors.getvalue())
+        self.assertNotIn("Traceback", errors.getvalue())
 
 
 if __name__ == "__main__":

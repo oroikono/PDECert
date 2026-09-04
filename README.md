@@ -129,6 +129,17 @@ callable evidence remain attached to their own records. A symbolic-only
 `--record qwen3-fisher-kpp-01` run works without PyTorch. See the
 [`typed Atlas evaluation contract`](docs/atlas-evaluation.md).
 
+Saved evaluation reports can be turned into a digest-bound descriptive view:
+
+```bash
+pdecert corpus summarize-evaluation matched-evaluation.json \
+  --output matched-summary.json
+```
+
+This groups matched records and counts statuses, evidence levels, and witnesses
+without using pending annotations, reporting accuracy, or deriving an overall
+verdict.
+
 Open-model batches follow a
 [predeclared, resumable collection protocol](docs/atlas-open-model-collection.md)
 that retains raw responses and accounts for outputs that cannot be materialized.
