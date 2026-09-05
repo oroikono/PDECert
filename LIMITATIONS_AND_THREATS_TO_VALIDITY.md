@@ -115,6 +115,15 @@ identity.
 
 ## Numerical and implementation limitations
 
+- The Atlas fixed-collocation baseline is a finite-grid diagnostic. A `pass`
+  means only that represented residuals and conditions stayed within tolerance
+  at those points. It can miss localized defects, between-grid singularities,
+  oscillatory aliasing, and tolerance-scale errors; it is not a proof,
+  continuous-domain bound, or solution-error guarantee. Callable artifacts are
+  currently reported as unsupported by that adapter. A threshold exceedance can
+  itself be caused by finite-precision roundoff when the tolerance is too small;
+  it should not be interpreted as a mathematical counterexample without
+  precision-stability or independent reproduction.
 - Callable evaluation assumes that each output row depends only on the
   corresponding input row. Training-mode batch operations, cross-sample
   attention, mutable state, randomness, and hidden preprocessing can invalidate

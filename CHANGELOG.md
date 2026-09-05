@@ -6,6 +6,11 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- An explicit Atlas baseline-adapter contract and deterministic full-condition
+  fixed-collocation runner for symbolic records, with empirical-only pass/fail
+  semantics, replayable numerical-threshold witnesses, structured callable
+  abstention, resource bounds, a CLI, and a versioned report schema.
+
 - Strict loading and digest-bound descriptive summaries for typed Atlas
   evaluations, with per-problem artifact views and no aggregate verdict or
   truth-label inference.
