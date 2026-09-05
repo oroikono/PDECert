@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 import sympy as sp
 from jsonschema import Draft202012Validator
@@ -14,10 +15,13 @@ from pdecert.atlas_baselines import (
     ATLAS_BASELINE_REPORT_VERSION,
     AtlasBaselineError,
     BaselineOutcome,
+    BaselineResult,
+    BaselineWitness,
     FixedCollocationBaseline,
     evaluate_atlas_baseline,
 )
 from pdecert.corpus import load_cross_artifact_atlas
+from pdecert.corpus import cross_artifact_atlas_sha256
 from pdecert.cli import INPUT_ERROR, main
 from pdecert.templates import bind_symbolic_candidate, template_from_dict
 
@@ -31,6 +35,155 @@ SCHEMA = Path("schema/atlas-baseline-report-v1.schema.json")
 def _validator() -> Draft202012Validator:
     schema = json.loads(SCHEMA.read_text())
     return Draft202012Validator(schema)
+
+
+class _ExampleAdapter:
+    adapter_id = "example_empirical"
+    adapter_version = 1
+    accepted_artifact_types = ("symbolic_expression",)
+    accepted_solution_semantics = ("classical_strong",)
+
+    def __init__(self):
+        self.calls = []
+
+    def configuration(self):
+        return {"tolerance": 1e-9}
+
+    def evaluate_record(self, record):
+        self.calls.append(record["id"])
+        return BaselineResult(
+            BaselineOutcome.PASS,
+            "EMPIRICAL_PASS",
+            "EMPIRICAL",
+            evaluations=1,
+            max_absolute_residual=0.0,
+        )
+
+
+class BaselineExtensionTests(unittest.TestCase):
+    def test_external_adapter_receives_only_its_declared_scope(self):
+        adapter = _ExampleAdapter()
+        report = evaluate_atlas_baseline(ATLAS, adapter)
+
+        self.assertEqual(adapter.calls, [SYMBOLIC_ID])
+        self.assertEqual([row["outcome"] for row in report["records"]], ["pass", "unsupported"])
+        self.assertEqual(list(_validator().iter_errors(report)), [])
+        self.assertEqual(
+            report["atlas"]["sha256"], cross_artifact_atlas_sha256(load_cross_artifact_atlas(ATLAS))
+        )
+
+        adapter.accepted_solution_semantics = ("external_semantics",)
+        adapter.calls.clear()
+        report = evaluate_atlas_baseline(ATLAS, adapter)
+        self.assertEqual(adapter.calls, [])
+        self.assertTrue(all(row["outcome"] == "unsupported" for row in report["records"]))
+
+    def test_adapter_cannot_rewrite_the_evaluated_artifact_or_report_identity(self):
+        class MutatingAdapter(_ExampleAdapter):
+            def evaluate_record(self, record):
+                record["artifact"]["fields"]["u"] = "0"
+                record["id"] = "rewritten-record"
+                return super().evaluate_record(record)
+
+        atlas = load_cross_artifact_atlas(ATLAS)
+        original = copy.deepcopy(atlas)
+        with patch("pdecert.atlas_baselines.load_cross_artifact_atlas", return_value=atlas):
+            with self.assertRaisesRegex(AtlasBaselineError, "modified.*record"):
+                evaluate_atlas_baseline(ATLAS, MutatingAdapter(), record_ids=[SYMBOLIC_ID])
+        self.assertEqual(atlas, original)
+
+    def test_pass_constructor_rejects_nonfinite_residual_and_nonnull_reason(self):
+        for overrides in (
+            {"max_absolute_residual": "infinity"},
+            {"reason": ""},
+            {"reason": False},
+            {"reason": 0},
+        ):
+            with self.subTest(overrides=overrides), self.assertRaises(ValueError):
+                BaselineResult(
+                    **{
+                        "outcome": BaselineOutcome.PASS,
+                        "evidence_kind": "EMPIRICAL_PASS",
+                        "evidence_level": "EMPIRICAL",
+                        "evaluations": 1,
+                        "max_absolute_residual": 0.0,
+                        **overrides,
+                    }
+                )
+
+    def test_failure_constructor_requires_a_matching_typed_witness(self):
+        witness = BaselineWitness("PDE", "D(u, x)", {"x": 0.5}, 2.0)
+        for overrides in (
+            {"witness": {}},
+            {"witness": "counterexample"},
+            {"max_absolute_residual": 1.0},
+            {"reason": ""},
+        ):
+            with self.subTest(overrides=overrides), self.assertRaises(ValueError):
+                BaselineResult(
+                    **{
+                        "outcome": BaselineOutcome.FAIL,
+                        "evidence_kind": "NUMERICAL_THRESHOLD_EXCEEDANCE",
+                        "evidence_level": "EMPIRICAL",
+                        "evaluations": 1,
+                        "max_absolute_residual": 2.0,
+                        "witness": witness,
+                        **overrides,
+                    }
+                )
+
+    def test_witness_owns_immutable_sample_inputs(self):
+        inputs = {"x": 0.5}
+        witness = BaselineWitness("PDE", "D(u, x)", inputs, 2.0)
+        inputs["x"] = float("nan")
+        self.assertEqual(witness.to_dict()["sampled_inputs"], {"x": 0.5})
+        with self.assertRaises(TypeError):
+            witness.sampled_inputs["x"] = 1.0
+
+    def test_bad_adapter_scope_metadata_fails_with_a_structured_error(self):
+        for values in ((["symbolic_expression"],), ("symbolic_expression", "symbolic_expression")):
+            adapter = _ExampleAdapter()
+            adapter.accepted_artifact_types = values
+            with self.subTest(values=values), self.assertRaises(AtlasBaselineError):
+                evaluate_atlas_baseline(ATLAS, adapter)
+
+    def test_reserved_adapter_id_requires_its_documented_configuration(self):
+        class MisidentifiedAdapter(_ExampleAdapter):
+            adapter_id = "fixed_collocation"
+
+        with self.assertRaisesRegex(AtlasBaselineError, "fixed_collocation"):
+            evaluate_atlas_baseline(ATLAS, MisidentifiedAdapter())
+
+        class FutureVersion(FixedCollocationBaseline):
+            adapter_version = 2
+
+        with self.assertRaisesRegex(AtlasBaselineError, "contract"):
+            evaluate_atlas_baseline(ATLAS, FutureVersion())
+
+        for key, value in (("include_conditions", 1), ("max_evaluations", 2_000_000)):
+
+            class ChangedConfiguration(FixedCollocationBaseline):
+                def configuration(self):
+                    return {**super().configuration(), key: value}
+
+            with self.subTest(key=key), self.assertRaisesRegex(AtlasBaselineError, "contract"):
+                evaluate_atlas_baseline(ATLAS, ChangedConfiguration())
+
+    def test_external_failure_result_matches_the_schema(self):
+        class ThresholdAdapter(_ExampleAdapter):
+            def evaluate_record(self, record):
+                return BaselineResult(
+                    BaselineOutcome.FAIL,
+                    "NUMERICAL_THRESHOLD_EXCEEDANCE",
+                    "EMPIRICAL",
+                    evaluations=1,
+                    max_absolute_residual=2.0,
+                    witness=BaselineWitness("PDE", "D(u, x)", {"x": 0.5}, 2.0),
+                )
+
+        report = evaluate_atlas_baseline(ATLAS, ThresholdAdapter())
+        self.assertEqual([row["outcome"] for row in report["records"]], ["fail", "unsupported"])
+        self.assertEqual(list(_validator().iter_errors(report)), [])
 
 
 class AtlasBaselineTests(unittest.TestCase):

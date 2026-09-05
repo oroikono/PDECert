@@ -10,11 +10,13 @@ import json
 import math
 import platform
 from collections.abc import Callable, Mapping, Sequence
+from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
 from importlib.metadata import PackageNotFoundError, version as distribution_version
 from itertools import product
 from pathlib import Path
+from types import MappingProxyType
 from typing import Protocol, runtime_checkable
 
 import mpmath
@@ -70,6 +72,7 @@ class BaselineWitness:
         if self.absolute_residual != "infinity":
             if not _is_nonnegative_finite_number(self.absolute_residual):
                 raise ValueError("witness residual must be nonnegative and finite or 'infinity'")
+        object.__setattr__(self, "sampled_inputs", MappingProxyType(dict(self.sampled_inputs)))
 
     def to_dict(self) -> dict[str, object]:
         """Return a strict-JSON-compatible witness."""
@@ -105,11 +108,13 @@ class BaselineResult:
                 self.evaluations is None
                 or self.max_absolute_residual is None
                 or self.witness is not None
-                or self.reason
+                or self.reason is not None
             ):
                 raise ValueError(
                     "a baseline pass requires a residual and evaluation count, with no witness"
                 )
+            if not _is_nonnegative_finite_number(self.max_absolute_residual):
+                raise ValueError("a baseline pass requires a finite nonnegative residual")
         elif self.outcome is BaselineOutcome.FAIL:
             expected = ("NUMERICAL_THRESHOLD_EXCEEDANCE", "EMPIRICAL")
             if (self.evidence_kind, self.evidence_level) != expected:
@@ -117,10 +122,12 @@ class BaselineResult:
             if (
                 self.evaluations is None
                 or self.max_absolute_residual is None
-                or self.witness is None
-                or self.reason
+                or not isinstance(self.witness, BaselineWitness)
+                or self.reason is not None
             ):
                 raise ValueError("a baseline failure requires a residual, count, and witness")
+            if self.witness.absolute_residual != self.max_absolute_residual:
+                raise ValueError("failure witness residual must match the maximum residual")
         else:
             if (self.evidence_kind, self.evidence_level) != ("ABSTENTION", None):
                 raise ValueError("an unsupported result must carry abstention evidence")
@@ -459,8 +466,8 @@ def _adapter_metadata(adapter: AtlasBaselineAdapter) -> dict[str, object]:
         if (
             not isinstance(values, tuple)
             or not values
-            or len(set(values)) != len(values)
             or any(not isinstance(value, str) or not value for value in values)
+            or len(set(values)) != len(values)
         ):
             raise AtlasBaselineError(f"baseline adapter {name} must be unique non-empty strings")
     configuration = adapter.configuration()
@@ -476,6 +483,23 @@ def _adapter_metadata(adapter: AtlasBaselineAdapter) -> dict[str, object]:
         raise AtlasBaselineError(
             f"baseline adapter configuration is not strict JSON: {error}"
         ) from error
+    if adapter_id == "fixed_collocation":
+        try:
+            expected = FixedCollocationBaseline(
+                decimal_precision=normalized_configuration.get("decimal_precision"),
+                points_per_axis=normalized_configuration.get("points_per_axis"),
+                tolerance=normalized_configuration.get("tolerance"),
+            )
+        except ValueError as error:
+            raise AtlasBaselineError(f"invalid fixed_collocation configuration: {error}") from error
+        if (
+            version != expected.adapter_version
+            or artifact_types != expected.accepted_artifact_types
+            or semantics != expected.accepted_solution_semantics
+            or json.dumps(normalized_configuration, sort_keys=True)
+            != json.dumps(expected.configuration(), sort_keys=True)
+        ):
+            raise AtlasBaselineError("fixed_collocation metadata must match its versioned contract")
     return {
         "accepted_artifact_types": list(artifact_types),
         "accepted_solution_semantics": list(semantics),
@@ -505,10 +529,46 @@ def evaluate_atlas_baseline(
     records = _select_records(atlas["records"], record_ids)
     if not records:
         raise AtlasBaselineError("Atlas contains no records to evaluate")
+    atlas_digest = cross_artifact_atlas_sha256(atlas)
 
     evaluations: list[dict[str, object]] = []
     for record in records:
-        result = adapter.evaluate_record(record)
+        artifact_type = record["artifact_type"]
+        semantics = record["template"]["solution_semantics"]
+        if artifact_type not in adapter_metadata["accepted_artifact_types"]:
+            result = BaselineResult(
+                BaselineOutcome.UNSUPPORTED,
+                "ABSTENTION",
+                None,
+                reason=(
+                    f"{adapter_metadata['id']} accepts artifact types "
+                    f"{adapter_metadata['accepted_artifact_types']}; received {artifact_type!r}"
+                ),
+            )
+        elif semantics not in adapter_metadata["accepted_solution_semantics"]:
+            result = BaselineResult(
+                BaselineOutcome.UNSUPPORTED,
+                "ABSTENTION",
+                None,
+                reason=(
+                    f"{adapter_metadata['id']} does not support solution semantics {semantics!r}"
+                ),
+            )
+        else:
+            # Adapters may keep local working state, but the evaluated input and
+            # the source identity attached to the report must remain unchanged.
+            working_record = deepcopy(record)
+            result = adapter.evaluate_record(working_record)
+            try:
+                unchanged = json.dumps(
+                    working_record, sort_keys=True, allow_nan=False
+                ) == json.dumps(record, sort_keys=True, allow_nan=False)
+            except (TypeError, ValueError, RecursionError) as error:
+                raise AtlasBaselineError(
+                    f"baseline adapter modified input record {record['id']!r}: {error}"
+                ) from error
+            if not unchanged:
+                raise AtlasBaselineError(f"baseline adapter modified input record {record['id']!r}")
         if not isinstance(result, BaselineResult):
             raise AtlasBaselineError("baseline adapter returned an invalid result object")
         artifact = record["artifact"]
@@ -529,7 +589,7 @@ def evaluate_atlas_baseline(
         "atlas": {
             "atlas_version": atlas["atlas_version"],
             "name": atlas["name"],
-            "sha256": cross_artifact_atlas_sha256(atlas),
+            "sha256": atlas_digest,
         },
         "baseline_report_version": ATLAS_BASELINE_REPORT_VERSION,
         "evidence_policy": "method_specific_empirical_diagnostics_no_proof",

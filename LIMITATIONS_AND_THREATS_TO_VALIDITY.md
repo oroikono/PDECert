@@ -212,6 +212,10 @@ one accuracy number.
 
 ## Security and trust boundaries
 
+- Baseline adapters are trusted Python code. Scope checks, defensive record
+  copies, mutation detection, and result validation prevent common contract
+  mistakes; they do not sandbox an adapter or establish that it performed the
+  declared calculation.
 - Candidate-free problem templates, problem definitions, evaluator settings,
   and labels are trusted inputs. A candidate must not be allowed to replace
   them.

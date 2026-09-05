@@ -71,3 +71,20 @@ accepted artifacts and solution semantics, reproduction settings, evidence
 strength, replayable failure witness, and abstention boundary. Adding an
 adapter does not change the built-in verifier or make the method a proof
 backend.
+
+The runner checks each record against the adapter's declared artifact types and
+solution semantics before calling it. Out-of-scope records receive an
+`unsupported` row even if the adapter does not implement its own scope guard.
+Supported records are passed as private copies; an adapter that changes the
+supplied record is rejected. Keep any normalization or intermediate state in
+separate objects. The report digest and record identifiers always refer to the
+original, validated Atlas.
+The `fixed_collocation` adapter ID is reserved for its versioned configuration
+and scope; external methods must choose their own ID.
+
+`BaselineResult` rejects infinite passing residuals, non-null reasons on pass or
+fail outcomes, and failures without a typed witness whose residual matches the
+reported maximum. `BaselineWitness` copies and freezes its sampled inputs so
+later changes to an adapter's working dictionary cannot alter saved evidence.
+These checks enforce the report contract; Python adapters are trusted code and
+are not sandboxed or independently verified by the runner.

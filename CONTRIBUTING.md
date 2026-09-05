@@ -120,6 +120,9 @@ a replayable numerical-threshold witness and disclose roundoff sensitivity,
 while unsupported artifacts or solution semantics must abstain with a reason.
 The built-in fixed-collocation contract and report shape are documented in
 [`docs/baseline-adapters.md`](docs/baseline-adapters.md).
+External adapters must leave supplied records unchanged and declare their
+accepted scope. Include a mixed-Atlas test showing that unsupported records
+abstain, and validate generated reports against the public baseline schema.
 
 Symbolic complexity limits must preserve counterexample search where practical.
 Skipping an over-budget exact check is an incomplete proof attempt, not evidence
