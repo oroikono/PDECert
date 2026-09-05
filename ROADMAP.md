@@ -61,6 +61,12 @@ reproduction settings. The gate therefore remains incomplete pending
 independent review and broader documented coverage across more than one natural
 matched problem.
 
+The first Atlas baseline adapter now reproduces deterministic full-condition
+fixed collocation for classical symbolic records and emits structured
+unsupported outcomes for callable records. Its finite passes remain empirical.
+Gate 8 is still incomplete until direct SymPy, reference-field, and applicable
+established SciML adapters run through the same reproducible comparison suite.
+
 ## v0.1: dependable verification interface
 
 The first release should let a user save one fully instantiated verification
