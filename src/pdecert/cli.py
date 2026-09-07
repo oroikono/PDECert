@@ -17,6 +17,11 @@ from .atlas_evaluation import (
     load_atlas_evaluation,
     summarize_atlas_evaluation,
 )
+from .atlas_baselines import (
+    AtlasBaselineError,
+    FixedCollocationBaseline,
+    evaluate_atlas_baseline,
+)
 from .corpus import CorpusError, load_atlas_coverage, load_corpus_source
 from .core import Status, verify
 from .manifests import (
@@ -167,6 +172,42 @@ def _build_parser() -> argparse.ArgumentParser:
         help="path to a version-1 Atlas evaluation JSON file",
     )
     summarize_parser.add_argument("-o", "--output", type=Path, help="write the JSON summary")
+    baseline_parser = corpus_commands.add_parser(
+        "baseline",
+        help="run a method-specific empirical baseline over Atlas v2 records",
+    )
+    baseline_parser.add_argument("corpus", type=Path, help="path to an Atlas v2 directory")
+    baseline_parser.add_argument(
+        "--method",
+        choices=("fixed-collocation",),
+        default="fixed-collocation",
+        help="baseline adapter to run (default: fixed-collocation)",
+    )
+    baseline_parser.add_argument(
+        "--record",
+        action="append",
+        dest="record_ids",
+        help="record ID to evaluate; repeat to select multiple records (default: all)",
+    )
+    baseline_parser.add_argument("-o", "--output", type=Path, help="write the JSON report")
+    baseline_parser.add_argument(
+        "--decimal-precision",
+        type=_positive_integer,
+        default=30,
+        help="mpmath decimal digits used for evaluation (default: 30; maximum: 100)",
+    )
+    baseline_parser.add_argument(
+        "--points-per-axis",
+        type=_integer_at_least_two,
+        default=5,
+        help="uniform samples per variable axis (default: 5)",
+    )
+    baseline_parser.add_argument(
+        "--tolerance",
+        type=_positive_float,
+        default=1e-9,
+        help="absolute residual threshold (default: 1e-9)",
+    )
     template_parser = subcommands.add_parser(
         "template", help="inspect candidate-free PDE problem templates"
     )
@@ -339,6 +380,35 @@ def _run_corpus_summarize_evaluation(arguments: argparse.Namespace) -> int:
     return 0
 
 
+def _run_corpus_baseline(arguments: argparse.Namespace) -> int:
+    try:
+        if arguments.method != "fixed-collocation":  # guarded by argparse choices
+            raise AtlasBaselineError(f"unsupported baseline method {arguments.method!r}")
+        payload = evaluate_atlas_baseline(
+            arguments.corpus,
+            FixedCollocationBaseline(
+                decimal_precision=arguments.decimal_precision,
+                points_per_axis=arguments.points_per_axis,
+                tolerance=arguments.tolerance,
+            ),
+            record_ids=arguments.record_ids,
+        )
+    except (AtlasBaselineError, OSError, ValueError) as error:
+        print(f"pdecert: {error}", file=sys.stderr)
+        return INPUT_ERROR
+
+    rendered = json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    if arguments.output is None:
+        print(rendered, end="")
+    else:
+        try:
+            arguments.output.write_text(rendered)
+        except OSError as error:
+            print(f"pdecert: {error}", file=sys.stderr)
+            return INPUT_ERROR
+    return 0
+
+
 def _run_template_validate(arguments: argparse.Namespace) -> int:
     try:
         template = load_template(arguments.template)
@@ -394,6 +464,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run_corpus_evaluate(arguments)
     if arguments.command == "corpus" and arguments.corpus_command == "summarize-evaluation":
         return _run_corpus_summarize_evaluation(arguments)
+    if arguments.command == "corpus" and arguments.corpus_command == "baseline":
+        return _run_corpus_baseline(arguments)
     if arguments.command == "template" and arguments.template_command == "validate":
         return _run_template_validate(arguments)
     if arguments.command == "run" and arguments.run_command == "validate":

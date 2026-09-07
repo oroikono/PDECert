@@ -115,6 +115,15 @@ identity.
 
 ## Numerical and implementation limitations
 
+- The Atlas fixed-collocation baseline is a finite-grid diagnostic. A `pass`
+  means only that represented residuals and conditions stayed within tolerance
+  at those points. It can miss localized defects, between-grid singularities,
+  oscillatory aliasing, and tolerance-scale errors; it is not a proof,
+  continuous-domain bound, or solution-error guarantee. Callable artifacts are
+  currently reported as unsupported by that adapter. A threshold exceedance can
+  itself be caused by finite-precision roundoff when the tolerance is too small;
+  it should not be interpreted as a mathematical counterexample without
+  precision-stability or independent reproduction.
 - Callable evaluation assumes that each output row depends only on the
   corresponding input row. Training-mode batch operations, cross-sample
   attention, mutable state, randomness, and hidden preprocessing can invalidate
@@ -203,6 +212,10 @@ one accuracy number.
 
 ## Security and trust boundaries
 
+- Baseline adapters are trusted Python code. Scope checks, defensive record
+  copies, mutation detection, and result validation prevent common contract
+  mistakes; they do not sandbox an adapter or establish that it performed the
+  declared calculation.
 - Candidate-free problem templates, problem definitions, evaluator settings,
   and labels are trusted inputs. A candidate must not be allowed to replace
   them.

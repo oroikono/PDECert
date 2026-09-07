@@ -140,6 +140,25 @@ This groups matched records and counts statuses, evidence levels, and witnesses
 without using pending annotations, reporting accuracy, or deriving an overall
 verdict.
 
+Run the first reproducible comparison baseline over the same Atlas:
+
+```bash
+pdecert corpus baseline corpus/matched \
+  --method fixed-collocation \
+  --points-per-axis 5 \
+  --decimal-precision 30 \
+  --tolerance 1e-9 \
+  --output fixed-collocation.json
+```
+
+The fixed-collocation adapter currently accepts classical strong-form symbolic
+records and retains callable records as structured `unsupported` outcomes. A
+finite grid `pass` is explicitly empirical and never becomes `PROVED`; a
+failure records the worst numerical threshold exceedance and its replay inputs.
+Roundoff-sensitive failures require independent or precision-stability checks.
+See the
+[`baseline adapter contract`](docs/baseline-adapters.md).
+
 Open-model batches follow a
 [predeclared, resumable collection protocol](docs/atlas-open-model-collection.md)
 that retains raw responses and accounts for outputs that cannot be materialized.
