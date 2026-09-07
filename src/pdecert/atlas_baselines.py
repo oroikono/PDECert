@@ -6,9 +6,11 @@ grid pass is not a PDECert proof and is never converted into ``Status.PROVED``.
 
 from __future__ import annotations
 
+import ast
 import json
 import math
 import platform
+import re
 from collections.abc import Callable, Mapping, Sequence
 from copy import deepcopy
 from dataclasses import dataclass
@@ -29,9 +31,12 @@ from .corpus import (
     load_cross_artifact_atlas,
 )
 from .templates import TemplateError, bind_symbolic_candidate, template_from_dict
+from .core import _run_bounded
 
 
 ATLAS_BASELINE_REPORT_VERSION = 1
+ATLAS_SYMBOLIC_BASELINE_REPORT_VERSION = 2
+DIRECT_SYMPY_BASELINE_VERSION = 1
 FIXED_COLLOCATION_BASELINE_VERSION = 1
 FIXED_COLLOCATION_MAX_EVALUATIONS = 1_000_000
 
@@ -165,6 +170,93 @@ class BaselineResult:
         }
 
 
+@dataclass(frozen=True)
+class SymbolicBaselineCheck:
+    """One CAS result about a represented expression, not domain regularity."""
+
+    obligation_id: str
+    constraint: str
+    constraint_source: str
+    outcome: str
+    materialized_residual: str | None = None
+    simplified_residual: str | None = None
+    reason: str | None = None
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.obligation_id, str) or not re.fullmatch(
+            r"(?:pde_residuals|conditions)\[[0-9]+\]", self.obligation_id
+        ):
+            raise ValueError("symbolic check requires a stable obligation id")
+        for value in (self.constraint, self.constraint_source):
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError("symbolic check requires a constraint name and source")
+        for value in (self.materialized_residual, self.simplified_residual):
+            if value is not None and (not isinstance(value, str) or not value.strip()):
+                raise ValueError("symbolic residual must be nonempty text or null")
+        if self.outcome not in ("zero", "nonzero", "undecided"):
+            raise ValueError("symbolic outcome must be zero, nonzero, or undecided")
+        if self.outcome == "undecided":
+            if not isinstance(self.reason, str) or not self.reason.strip():
+                raise ValueError("undecided symbolic check requires a reason")
+        elif (
+            self.materialized_residual is None
+            or self.simplified_residual is None
+            or self.reason is not None
+        ):
+            raise ValueError("decided symbolic check requires both residuals and no reason")
+        if self.outcome == "zero" and self.simplified_residual != "0":
+            raise ValueError("a zero check must record simplified residual '0'")
+        if self.outcome == "nonzero" and self.simplified_residual == "0":
+            raise ValueError("a nonzero check cannot record residual '0'")
+
+    def to_dict(self) -> dict[str, object]:
+        kinds = {
+            "zero": "CAS_RESIDUAL_ZERO",
+            "nonzero": "CAS_CONSTANT_NONZERO",
+            "undecided": "ABSTENTION",
+        }
+        return {
+            "obligation_id": self.obligation_id,
+            "constraint": self.constraint,
+            "constraint_source": self.constraint_source,
+            "outcome": self.outcome,
+            "materialized_residual": self.materialized_residual,
+            "simplified_residual": self.simplified_residual,
+            "reason": self.reason,
+            "evidence_kind": kinds[self.outcome],
+            "evidence_level": None if self.outcome == "undecided" else "EXACT",
+        }
+
+
+@dataclass(frozen=True)
+class SymbolicBaselineResult:
+    """Ordered expression checks with a derived, method-local outcome."""
+
+    checks: tuple[SymbolicBaselineCheck, ...]
+
+    def __post_init__(self) -> None:
+        checks = tuple(self.checks)
+        if not checks or not all(isinstance(check, SymbolicBaselineCheck) for check in checks):
+            raise ValueError("symbolic result requires at least one typed check")
+        if len({check.obligation_id for check in checks}) != len(checks):
+            raise ValueError("symbolic result contains duplicate obligation ids")
+        object.__setattr__(self, "checks", checks)
+
+    @property
+    def outcome(self) -> str:
+        if any(check.outcome == "nonzero" for check in self.checks):
+            return "nonzero"
+        return "zero" if all(check.outcome == "zero" for check in self.checks) else "undecided"
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "result_type": "symbolic_residuals",
+            "scope": "represented_residuals_and_conditions_only",
+            "outcome": self.outcome,
+            "checks": [check.to_dict() for check in self.checks],
+        }
+
+
 @runtime_checkable
 class AtlasBaselineAdapter(Protocol):
     """Explicit extension boundary for one reproducible Atlas baseline."""
@@ -177,7 +269,9 @@ class AtlasBaselineAdapter(Protocol):
     def configuration(self) -> Mapping[str, object]:
         """Return strict-JSON-compatible method settings."""
 
-    def evaluate_record(self, record: Mapping[str, object]) -> BaselineResult:
+    def evaluate_record(
+        self, record: Mapping[str, object]
+    ) -> BaselineResult | SymbolicBaselineResult:
         """Evaluate one already validated Atlas v2 record."""
 
 
@@ -418,6 +512,166 @@ class FixedCollocationBaseline:
         )
 
 
+@dataclass(frozen=True)
+class DirectSympyBaseline:
+    """Bounded CAS simplification of every represented residual and condition."""
+
+    symbolic_timeout: float = 2.0
+    max_expression_ops: int = 10_000
+
+    adapter_id = "direct_sympy"
+    adapter_version = DIRECT_SYMPY_BASELINE_VERSION
+    report_version = ATLAS_SYMBOLIC_BASELINE_REPORT_VERSION
+    accepted_artifact_types = ("symbolic_expression",)
+    accepted_solution_semantics = ("classical_strong",)
+
+    def __post_init__(self) -> None:
+        if (
+            not _is_finite_number(self.symbolic_timeout)
+            or not 0.001 <= self.symbolic_timeout <= 3600
+        ):
+            raise ValueError("symbolic_timeout must be from 0.001 through 3600 seconds")
+        if (
+            isinstance(self.max_expression_ops, bool)
+            or not isinstance(self.max_expression_ops, int)
+            or self.max_expression_ops < 1
+        ):
+            raise ValueError("max_expression_ops must be a positive integer")
+        object.__setattr__(self, "symbolic_timeout", float(self.symbolic_timeout))
+
+    def configuration(self) -> Mapping[str, object]:
+        return {
+            "pipeline": ["simplify", "cancel", "trigsimp"],
+            "include_conditions": True,
+            "domain_checks": False,
+            "nonzero_policy": "finite_real_constant_only",
+            "float_policy": "abstain_on_inexact_literals",
+            "symbolic_timeout_seconds": self.symbolic_timeout,
+            "max_expression_ops": self.max_expression_ops,
+            "deadline_scope": "binding_and_each_obligation_after_atlas_validation",
+        }
+
+    def evaluate_record(
+        self, record: Mapping[str, object]
+    ) -> BaselineResult | SymbolicBaselineResult:
+        if record.get("artifact_type") not in self.accepted_artifact_types:
+            return BaselineResult(
+                BaselineOutcome.UNSUPPORTED,
+                "ABSTENTION",
+                None,
+                reason="direct_sympy accepts only symbolic_expression artifacts",
+            )
+        raw_template = record["template"]
+        if raw_template.get("solution_semantics") not in self.accepted_solution_semantics:
+            return BaselineResult(
+                BaselineOutcome.UNSUPPORTED,
+                "ABSTENTION",
+                None,
+                reason="direct_sympy accepts only classical_strong solution semantics",
+            )
+        fields = record["artifact"]["fields"]
+        obligations = [
+            (f"{group}[{index}]", constraint["name"], constraint["expression"])
+            for group in ("pde_residuals", "conditions")
+            for index, constraint in enumerate(raw_template[group])
+        ]
+
+        def abstain(reason: str) -> SymbolicBaselineResult:
+            return SymbolicBaselineResult(
+                tuple(
+                    SymbolicBaselineCheck(identifier, name, source, "undecided", reason=reason)
+                    for identifier, name, source in obligations
+                )
+            )
+
+        # Eager parsing can cancel Float literals to integer zero, so inspect
+        # source syntax before binding. Decimal domain bounds are metadata.
+        sources = [*fields.values(), *(source for _, _, source in obligations)]
+        if any(
+            (isinstance(node, ast.Constant) and isinstance(node.value, float))
+            or (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Name)
+                and node.func.id == "Float"
+            )
+            for source in sources
+            for node in ast.walk(ast.parse(source, mode="eval"))
+        ):
+            return abstain(
+                "inexact numeric literal in field or operator; use exact rational syntax"
+            )
+        case, error = _run_bounded(
+            lambda: bind_symbolic_candidate(template_from_dict(raw_template), fields),
+            self.symbolic_timeout,
+        )
+        if error is not None:
+            return abstain(f"candidate binding: {error}")
+        constraints = case.problem.pde_residuals + case.problem.conditions
+        checks = []
+        for (identifier, name, source), constraint in zip(obligations, constraints, strict=True):
+            checked, error = _run_bounded(
+                lambda expression=constraint.residual: self._check_expression(expression),
+                self.symbolic_timeout,
+            )
+            if error is not None:
+                checks.append(
+                    SymbolicBaselineCheck(identifier, name, source, "undecided", reason=error)
+                )
+            else:
+                outcome, materialized, simplified, reason = checked
+                checks.append(
+                    SymbolicBaselineCheck(
+                        identifier, name, source, outcome, materialized, simplified, reason
+                    )
+                )
+        return SymbolicBaselineResult(tuple(checks))
+
+    def _check_expression(
+        self, expression: sympy.Expr
+    ) -> tuple[str, str | None, str | None, str | None]:
+        operations = int(sympy.count_ops(expression))
+        if operations > self.max_expression_ops:
+            return (
+                "undecided",
+                None,
+                None,
+                f"input expression has {operations} operations, exceeding {self.max_expression_ops}",
+            )
+        materialized = sympy.sstr(expression)
+        if (
+            expression.has(sympy.Float, sympy.nan, sympy.zoo, sympy.oo, -sympy.oo)
+            or expression.is_real is False
+        ):
+            return "undecided", materialized, None, "inexact, non-finite, or non-real residual"
+        simplified = sympy.trigsimp(sympy.cancel(sympy.simplify(expression)))
+        rendered = sympy.sstr(simplified)
+        if (
+            simplified.has(sympy.Float, sympy.nan, sympy.zoo, sympy.oo, -sympy.oo)
+            or simplified.is_real is False
+        ):
+            return (
+                "undecided",
+                materialized,
+                rendered,
+                "inexact, non-finite, or non-real simplified residual",
+            )
+        if simplified == 0 or simplified.is_zero is True:
+            return "zero", materialized, "0", None
+        if (
+            not simplified.free_symbols
+            and simplified.is_real is True
+            and simplified.is_finite is True
+            and simplified.is_zero is False
+        ):
+            return "nonzero", materialized, rendered, None
+        return (
+            "undecided",
+            materialized,
+            rendered,
+            "CAS did not establish zero or a finite real nonzero constant",
+        )
+
+
 def _select_records(
     records: Sequence[Mapping[str, object]],
     requested: Sequence[str] | None,
@@ -500,6 +754,22 @@ def _adapter_metadata(adapter: AtlasBaselineAdapter) -> dict[str, object]:
             != json.dumps(expected.configuration(), sort_keys=True)
         ):
             raise AtlasBaselineError("fixed_collocation metadata must match its versioned contract")
+    if adapter_id == "direct_sympy":
+        try:
+            expected = DirectSympyBaseline(
+                symbolic_timeout=normalized_configuration.get("symbolic_timeout_seconds"),
+                max_expression_ops=normalized_configuration.get("max_expression_ops"),
+            )
+        except ValueError as error:
+            raise AtlasBaselineError(f"invalid direct_sympy configuration: {error}") from error
+        if (
+            version != expected.adapter_version
+            or artifact_types != expected.accepted_artifact_types
+            or semantics != expected.accepted_solution_semantics
+            or json.dumps(normalized_configuration, sort_keys=True)
+            != json.dumps(expected.configuration(), sort_keys=True)
+        ):
+            raise AtlasBaselineError("direct_sympy metadata must match its versioned contract")
     return {
         "accepted_artifact_types": list(artifact_types),
         "accepted_solution_semantics": list(semantics),
@@ -520,6 +790,15 @@ def evaluate_atlas_baseline(
     if not isinstance(adapter, AtlasBaselineAdapter):
         raise TypeError("adapter must implement AtlasBaselineAdapter")
     adapter_metadata = _adapter_metadata(adapter)
+    report_version = getattr(adapter, "report_version", ATLAS_BASELINE_REPORT_VERSION)
+    if type(report_version) is not int or report_version not in (1, 2):
+        raise AtlasBaselineError("baseline report_version must be 1 or 2")
+    reserved_versions = {"fixed_collocation": 1, "direct_sympy": 2}
+    if (
+        adapter_metadata["id"] in reserved_versions
+        and report_version != reserved_versions[adapter_metadata["id"]]
+    ):
+        raise AtlasBaselineError("adapter report_version does not match its versioned contract")
     try:
         atlas = load_cross_artifact_atlas(path)
     except (OSError, CorpusError) as error:
@@ -569,8 +848,27 @@ def evaluate_atlas_baseline(
                 ) from error
             if not unchanged:
                 raise AtlasBaselineError(f"baseline adapter modified input record {record['id']!r}")
-        if not isinstance(result, BaselineResult):
+        if not isinstance(result, (BaselineResult, SymbolicBaselineResult)):
             raise AtlasBaselineError("baseline adapter returned an invalid result object")
+        if isinstance(result, SymbolicBaselineResult):
+            if report_version != ATLAS_SYMBOLIC_BASELINE_REPORT_VERSION:
+                raise AtlasBaselineError("symbolic baseline results require report_version 2")
+            expected_checks = [
+                (f"{group}[{index}]", constraint["name"], constraint["expression"])
+                for group in ("pde_residuals", "conditions")
+                for index, constraint in enumerate(record["template"][group])
+            ]
+            if (
+                artifact_type != "symbolic_expression"
+                or [
+                    (check.obligation_id, check.constraint, check.constraint_source)
+                    for check in result.checks
+                ]
+                != expected_checks
+            ):
+                raise AtlasBaselineError(
+                    "symbolic result must cover every represented obligation in order"
+                )
         artifact = record["artifact"]
         if not isinstance(artifact, Mapping):  # already guaranteed by Atlas validation
             raise AtlasBaselineError(f"record {record['id']!r}: artifact must be an object")
@@ -591,8 +889,12 @@ def evaluate_atlas_baseline(
             "name": atlas["name"],
             "sha256": atlas_digest,
         },
-        "baseline_report_version": ATLAS_BASELINE_REPORT_VERSION,
-        "evidence_policy": "method_specific_empirical_diagnostics_no_proof",
+        "baseline_report_version": report_version,
+        "evidence_policy": (
+            "method_specific_empirical_diagnostics_no_proof"
+            if report_version == 1
+            else "method_specific_obligation_diagnostics_no_global_verdict"
+        ),
         "records": evaluations,
         "runtime": {
             "mpmath_version": mpmath.__version__,

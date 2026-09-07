@@ -6,6 +6,11 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- A direct SymPy Atlas baseline with exact-input checks, bounded symbolic
+  operations, complete per-obligation zero/nonzero/undecided results, and a
+  version-2 report schema. Fixed-collocation version-1 output remains unchanged;
+  the symbolic baseline does not check candidate domains or regularity.
+
 - An explicit Atlas baseline-adapter contract and deterministic full-condition
   fixed-collocation runner for symbolic records, with empirical-only pass/fail
   semantics, replayable numerical-threshold witnesses, structured callable
