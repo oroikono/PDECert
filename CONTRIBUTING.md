@@ -123,6 +123,10 @@ The built-in fixed-collocation contract and report shape are documented in
 External adapters must leave supplied records unchanged and declare their
 accepted scope. Include a mixed-Atlas test showing that unsupported records
 abstain, and validate generated reports against the public baseline schema.
+Symbolic adapters opt into report version 2 and return all represented
+obligations through `SymbolicBaselineResult`; evidence about residual identities
+must not imply that candidate singularities or regularity were checked. Keep
+version-1 empirical output compatibility covered when extending this interface.
 
 Symbolic complexity limits must preserve counterexample search where practical.
 Skipping an over-budget exact check is an incomplete proof attempt, not evidence
