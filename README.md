@@ -634,6 +634,17 @@ See the [reference-field guide](docs/reference-fields.md) for the Python API,
 explicit array conversion, numerical limits, and reproduction requirements.
 This is not yet an external-model loader or an Atlas reference-field adapter.
 
+With the existing `autodiff` extra, run the same comparison on the frozen trained
+Fisher--KPP PINN and inspect all PDE, initial, and boundary diagnostics:
+
+```bash
+python -m experiments.trained_fisher_kpp_reference
+```
+
+The [trained-model walkthrough](docs/trained-reference-comparison.md) explains
+the separate metrics, integrity checks, and replayable samples. No retraining
+is performed, and passing samples remain inconclusive.
+
 ## Current limits
 
 The prototype does not yet define weak or viscosity solution semantics. It has

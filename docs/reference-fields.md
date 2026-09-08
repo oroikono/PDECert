@@ -43,6 +43,12 @@ is evaluated in binary64; this command does not certify it against the PDE.
 This is an injected analytical fixture, not a trained-model failure, external
 reproduction, or independently labeled benchmark result.
 
+For actual trained-model outputs, the optional
+[Fisher--KPP walkthrough](trained-reference-comparison.md) evaluates the existing
+frozen PINN and places reference errors beside fresh PDE and trace diagnostics.
+It retains every sample and checks every obligation even after an interior
+failure. It neither retrains the model nor upgrades empirical evidence.
+
 ## Inputs and native workflows
 
 Each mapping contains named, flat Python numeric sequences, such as lists or

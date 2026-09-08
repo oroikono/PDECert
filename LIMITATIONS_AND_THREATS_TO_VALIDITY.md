@@ -189,6 +189,11 @@ not continuous-domain norms or bounds on the true solution. The normalized-input
 digest establishes sample and metadata identity, not checkpoint identity or
 trusted model execution. A largest-discrepancy sample is not a PDE refutation.
 
+The trained Fisher--KPP reference example pairs those metrics with separate
+per-obligation callable reports. Its template-pinned analytical reference and
+finite samples do not establish continuous-domain solution error. Its training
+metadata is retained, not rerun or independently audited; no labels are changed.
+
 Machine reports, model critiques, and user-approved amendments are not
 independent labels. Benchmark claims require the published blind-review and
 disagreement-adjudication protocol. Numerical reference fields also carry
