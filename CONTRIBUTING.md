@@ -169,6 +169,11 @@ authorship, or trusted execution.
 
 ## Local setup
 
+Reference-metric contributions follow [the supplied-field contract](docs/reference-fields.md).
+Test exact and discrepant values, zero reference norms, numerical extremes,
+unsupported inputs, sample identity, and the recorded maximum-error location.
+Keep optional model loaders separate from this pure-Python comparison primitive.
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate

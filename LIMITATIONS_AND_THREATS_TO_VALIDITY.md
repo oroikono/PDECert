@@ -182,6 +182,13 @@ claims of state-of-the-art PINN evaluation or representative LLM reasoning.
 
 ### Labels and reference uncertainty
 
+The [reference-field metric API](docs/reference-fields.md) compares supplied
+values only. It does not verify declared problem IDs, coordinate alignment,
+units, or reference accuracy. Its discrete errors are empirical comparisons,
+not continuous-domain norms or bounds on the true solution. The normalized-input
+digest establishes sample and metadata identity, not checkpoint identity or
+trusted model execution. A largest-discrepancy sample is not a PDE refutation.
+
 Machine reports, model critiques, and user-approved amendments are not
 independent labels. Benchmark claims require the published blind-review and
 disagreement-adjudication protocol. Numerical reference fields also carry

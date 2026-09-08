@@ -121,6 +121,9 @@ Next:
 
 ## v0.3: integrations
 
+- an empirical reference-field metric primitive for supplied aligned values,
+  with reference uncertainty, input identity, and a runnable analytical example;
+  external-model loaders and the reference-field Atlas adapter remain incomplete;
 - an explicit checker registry with immutable run configuration and validated
   obligation scope;
 - a general solution-artifact protocol with symbolic and PyTorch-callable

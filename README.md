@@ -616,6 +616,24 @@ not a production sandbox backend. See the
 [generated-program guide](docs/generated-programs.md) and
 [isolation decision](docs/adr/0005-generated-program-isolation.md).
 
+## Reference-field comparisons
+
+`compare_reference_fields()` compares already evaluated predictions with supplied
+reference values: per-field RMSE, discrete relative L2, and the largest sampled
+discrepancy with its coordinates. It records reference uncertainty and normalized
+input identity, adds no dependencies, and returns empirical metrics without a
+PDE verdict or solution-error guarantee.
+
+Run the deliberately perturbed analytical example from a checkout:
+
+```bash
+python -m examples.reference_field_comparison
+```
+
+See the [reference-field guide](docs/reference-fields.md) for the Python API,
+explicit array conversion, numerical limits, and reproduction requirements.
+This is not yet an external-model loader or an Atlas reference-field adapter.
+
 ## Current limits
 
 The prototype does not yet define weak or viscosity solution semantics. It has
