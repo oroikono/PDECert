@@ -42,6 +42,7 @@ jobs:
       - run: python -m pytest tests/test_autodiff.py tests/test_frozen_callable.py tests/test_atlas_evaluation.py
       - run: python -m pytest tests/test_trained_burgers_pair.py
       - run: python -m pytest tests/test_trained_fisher_kpp_pair.py
+      - run: python -m pytest tests/test_trained_fisher_kpp_reference.py
       - run: >-
           python -m experiments.burgers_pinn_fixture
           benchmarks/matched/burgers-classical-01/pinn.json
@@ -50,6 +51,7 @@ jobs:
       - run: python -m examples.matched_heat
       - run: python -m experiments.trained_burgers_pair
       - run: python -m experiments.trained_fisher_kpp_pair
+      - run: python -m experiments.trained_fisher_kpp_reference
       - run: >-
           pdecert corpus evaluate corpus/matched
           --callable-tolerance 0.001

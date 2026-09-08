@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/oroikono/PDECert/blob/main/schema/reference-comparison-v1.schema.json",
+  "title": "PDECert reference-field comparison version 1",
+  "$comment": "This schema checks report structure and local constraints, not mathematical validity. The Python API enforces finite binary64 inputs and cross-field consistency, including aligned column lengths, unique field names, sample indices, coordinate names, and metric calculations. A report is not a PDE verdict or a solution-error guarantee.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reference_comparison_version", "evidence_level", "scope", "problem_id",
+    "candidate_id", "reference", "sampling_description", "sample_count",
+    "coordinate_names", "input_sha256", "input_identity_scope", "configuration",
+    "fields", "runtime"
+  ],
+  "properties": {
+    "reference_comparison_version": {"const": 1},
+    "evidence_level": {"const": "EMPIRICAL"},
+    "scope": {"const": "supplied_field_values_at_supplied_points_only"},
+    "problem_id": {"$ref": "#/$defs/nonblank"},
+    "candidate_id": {"$ref": "#/$defs/nonblank"},
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "description", "uncertainty", "assessment"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonblank"},
+        "description": {"$ref": "#/$defs/nonblank"},
+        "uncertainty": {"$ref": "#/$defs/nonblank"},
+        "assessment": {"const": "caller_supplied_not_verified"}
+      }
+    },
+    "sampling_description": {"$ref": "#/$defs/nonblank"},
+    "sample_count": {"type": "integer", "minimum": 1},
+    "coordinate_names": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": {"$ref": "#/$defs/nonblank"}
+    },
+    "input_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "input_identity_scope": {"const": "normalized_binary64_samples_and_declared_metadata_only"},
+    "configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["arithmetic", "reduction", "relative_norm", "units", "max_values"],
+      "properties": {
+        "arithmetic": {"const": "python_binary64"},
+        "reduction": {"const": "equal_weight_per_row_duplicates_retained"},
+        "relative_norm": {"const": "per_field_discrete_l2"},
+        "units": {"const": "as_supplied_no_conversion"},
+        "max_values": {"const": 1000000}
+      }
+    },
+    "fields": {
+      "type": "array", "minItems": 1,
+      "items": {"$ref": "#/$defs/field"}
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["python_version", "pdecert_version"],
+      "properties": {
+        "python_version": {"$ref": "#/$defs/nonblank"},
+        "pdecert_version": {"$ref": "#/$defs/nonblank"}
+      }
+    }
+  },
+  "$defs": {
+    "nonblank": {"type": "string", "pattern": "\\S"},
+    "nullable_nonnegative": {"type": ["number", "null"], "minimum": 0},
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field", "rmse", "rmse_unavailable_reason", "relative_l2",
+        "relative_l2_unavailable_reason", "max_absolute_error", "max_error_sample"
+      ],
+      "properties": {
+        "field": {"$ref": "#/$defs/nonblank"},
+        "rmse": {"$ref": "#/$defs/nullable_nonnegative"},
+        "rmse_unavailable_reason": {"enum": [null, "binary64_underflow"]},
+        "relative_l2": {"$ref": "#/$defs/nullable_nonnegative"},
+        "relative_l2_unavailable_reason": {
+          "enum": [null, "zero_reference_norm", "binary64_overflow", "binary64_underflow"]
+        },
+        "max_absolute_error": {"type": "number", "minimum": 0},
+        "max_error_sample": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["index", "coordinates", "candidate_value", "reference_value"],
+          "properties": {
+            "index": {"type": "integer", "minimum": 0},
+            "coordinates": {
+              "type": "object", "minProperties": 1,
+              "propertyNames": {"$ref": "#/$defs/nonblank"},
+              "additionalProperties": {"type": "number"}
+            },
+            "candidate_value": {"type": "number"},
+            "reference_value": {"type": "number"}
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"rmse": {"type": "null"}}, "required": ["rmse"]},
+          "then": {"properties": {"rmse_unavailable_reason": {"const": "binary64_underflow"}}},
+          "else": {"properties": {"rmse_unavailable_reason": {"type": "null"}}}
+        },
+        {
+          "if": {"properties": {"relative_l2": {"type": "null"}}, "required": ["relative_l2"]},
+          "then": {
+            "properties": {
+              "relative_l2_unavailable_reason": {
+                "enum": ["zero_reference_norm", "binary64_overflow", "binary64_underflow"]
+              }
+            }
+          },
+          "else": {"properties": {"relative_l2_unavailable_reason": {"type": "null"}}}
+        }
+      ]
+    }
+  }
+}
