@@ -298,6 +298,42 @@ class AtlasEvaluationTests(unittest.TestCase):
         with self.assertRaisesRegex(AtlasEvaluationError, "finite and positive"):
             validate_atlas_evaluation(evaluation)
 
+    def test_saved_evaluation_cannot_hide_a_refutation_in_a_non_refuted_summary(self):
+        evaluation = _mixed_evaluation_without_torch()
+        for record_index in (0, 1):
+            with self.subTest(record_index=record_index):
+                tampered = copy.deepcopy(evaluation)
+                tampered["records"][record_index]["report"]["evidence_events"].append(
+                    {
+                        "bound": None,
+                        "checker": "test_counterexample",
+                        "detail": "Injected transport-consistency test event.",
+                        "kind": "EMPIRICAL_COUNTEREXAMPLE",
+                        "level": "EMPIRICAL",
+                        "obligation_id": "constraint:0",
+                        "outcome": "REFUTED",
+                        "witness": {
+                            "constraint": "test PDE",
+                            "point": {"x": 0.5},
+                            "residual": 1.0,
+                            "reason": "Injected witness, not a scientific finding.",
+                        },
+                    }
+                )
+                for consumer in (validate_atlas_evaluation, summarize_atlas_evaluation):
+                    with self.assertRaisesRegex(
+                        AtlasEvaluationError, "refuting evidence requires a REFUTED report"
+                    ):
+                        consumer(tampered)
+                self.assertTrue(list(_evaluation_validator().iter_errors(tampered)))
+                with tempfile.TemporaryDirectory() as directory:
+                    path = Path(directory) / "evaluation.json"
+                    path.write_text(json.dumps(tampered))
+                    with self.assertRaisesRegex(
+                        AtlasEvaluationError, "refuting evidence requires a REFUTED report"
+                    ):
+                        load_atlas_evaluation(path)
+
     def test_evaluation_digest_normalizes_equivalent_numeric_options(self):
         integer_options = evaluate_cross_artifact_atlas(ATLAS, record_ids=[SYMBOLIC_ID])
         integer_options["options"]["symbolic_tolerance"] = 1
