@@ -266,6 +266,10 @@ def report_from_dict(value: object) -> Report:
         evidence_event_from_dict(item, f"$.evidence_events[{index}]")
         for index, item in enumerate(events_value)
     ]
+    if status is not Status.REFUTED and any(
+        event.outcome is EvidenceOutcome.REFUTED for event in events
+    ):
+        raise _error("$.evidence_events", "refuting evidence requires a REFUTED report")
     discharged_levels: dict[str, EvidenceLevel] = {}
     for event in events:
         if event.outcome is not EvidenceOutcome.DISCHARGED or event.level is None:

@@ -4,6 +4,13 @@ All notable changes to PDECert are documented here.
 
 ## Unreleased
 
+### Fixed
+
+- Report loading and the public JSON schema reject `PROVED` or `INCONCLUSIVE`
+  summaries containing refuting evidence. Refutation keeps precedence over
+  discharged obligations, including in saved Atlas evaluations; legitimate
+  abstention and sampled-pass history remains readable.
+
 ### Added
 
 - An explicit Atlas baseline-adapter contract and deterministic full-condition

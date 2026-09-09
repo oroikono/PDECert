@@ -50,6 +50,20 @@
   },
   "allOf": [
     {
+      "if": {
+        "properties": {
+          "evidence_events": {
+            "contains": {
+              "type": "object",
+              "properties": {"outcome": {"const": "REFUTED"}},
+              "required": ["outcome"]
+            }
+          }
+        }
+      },
+      "then": {"properties": {"status": {"const": "REFUTED"}}}
+    },
+    {
       "if": {"properties": {"status": {"const": "PROVED"}}},
       "then": {
         "properties": {
