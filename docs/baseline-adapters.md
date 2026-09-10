@@ -44,6 +44,53 @@ solution-error estimate. Roundoff can cause false failures when tolerance is
 too small for the configured decimal precision; important failures should be
 checked for precision stability or independently reproduced.
 
+### Arithmetic precision and replay
+
+The grid and its saved witness coordinates use Python binary64 floats. Before
+evaluating a residual, float coordinates are converted directly to mpmath
+numbers inside the configured `decimal_precision` context. Integer parameter
+coordinates remain exact Python integers. This prevents polynomial arithmetic
+from silently running at binary64 precision even when more digits were requested.
+The final absolute residual is converted back to a JSON-compatible float (or
+`"infinity"` when nonfinite or outside that range).
+
+Conversion uses the actual binary coordinate, not its printed decimal spelling.
+Increasing arithmetic precision does not refine the grid or recover lost input
+digits. To replay a saved witness, convert float `sampled_inputs` with
+`mpmath.mpf(value)` inside `mpmath.workdps(decimal_precision)` before calling the
+mpmath-generated residual; leave integer inputs unchanged.
+
+Run the manufactured cancellation example:
+
+```bash
+python -m examples.collocation_precision
+```
+
+Its transport residual expands to `x**2 - 200000000*x + 10000000000000001`,
+which is `(x - 100000000)**2 + 1`. At the five sampled coordinates in
+`[100000000, 100000001]` its exact values are `1, 1.0625, 1.25, 1.5625, 2`.
+At 30 digits the adapter reports `fail`, maximum residual `2`, and endpoint
+witness `x = 100000001`. Native float evaluation previously rounded every one
+of these values to zero despite the requested precision. No initial or boundary
+conditions are included: this example isolates evaluation arithmetic, not
+problem coverage or a natural solver failure.
+
+This corrects the existing precision contract without changing adapter or
+report versions. Cancellation-sensitive results from older builds should be
+rerun with the corrected implementation; preserve the software revision when
+comparing them. Finite precision remains empirical: low precision can still
+miss defects or create threshold exceedances, and no fixed digit count is a
+universal accuracy guarantee. The mpmath context is process-global, so concurrent
+threaded runs with different precisions are not isolated; use separate processes.
+
+This fix does not change the handling of integer-only expressions. Although
+integer inputs themselves remain exact, division or negative powers in the
+generated function can still create native-float intermediates. For example,
+`1/n - 1/3` at integer `n = 3` can show a small roundoff residual even when more
+digits are requested. Such exceedances need independent or precision-aware
+replay; changing `decimal_precision` alone need not resolve every arithmetic
+path.
+
 ## Accepted and unsupported scope
 
 Version 1 accepts Atlas v2 `symbolic_expression` records using
