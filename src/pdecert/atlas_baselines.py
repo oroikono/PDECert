@@ -236,7 +236,10 @@ def _axis_cardinality(
 
 def _absolute_residual(function: Callable[..., object], values: tuple[int | float, ...]) -> float:
     try:
-        evaluated = function(*values)
+        # Native floats keep polynomial arithmetic at binary64 precision even
+        # inside workdps. Promote them here, retaining integer parameter inputs.
+        inputs = tuple(mpmath.mpf(value) if isinstance(value, float) else value for value in values)
+        evaluated = function(*inputs)
         residual = float(abs(evaluated))
     except (ArithmeticError, TypeError, ValueError):
         return float("inf")
