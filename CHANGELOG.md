@@ -6,6 +6,11 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- An optional Hugging Face pilot consumer check with pinned dependencies,
+  immutable anonymous Hub loading, exact nested-record fidelity checks,
+  per-record verifier reports, offline integration tests, and an opt-in live
+  CI check. No core dependency, frozen record, label, or evidence rule changes.
+
 - An explicit Atlas baseline-adapter contract and deterministic full-condition
   fixed-collocation runner for symbolic records, with empirical-only pass/fail
   semantics, replayable numerical-threshold witnesses, structured callable
