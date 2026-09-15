@@ -25,8 +25,8 @@ from experiments.trained_fisher_kpp_pair import (
     build_case,
     build_symbolic_case,
     load_symbolic_proposal,
-    run,
 )
+from experiments.current_fisher_kpp_pair import DEFAULT_HISTORY, run, validate_receipt
 
 
 RESULT = Path("results/trained-fisher-kpp-pair.json")
@@ -66,7 +66,7 @@ class FisherKppProvenanceTests(unittest.TestCase):
             copied_raw = Path(directory) / "raw-output.txt"
             copied_raw.write_bytes(DEFAULT_RAW.read_bytes())
             with self.assertRaisesRegex(FrozenCallableError, "not bound"):
-                run(raw=copied_raw)
+                run(raw=copied_raw, historical_source_root=DEFAULT_HISTORY)
 
     def test_preserved_symbolic_candidate_has_exact_evidence(self):
         _, symbolic_case, _ = build_symbolic_case()
@@ -83,10 +83,25 @@ except ImportError:
 
 @unittest.skipIf(torch is None, "trained fixture requires PyTorch")
 class TrainedFisherKppPairTests(unittest.TestCase):
+    def test_current_runner_evaluates_and_validates_its_separate_receipt(self):
+        receipt = run(evaluate=True, historical_source_root=DEFAULT_HISTORY)
+        validate_receipt(receipt, historical_source_root=DEFAULT_HISTORY)
+        self.assertFalse(receipt["historical_replay"])
+        self.assertEqual(receipt["operation"], "current_evaluation")
+        lanes = {lane["name"]: lane["report"] for lane in receipt["matched_report"]["lanes"]}
+        self.assertEqual(lanes["symbolic-qwen3"]["status"], "PROVED")
+        self.assertEqual(lanes["symbolic-qwen3"]["decision_evidence"], "EXACT")
+        self.assertEqual(lanes["trained-pinn"]["status"], "REFUTED")
+        self.assertEqual(lanes["trained-pinn"]["decision_evidence"], "EMPIRICAL")
+        self.assertGreater(lanes["trained-pinn"]["witness"]["residual"], 1e-3)
+        self.assertNotIn("status", receipt["matched_report"])
+
     def test_frozen_artifact_and_bound_sources_have_valid_digests(self):
         self.assertTrue(DEFAULT_FIXTURE.is_file(), "the Fisher--KPP fixture is missing")
         self.assertTrue(DEFAULT_INTEGRITY.is_file(), "the Fisher--KPP integrity record is missing")
-        validate_frozen_callable_integrity(DEFAULT_FIXTURE, DEFAULT_INTEGRITY)
+        validate_frozen_callable_integrity(
+            DEFAULT_FIXTURE, DEFAULT_INTEGRITY, historical_source_root=DEFAULT_HISTORY
+        )
 
     def test_matched_lanes_keep_exact_and_empirical_evidence_separate(self):
         from pdecert import LaneVerificationOptions, verify_matched_case

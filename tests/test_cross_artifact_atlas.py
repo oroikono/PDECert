@@ -122,6 +122,7 @@ class CrossArtifactAtlasTests(unittest.TestCase):
         integrity = validate_frozen_callable_integrity(
             bundle / "artifact.json",
             bundle / "integrity.json",
+            historical_source_root="benchmarks/historical/fisher-kpp-source-v1",
         )
         self.assertEqual(integrity["artifact_sha256"], _sha256(bundle / "artifact.json"))
 

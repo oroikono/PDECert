@@ -1,0 +1,43 @@
+{
+  "conditions": [
+    {
+      "expression": "At(u, t, 0) - (1+exp(x/sqrt(6)))**(-2)",
+      "name": "initial condition"
+    },
+    {
+      "expression": "At(u, x, -6) - (1+exp(-6/sqrt(6)-5*t/6))**(-2)",
+      "name": "left boundary"
+    },
+    {
+      "expression": "At(u, x, 6) - (1+exp(6/sqrt(6)-5*t/6))**(-2)",
+      "name": "right boundary"
+    }
+  ],
+  "domains": {
+    "t": [
+      0.0,
+      2.0
+    ],
+    "x": [
+      -6.0,
+      6.0
+    ]
+  },
+  "field_names": [
+    "u"
+  ],
+  "name": "Fisher KPP traveling front",
+  "parameters": {},
+  "pde_residuals": [
+    {
+      "expression": "D(u, t) - D(u, x, 2) - u*(1-u)",
+      "name": "Fisher KPP PDE"
+    }
+  ],
+  "solution_semantics": "classical_strong",
+  "template_version": 1,
+  "variables": [
+    "x",
+    "t"
+  ]
+}

@@ -157,6 +157,12 @@ identity.
   but do not prove platform-independent optimization or evaluation.
 - Content digests establish byte identity, not scientific correctness,
   reproducibility of stochastic training, or equivalence of two artifacts.
+- Historical frozen-source validation can use an explicit archived source
+  root; every original digest remains mandatory. Current evaluation has its
+  own source receipt and never inherits a historical-replay claim. The bundled
+  historical source snapshot is data, not a complete executable environment.
+  Source origins and pre/post hashes do not attest in-memory execution or the
+  full external dependency closure. See [source replay](docs/source-replay.md).
 - Atlas v2 transport validation checks that a frozen callable is consistent
   with its declared artifact, configuration, weight, and source-file digests.
   It does not prove that the referenced training run occurred. Full repository

@@ -38,6 +38,12 @@ All notable changes to PDECert are documented here.
   symbolic verification APIs, with executable-documentation tests for exact,
   refuted, inconclusive, and rejected-input cases in clean package installs.
 
+- An explicit historical-source root for frozen callable integrity validation,
+  an exact Fisher--KPP source snapshot, and separate versioned current-evaluator
+  receipts. Every historical hash remains mandatory; current diagnostics bind
+  their own source, inputs, configuration and output without changing frozen
+  artifacts, integrity records or results.
+
 - An explicit Atlas baseline-adapter contract and deterministic full-condition
   fixed-collocation runner for symbolic records, with empirical-only pass/fail
   semantics, replayable numerical-threshold witnesses, structured callable

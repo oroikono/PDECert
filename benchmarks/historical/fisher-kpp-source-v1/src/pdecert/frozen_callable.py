@@ -633,16 +633,8 @@ def validate_frozen_callable_integrity(
     fixture_path: str | Path,
     integrity_path: str | Path,
     repository_root: str | Path = ".",
-    *,
-    historical_source_root: str | Path | None = None,
 ) -> dict[str, object]:
-    """Check artifact bytes and every historical source digest without executing them.
-
-    ``repository_root`` owns the supplied artifact. An explicit
-    ``historical_source_root`` may supply separately archived source bytes;
-    omitting it retains strict validation against ``repository_root``. This
-    checks historical content identity, not the currently executing evaluator.
-    """
+    """Validate artifact identity and its digest-bound training source record."""
 
     fixture = Path(fixture_path)
     integrity_source = Path(integrity_path)
@@ -692,9 +684,8 @@ def validate_frozen_callable_integrity(
         raise FrozenCallableError(
             f"$.source_files_sha256: source count exceeds {FROZEN_CALLABLE_MAX_SOURCE_FILES}"
         )
-    source_root = root if historical_source_root is None else Path(historical_source_root).resolve()
     for relative, expected in sources.items():
-        source = _safe_repository_file(source_root, relative, "$.source_files_sha256")
+        source = _safe_repository_file(root, relative, "$.source_files_sha256")
         digest = _digest(expected, f"$.source_files_sha256.{relative}")
         if _file_sha256(source) != digest:
             raise FrozenCallableError(f"$.source_files_sha256.{relative}: digest mismatch")

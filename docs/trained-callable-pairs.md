@@ -103,7 +103,25 @@ representation milestone, not an additional verification result.
 
 ## Reproduce
 
-Install the optional backend and evaluate both committed pairs:
+The legacy pair runners target their historical source closure. To evaluate
+Fisher--KPP with an evolved checkout, use the separate current runner and
+write a fresh result:
+
+```bash
+python -m experiments.current_fisher_kpp_pair \
+  --historical-source-root benchmarks/historical/fisher-kpp-source-v1 \
+  --evaluate --output /tmp/fisher-kpp-current-evaluation.json
+```
+
+Omit `--evaluate` for content validation without PyTorch. The new receipt binds
+historical inputs and current source separately and never claims historical
+replay. See [source replay](source-replay.md) for receipt validation and the
+explicit historical-checkout command.
+
+### Historical-checkout commands only
+
+Run these original pair commands only inside the complete matching historical
+checkout described in the source replay guide, with its optional backend:
 
 ```bash
 pip install -e ".[dev,autodiff]"

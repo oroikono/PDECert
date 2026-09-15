@@ -60,6 +60,14 @@ readable. In both versions, the declared training script must be among the
 source files and match its recorded digest. Absolute paths, repository
 traversal, and symlink escapes are rejected.
 
+By default, every source is checked in the supplied repository root. For an
+evolved checkout, an explicit `historical_source_root` can supply archived
+source bytes while the artifact remains bound to `repository_root`. All
+historical hashes remain mandatory. A separate current-source receipt binds
+the active evaluator; historical content validation does not claim that the
+current evaluator is the historical one. See the
+[source replay guide](source-replay.md).
+
 These hashes establish identity only. They do not establish who ran training,
 that the metadata is true, that the source produced the weights, or that the model
 satisfies a PDE. Independent provenance controls are still required for those
