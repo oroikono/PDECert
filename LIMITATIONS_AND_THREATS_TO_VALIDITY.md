@@ -123,6 +123,13 @@ identity.
   deadlines begin after Atlas validation; they are not an end-to-end timeout
   or a memory/isolation guarantee. See the
   [baseline contract](docs/baseline-adapters.md) for the supported scope.
+
+- Symbolic coordinate budgets above six extend the historical six-point prefix
+  with deterministic dyadic midpoints. Finite samples can still miss defects;
+  floating-point rounding can collapse distinct fractions on extreme domains.
+  Historical higher-budget runs require their original evaluator for replay.
+  See [symbolic sampling](docs/symbolic-sampling.md).
+
 - The Atlas fixed-collocation baseline is a finite-grid diagnostic. A `pass`
   means only that represented residuals and conditions stayed within tolerance
   at those points. It can miss localized defects, between-grid singularities,

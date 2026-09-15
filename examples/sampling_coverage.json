@@ -1,0 +1,16 @@
+{
+  "schema_version": 3,
+  "name": "six-point sampling alias",
+  "variables": ["x", "t"],
+  "domains": {"x": [0.0, 1.0], "t": [0.0, 1.0]},
+  "parameters": {},
+  "fields": {
+    "u": "t*(x-113/1000)*(x-271/1000)*(x-419/1000)*(x-613/1000)*(x-787/1000)*(x-937/1000)"
+  },
+  "pde_residuals": [
+    {"name": "stationary PDE", "expression": "D(u, t)"}
+  ],
+  "conditions": [
+    {"name": "initial condition", "expression": "At(u, t, 0)"}
+  ]
+}

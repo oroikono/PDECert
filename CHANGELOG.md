@@ -16,6 +16,11 @@ All notable changes to PDECert are documented here.
   This fixes cancellation-driven false passes while preserving exact integer
   inputs, saved sample coordinates, and empirical-only evidence semantics.
 
+- Symbolic coordinate budgets above six now add deterministic dyadic midpoint
+  samples instead of repeating six points. Budgets through six retain their
+  exact prefix; finite passing samples still cannot prove an obligation.
+  Frozen history is preserved through the explicit source-replay boundary.
+
 ### Added
 
 - A direct SymPy Atlas baseline with exact-input checks, bounded symbolic
