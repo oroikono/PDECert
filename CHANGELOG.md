@@ -6,6 +6,10 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- A self-contained own-candidate walkthrough using the public template and
+  symbolic verification APIs, with executable-documentation tests for exact,
+  refuted, inconclusive, and rejected-input cases in clean package installs.
+
 - An explicit Atlas baseline-adapter contract and deterministic full-condition
   fixed-collocation runner for symbolic records, with empirical-only pass/fail
   semantics, replayable numerical-threshold witnesses, structured callable

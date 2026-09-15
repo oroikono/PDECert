@@ -61,6 +61,13 @@ pass that correctly remains `INCONCLUSIVE`, and a recorded agent proposal-to-
 repair trace. No repository checkout, optional dependency, credential, network
 call, or model API is used. See the [walkthrough and scope](docs/quickstart.md).
 
+### Check your own candidate next
+
+The [copy-paste candidate walkthrough](docs/check-your-candidate.md) defines a
+trusted heat-equation problem inline, so it works with the installed package
+without a checkout. Change one expression to reproduce exact proof, a failed
+condition, or conservative abstention, then inspect the complete JSON report.
+
 ## Why this exists
 
 PDE solvers and language models can produce expressions that look convincing
