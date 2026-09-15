@@ -148,7 +148,7 @@ def evaluate_agent_proposal(
     symbolic_timeout: float | None = None,
     max_expression_ops: int | None = None,
 ) -> AgentEvaluation:
-    """Check a parsed candidate against the caller's fixed problem.
+    """Check a supplied candidate against the caller's fixed problem.
 
     A symbolic case must retain field references in its constraints. Each new
     candidate is substituted into those constraints, so a repair cannot reuse

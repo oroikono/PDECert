@@ -23,6 +23,10 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- A read-only benchmark coverage audit for origin/verdict counts, pending
+  annotations, and reviewer IDs. It exposes confounding without treating stored
+  labels or multiple reviewer IDs as independent ground truth.
+
 - A direct SymPy Atlas baseline with exact-input checks, bounded symbolic
   operations, complete per-obligation zero/nonzero/undecided results, and a
   version-2 report schema. Fixed-collocation version-1 output remains unchanged;
@@ -78,6 +82,12 @@ All notable changes to PDECert are documented here.
   trains a separate PINN from PDE and trace targets, digest-binds the resulting
   artifact and sources, and records the held-out empirical counterexample
   without transferring exact symbolic evidence to the callable lane.
+
+### Changed
+
+- Shortened the README, clarified the first-candidate guides, and simplified
+  API docstrings. Contributor guidance now covers plain wording and preserving
+  historical source, raw outputs, and review records during maintenance.
 
 ## 0.1.1rc2 - 2026-09-01
 

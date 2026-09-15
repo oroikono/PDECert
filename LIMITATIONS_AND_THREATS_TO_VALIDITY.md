@@ -223,6 +223,13 @@ per-obligation callable reports. Its template-pinned analytical reference and
 finite samples do not establish continuous-domain solution error. Its training
 metadata is retained, not rerun or independently audited; no labels are changed.
 
+The [coverage audit](docs/benchmark-coverage.md) recounts stored annotations,
+not independent ground truth. In the pilot, all ten solver records are labeled
+valid and all ten open-model records invalid, with one annotator ID across all
+20. Origin and verdict are therefore confounded. Pending community and matched
+records do not fill that gap; multiple IDs alone would not establish independent
+review either.
+
 Machine reports, model critiques, and user-approved amendments are not
 independent labels. Benchmark claims require the published blind-review and
 disagreement-adjudication protocol. Numerical reference fields also carry
