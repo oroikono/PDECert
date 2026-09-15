@@ -174,6 +174,13 @@ simplification decides 13/20 and abstains on seven. These are descriptive pilot
 results, not evidence of general superiority. See the
 [collection and review notes](corpus/README.md).
 
+The [coverage audit](docs/benchmark-coverage.md) recounts origin/verdict groups,
+pending annotations, and reviewer IDs without evaluating or relabeling records:
+
+```bash
+python -m experiments.audit_benchmark_coverage corpus/pilot.json
+```
+
 The pilot is available on
 [Hugging Face](https://huggingface.co/datasets/oroikono/pdecert-pilot) at the
 [immutable first-release revision](https://huggingface.co/datasets/oroikono/pdecert-pilot/commit/db690f9b161762ea288dd5dfb4b6b2f999c48e03).
