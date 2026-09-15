@@ -1,23 +1,19 @@
 # Check your own symbolic candidate
 
-This is the next step after the [offline quickstart](quickstart.md): supply an
-expression yourself and inspect its evidence. You only need the core package,
-not a repository checkout, PyTorch, an agent framework, or model credentials.
+Check an expression against a heat-equation problem, then change it to see how
+the result changes. This example uses only the core package. It works without
+a repository checkout or optional dependencies.
 
-## Keep the problem separate from the answer
+## Run the example
 
-The example checks the classical heat equation `u_t - u_xx = 0` on
-`x in [0, 1]`, `t in [0, 1]`, with initial data `u(x, 0) = sin(pi*x)` and
-boundary data `u(0, t) = u(1, t) = 0`.
+The problem is `u_t - u_xx = 0` on `x in [0, 1]`, `t in [0, 1]`, with
+`u(x, 0) = sin(pi*x)` and `u(0, t) = u(1, t) = 0`. The template below defines
+that problem; the quoted expression after `python -` is the proposed solution.
 
-The template below is the trusted problem. To try a different candidate for
-**this same problem**, replace only the quoted expression after `python -`.
-Do not let a candidate generator change the equation or conditions it is being
-checked against.
-
-Run this block in a terminal with Python 3.10–3.14 on macOS or Linux, preferably
-in a virtual environment. Installation needs network access; the check itself
-runs locally without network or model calls.
+Paste the whole block into a terminal on macOS or Linux with Python 3.10–3.14,
+preferably in the virtual environment from the [quickstart](quickstart.md).
+Installation needs network access. The check runs locally without network or
+model calls.
 
 <!-- tested-candidate-walkthrough:start -->
 ```bash
@@ -62,68 +58,73 @@ PY
 ```
 <!-- tested-candidate-walkthrough:end -->
 
-The first result has `report.status: "PROVED"` and
-`report.decision_evidence: "EXACT"`. That establishes the represented symbolic
-obligations for this expression, not existence, uniqueness, or a proof checked
-by a formal proof-assistant kernel.
+In the printed JSON, look for `report.status: "PROVED"` and
+`report.decision_evidence: "EXACT"`. The expression passes the encoded equation,
+conditions, and domain checks through exact symbolic evidence. This result does
+not establish existence or uniqueness, or supply a proof checked by a formal
+proof-assistant kernel.
 
-## Change just the candidate
+## Try another expression
 
-Rerun the block with each of these expressions in the quoted argument:
+Replace the quoted expression on the `python -` line with one from the table
+and rerun the Python block. You only need to install the package once.
+Keep the template fixed when comparing candidates: a generator must not change
+the equation or conditions its answer is checked against.
 
-| Expression | Expected result | What it demonstrates |
+| Expression | Expected result | Why |
 | --- | --- | --- |
-| `exp(-pi**2*t)*sin(pi*x)` | `PROVED`, `EXACT` | The equation and represented conditions hold exactly. |
+| `exp(-pi**2*t)*sin(pi*x)` | `PROVED`, `EXACT` | The encoded equation and conditions hold exactly. |
 | `exp(-pi**2*t)*sin(pi*x) + x/10` | `REFUTED`, `EMPIRICAL` | The PDE still holds, but the initial and right boundary data are wrong. |
-| `exp(-pi**2*t)*sin(pi*x) + t*x*(1-x)/10**14` | `INCONCLUSIVE` | A nonzero error passes the numerical tolerance; that does not prove correctness. |
+| `exp(-pi**2*t)*sin(pi*x) + t*x*(1-x)/10**14` | `INCONCLUSIVE` | A nonzero residual falls below the numerical tolerance. Passing samples cannot prove correctness. |
 | `sin(y)` | `TemplateError` | An undeclared variable is rejected before verification. |
 
-For the `+ x/10` case, the first witness is the **initial condition**, at
-`x = 0.113`, with residual approximately `0.0113`. Here `t = 0` has already
-been substituted by `At(u, t, 0)`, so it is not repeated in the witness's `point`.
-The report need not list every violation after it has found one.
+## Read the report
 
-Read `report.witness` for the failing obligation and point,
-`report.evidence_events` for the supporting evidence, and
-`report.incomplete_reasons` when the answer is inconclusive. A floating-point
-counterexample is empirical; replay numerically sensitive findings at higher
-precision or independently before making a mathematical claim.
+For a `REFUTED` result, start with `report.witness`. In the `+ x/10` example,
+it identifies the initial condition at `x = 0.113`, with residual approximately
+`0.0113`. The template already substituted `t = 0`, so the witness's `point`
+only contains `x`. The verifier can stop after finding one violation.
 
-This Python snippet prints a report and normally exits successfully for all
-three statuses. Inspect `report.status`; do not interpret shell success as a
-proof. The separate [`pdecert verify` CLI](../README.md#install-and-run) has
-status-specific exit codes.
+For `INCONCLUSIVE`, read `report.incomplete_reasons` to see what the verifier
+could not establish. `report.evidence_events` records the evidence for each
+check. Floating-point counterexamples are empirical; replay numerically
+sensitive findings at higher precision or independently before making a
+mathematical claim.
+
+The Python block exits successfully for all three statuses, so read
+`report.status` to learn the result. The separate
+[`pdecert verify` CLI](../README.md#install-and-run) uses status-specific exit
+codes.
 
 ## Use a different PDE
 
-As the problem author, replace the template's variables, domains, operators,
-and conditions together, then supply a separate candidate. `D(u, x, 2)` means
-the second derivative of `u` with respect to `x`; `At(u, x, 0)` substitutes a
-boundary coordinate. See the [template contract](problem-templates.md) for the
-accepted grammar and field-binding rules.
+To check your own PDE, define its variables, domains, operators, and conditions
+in the template, then supply a candidate separately. `D(u, x, 2)` is the second
+derivative of `u` with respect to `x`; `At(u, x, 0)` substitutes `x = 0`.
+The [template guide](problem-templates.md) explains the accepted grammar and
+how expressions bind to fields.
 
-This path accepts symbolic expressions for classical strong-form problems on
-rectangular domains. It does not accept arbitrary Python programs, neural
-checkpoints, weak solutions, or general meshes. Unsupported syntax is an input
-error, not a mathematical refutation. Do not use `eval` to turn model text into
-a candidate.
+This path uses pointwise derivatives (`classical_strong` semantics) on
+rectangular domains. It accepts symbolic expressions, but not arbitrary Python
+programs, neural checkpoints, weak solutions, or general meshes. Unsupported
+syntax is an input error, not a mathematical refutation. Do not use `eval` to
+turn model text into a candidate.
 
-The two-second deadline applies to individual symbolic checks on supported
-main-thread interval-timer environments. It does not bound parsing, all work,
-or process memory. If deadlines are unavailable or a check times out, the
-verifier abstains unless another check can refute. Do not expose this local
-recipe as a public service for untrusted workloads without outer process and
-resource isolation. See [limitations](../LIMITATIONS_AND_THREATS_TO_VALIDITY.md).
+The two-second timeout limits individual symbolic checks on supported
+main-thread interval-timer environments. It does not limit parsing, total
+runtime, or process memory. If the timeout is unavailable or reached, the
+verifier remains inconclusive unless another check can refute. A public service
+for untrusted workloads needs outer process and resource isolation. See the
+[limitations](../LIMITATIONS_AND_THREATS_TO_VALIDITY.md).
 
-## Keep and contribute useful evidence
+## Save or share a result
 
-The JSON includes the instantiated case, evaluator settings, and complete
-report. Retain the original candidate text and your package/runtime versions
-alongside it; this wrapper is not a digest-bound run manifest or a human label.
-For publication, follow the [run-manifest contract](run-manifests.md).
+Save the JSON together with the original candidate text and your package and
+Python versions. The JSON contains the case, settings, and complete report; it
+is not a digest-bound run manifest or a human label. For publication, follow
+the [run-manifest guide](run-manifests.md).
 
-Have a real candidate that exposes an interesting failure? Use the
+To contribute a real candidate that fails its stated problem, use the
 [failure-case form](https://github.com/oroikono/PDECert/issues/new?template=failure-case.yml)
-with the unchanged output, problem, provenance, and report. The three examples
-above are deliberately constructed teaching cases, not new natural benchmark
-records.
+with the unchanged output, problem, provenance, and report. The expressions
+above are constructed teaching cases, not natural benchmark records.
