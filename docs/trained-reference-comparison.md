@@ -9,15 +9,18 @@ No training or model-provider call is needed.
 
 ```bash
 python -m pip install -e ".[dev,autodiff]"
-python -m experiments.trained_fisher_kpp_reference > trained-reference.json
+python -m experiments.trained_fisher_kpp_reference \
+  --historical-source-root benchmarks/historical/fisher-kpp-source-v1 \
+  > trained-reference-current.json
 python -m pytest tests/test_trained_fisher_kpp_reference.py
 ```
 
 The command requires PyTorch but adds no new package dependency. It resolves the
 bundled files relative to its checkout, not the shell's current directory. An
-explicit `--repository-root /path/to/PDECert` can select a complete copy of the
-same inputs. The guide and experiment are repository resources, not installed
-CLI commands in the published release candidate.
+explicit `--repository-root /path/to/PDECert` must identify the checkout from
+which the package and runner are imported. Supply an absolute historical source
+path when running outside the checkout. The guide and experiment are repository
+resources, not installed CLI commands in the published release candidate.
 
 Accepted scope is the represented classical Fisher--KPP problem
 `u_t - u_xx - u*(1-u) = 0` on `x in [-6,6]`, `t in [0,2]`, with its three
@@ -69,10 +72,41 @@ and boundary sets instead fix their declared surface coordinate. The sample
 values are included so that metric calculations and witnesses can be replayed.
 
 Before materialization the experiment verifies the frozen artifact, weights,
-configuration, and retained source-file digests. It also checks that the actually
-imported evaluator modules match the fixture's declared sources and records
-digests of the new runner and comparison implementation. Changed or missing
-required bindings are errors, not a silently accepted new baseline.
+configuration, and all 18 retained historical source-file digests in the explicit
+historical source root. The original integrity record is itself digest-pinned,
+so removing or replacing historical bindings fails validation. Archived files
+are checked as data and are never imported by this runner.
+
+The `trained-fisher-kpp-reference-v2` report retains that historical record in
+`integrity`. Its `current_evaluator` source receipt separately hashes every
+current package Python file, the runner, relevant schemas and `pyproject.toml`.
+`active_inputs` binds the exact fixture, integrity record and template used.
+This replaces the version-1 `source_digests` map, which required current evaluator
+bytes to equal historical bytes. The per-obligation numerical reports and the
+reference-comparison version-1 schema keep their existing meanings.
+
+The runner checks imported package/runner origins and repeats input and source
+checks after evaluation. Reports state `historical_replay: false` and
+`integrity_scope: content_identity_only`: they describe current evaluation of
+preserved weights. Source hashes do not attest in-memory execution or bind all
+external dependency bytes. See [source replay](source-replay.md) for the separate
+historical replay procedure and the snapshot's limits.
+
+Inspect the same historical and current bindings without PyTorch or evaluation:
+
+```python
+from experiments.trained_fisher_kpp_reference import inspect_inputs
+
+provenance = inspect_inputs(
+    historical_source_root="benchmarks/historical/fisher-kpp-source-v1",
+)
+print(provenance["current_evaluator"])
+```
+
+The Python `run()` entrypoint now requires `historical_source_root` explicitly.
+`load_inputs()` accepts the same keyword; omitting it retains strict historical
+validation against the current checkout. Provenance tests run in the core-only
+environment; only numerical tests require PyTorch.
 
 The output retains training provenance, all integrity fields, execution versions,
 dtype, device, thread count, sampling fractions, and tolerance. Stored training

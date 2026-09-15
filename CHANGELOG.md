@@ -52,6 +52,9 @@ All notable changes to PDECert are documented here.
   receipts. Every historical hash remains mandatory; current diagnostics bind
   their own source, inputs, configuration and output without changing frozen
   artifacts, integrity records or results.
+  The trained reference comparison now emits suite version 2 and requires an
+  explicit historical source root; current evaluator hashes are recorded
+  separately from the original integrity record.
 
 - An explicit Atlas baseline-adapter contract and deterministic full-condition
   fixed-collocation runner for symbolic records, with empirical-only pass/fail
