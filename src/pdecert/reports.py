@@ -26,7 +26,7 @@ from .evidence import (
 
 
 class ReportSchemaError(ValueError):
-    """Raised when a serialized report violates the public report contract."""
+    """Raised when saved report fields are invalid or inconsistent."""
 
 
 _EnumType = TypeVar("_EnumType")

@@ -1,4 +1,7 @@
-"""Digest-bound manifests for reproducible PDECert evaluation runs."""
+"""Track the files and settings used by an evaluation run.
+
+Matching hashes establish content identity, not authorship or correct execution.
+"""
 
 from __future__ import annotations
 
@@ -97,7 +100,7 @@ def _string_mapping(value: Mapping[str, str], path: str) -> Mapping[str, str]:
 
 @dataclass(frozen=True)
 class FileReference:
-    """One bundle-local file bound to its exact SHA-256 digest."""
+    """A relative file path and the SHA-256 hash of its contents."""
 
     path: str
     sha256: str
@@ -120,7 +123,7 @@ class FileReference:
 
 @dataclass(frozen=True)
 class CandidateReference:
-    """Identity and provenance for the exact candidate artifact bytes."""
+    """A candidate's file reference, field names, and reported origin."""
 
     artifact_id: str
     kind: str
@@ -151,7 +154,7 @@ class CandidateReference:
 
 @dataclass(frozen=True)
 class EvaluatorReference:
-    """Evaluator identity, immutable configuration, and runtime environment."""
+    """The evaluator version, frozen settings, and recorded environment."""
 
     name: str
     version: str
@@ -417,7 +420,7 @@ def _validate_bundle_root(manifest: RunManifest, root: Path) -> ProblemTemplate:
 
 
 def validate_run_bundle(path: str | Path) -> RunManifest:
-    """Verify all bundle digests and the template/candidate field contract."""
+    """Check file hashes and ensure candidate fields match the template."""
 
     source = Path(path)
     manifest = load_run_manifest(source)

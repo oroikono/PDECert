@@ -5,7 +5,7 @@ changes are easiest to review.
 
 Start with [`ARCHITECTURE.md`](ARCHITECTURE.md) to see the package layers,
 extension boundaries, evidence rules, and six contributor workstreams. New work
-should deliver one vertical slice rather than changing several unrelated layers.
+should solve one problem, with its tests and documentation in the same change.
 
 ## Choose a workstream
 
@@ -17,6 +17,21 @@ should deliver one vertical slice rather than changing several unrelated layers.
 | Benchmark science | Contribute one natural failure or matched case | Preserve provenance and follow independent review protocol |
 | Ecosystem integrations | Add an optional loader or report adapter | Test without making the integration a core dependency |
 | Developer experience | Improve setup, CI, documentation, or packaging | Tie the change to a reproducible contributor problem |
+
+## Code and documentation style
+
+Use the existing module boundaries and public APIs before adding abstractions.
+Keep optional integrations out of the core dependencies. A behavior change needs
+a regression test; a formatting or wording change should leave behavior intact.
+
+Write docstrings in plain language: start with what the function returns or
+does, then explain assumptions, failure cases, or surprising behavior. Comments
+should explain why a check exists, not repeat the next line of code. Keep
+mathematical and security warnings next to the API they constrain.
+
+Test examples as written. Keep the README focused on getting started and link
+to detailed guides instead of copying them. Do not polish raw model outputs,
+human review records, or hash-bound historical files as part of a prose cleanup.
 
 ## Good ways to begin
 
