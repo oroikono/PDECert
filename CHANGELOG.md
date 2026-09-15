@@ -11,6 +11,11 @@ All notable changes to PDECert are documented here.
   discharged obligations, including in saved Atlas evaluations; legitimate
   abstention and sampled-pass history remains readable.
 
+- Atlas fixed collocation now promotes float coordinates to mpmath numbers at
+  the requested decimal precision before evaluating polynomial residuals.
+  This fixes cancellation-driven false passes while preserving exact integer
+  inputs, saved sample coordinates, and empirical-only evidence semantics.
+
 ### Added
 
 - An explicit Atlas baseline-adapter contract and deterministic full-condition

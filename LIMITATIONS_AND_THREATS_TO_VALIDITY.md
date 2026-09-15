@@ -124,6 +124,14 @@ identity.
   itself be caused by finite-precision roundoff when the tolerance is too small;
   it should not be interpreted as a mathematical counterexample without
   precision-stability or independent reproduction.
+- Fixed collocation promotes float grid coordinates to mpmath numbers at the
+  configured precision. This does not refine the grid, restore missing input
+  digits, or guarantee accuracy for ill-conditioned residuals. Exact integer
+  parameter inputs are preserved, but integer-only division or negative powers
+  may still introduce native-float intermediates in generated functions; more
+  digits do not fix every arithmetic path. Reported magnitudes are converted
+  back to JSON floats, where extreme values can underflow or overflow. Different
+  mpmath precisions in concurrent threads are not isolated; use separate processes.
 - Callable evaluation assumes that each output row depends only on the
   corresponding input row. Training-mode batch operations, cross-sample
   attention, mutable state, randomness, and hidden preprocessing can invalidate
