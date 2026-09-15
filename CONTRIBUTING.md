@@ -178,6 +178,13 @@ Test exact and discrepant values, zero reference norms, numerical extremes,
 unsupported inputs, sample identity, and the recorded maximum-error location.
 Keep optional model loaders separate from this pure-Python comparison primitive.
 
+The own-candidate guide is executable documentation. When editing its marked
+command block or expected outcomes, run `python tests/test_candidate_walkthrough.py`.
+These tests execute the documented Python code from an empty working directory
+and also run against core-only wheel and source-distribution installs in CI.
+Keep the example self-contained and preserve the distinction between a Python
+process succeeding and a candidate being proved.
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate

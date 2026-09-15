@@ -39,3 +39,7 @@ strong-form obligations. The sampled pass is explicitly not a certificate. See
 the project-wide
 [limitations and threats-to-validity statement](../LIMITATIONS_AND_THREATS_TO_VALIDITY.md)
 before using a report in an evaluation or publication.
+
+Next, [check your own symbolic candidate](check-your-candidate.md). The complete
+copy-paste recipe defines the trusted problem inline and shows which expression
+to change; it needs no repository files or optional dependencies.

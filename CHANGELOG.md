@@ -34,6 +34,10 @@ All notable changes to PDECert are documented here.
   per-record verifier reports, offline integration tests, and an opt-in live
   CI check. No core dependency, frozen record, label, or evidence rule changes.
 
+- A self-contained own-candidate walkthrough using the public template and
+  symbolic verification APIs, with executable-documentation tests for exact,
+  refuted, inconclusive, and rejected-input cases in clean package installs.
+
 - An explicit Atlas baseline-adapter contract and deterministic full-condition
   fixed-collocation runner for symbolic records, with empirical-only pass/fail
   semantics, replayable numerical-threshold witnesses, structured callable
