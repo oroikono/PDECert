@@ -138,6 +138,10 @@ The built-in fixed-collocation contract and report shape are documented in
 External adapters must leave supplied records unchanged and declare their
 accepted scope. Include a mixed-Atlas test showing that unsupported records
 abstain, and validate generated reports against the public baseline schema.
+Symbolic adapters opt into report version 2 and return all represented
+obligations through `SymbolicBaselineResult`; evidence about residual identities
+must not imply that candidate singularities or regularity were checked. Keep
+version-1 empirical output compatibility covered when extending this interface.
 
 Symbolic complexity limits must preserve counterexample search where practical.
 Skipping an over-budget exact check is an incomplete proof attempt, not evidence
@@ -183,6 +187,18 @@ identity only, so descriptions must not present manifest validation as proof,
 authorship, or trusted execution.
 
 ## Local setup
+
+Reference-metric contributions follow [the supplied-field contract](docs/reference-fields.md).
+Test exact and discrepant values, zero reference norms, numerical extremes,
+unsupported inputs, sample identity, and the recorded maximum-error location.
+Keep optional model loaders separate from this pure-Python comparison primitive.
+
+The own-candidate guide is executable documentation. When editing its marked
+command block or expected outcomes, run `python tests/test_candidate_walkthrough.py`.
+These tests execute the documented Python code from an empty working directory
+and also run against core-only wheel and source-distribution installs in CI.
+Keep the example self-contained and preserve the distinction between a Python
+process succeeding and a candidate being proved.
 
 ```bash
 python -m venv .venv

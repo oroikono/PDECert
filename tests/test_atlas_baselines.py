@@ -8,9 +8,11 @@ from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
+import mpmath
 import sympy as sp
 from jsonschema import Draft202012Validator
 
+from examples.collocation_precision import run as run_collocation_precision_example
 from pdecert.atlas_baselines import (
     ATLAS_BASELINE_REPORT_VERSION,
     AtlasBaselineError,
@@ -35,6 +37,25 @@ SCHEMA = Path("schema/atlas-baseline-report-v1.schema.json")
 def _validator() -> Draft202012Validator:
     schema = json.loads(SCHEMA.read_text())
     return Draft202012Validator(schema)
+
+
+def _cancellation_record():
+    return {
+        "artifact": {"fields": {"u": "x**3/3 - 100000000*x**2 + 10000000000000001*x"}},
+        "artifact_type": "symbolic_expression",
+        "id": "polynomial-cancellation",
+        "template": {
+            "conditions": [],
+            "domains": {"x": [100000000.0, 100000001.0]},
+            "field_names": ["u"],
+            "name": "polynomial cancellation",
+            "parameters": {},
+            "pde_residuals": [{"name": "u_x", "expression": "D(u, x)"}],
+            "solution_semantics": "classical_strong",
+            "template_version": 1,
+            "variables": ["x"],
+        },
+    }
 
 
 class _ExampleAdapter:
@@ -187,6 +208,17 @@ class BaselineExtensionTests(unittest.TestCase):
 
 
 class AtlasBaselineTests(unittest.TestCase):
+    def test_public_precision_example_reports_an_empirical_failure(self):
+        payload = run_collocation_precision_example()
+
+        self.assertEqual(payload["configuration"]["decimal_precision"], 30)
+        result = json.loads(json.dumps(payload, allow_nan=False))["result"]
+        self.assertEqual(result["outcome"], "fail")
+        self.assertEqual(result["evidence_kind"], "NUMERICAL_THRESHOLD_EXCEEDANCE")
+        self.assertEqual(result["evidence_level"], "EMPIRICAL")
+        self.assertEqual(result["max_absolute_residual"], 2.0)
+        self.assertEqual(result["witness"]["sampled_inputs"], {"x": 100000001.0})
+
     def test_fixed_collocation_pass_is_empirical_and_not_a_proof(self):
         report = evaluate_atlas_baseline(
             ATLAS,
@@ -302,6 +334,111 @@ class AtlasBaselineTests(unittest.TestCase):
 
         self.assertEqual(result.outcome, BaselineOutcome.FAIL)
         self.assertEqual(result.evidence_kind, "NUMERICAL_THRESHOLD_EXCEEDANCE")
+
+    def test_polynomial_cancellation_uses_the_requested_decimal_precision(self):
+        record = _cancellation_record()
+        case = bind_symbolic_candidate(
+            template_from_dict(record["template"]), record["artifact"]["fields"]
+        )
+        (x,) = case.problem.variables
+        residual = case.problem.pde_residuals[0].residual
+        exact_samples = [sp.Integer(100000000) + sp.Rational(index, 4) for index in range(5)]
+        self.assertEqual(
+            [residual.subs(x, value) for value in exact_samples],
+            [1, sp.Rational(17, 16), sp.Rational(5, 4), sp.Rational(25, 16), 2],
+        )
+
+        for precision in (30, 60, 100):
+            with self.subTest(decimal_precision=precision):
+                result = FixedCollocationBaseline(decimal_precision=precision).evaluate_record(
+                    record
+                )
+                self.assertEqual(result.outcome, BaselineOutcome.FAIL)
+                self.assertEqual(result.max_absolute_residual, 2.0)
+                self.assertEqual(result.evaluations, 5)
+                witness = result.witness
+                assert witness is not None
+                self.assertEqual(witness.sampled_inputs, {"x": 100000001.0})
+                self.assertEqual(witness.absolute_residual, 2.0)
+
+    def test_equivalent_polynomial_forms_can_cancel_to_a_passing_residual(self):
+        record = _cancellation_record()
+        record["template"]["pde_residuals"][0]["expression"] = "D(u, x) - ((x - 100000000)**2 + 1)"
+
+        result = FixedCollocationBaseline(decimal_precision=30).evaluate_record(record)
+
+        self.assertEqual(result.outcome, BaselineOutcome.PASS)
+        self.assertEqual(result.max_absolute_residual, 0.0)
+        self.assertIsNone(result.witness)
+
+    def test_integer_parameter_samples_remain_exact_python_integers(self):
+        record = _cancellation_record()
+        record["artifact"]["fields"]["u"] = "n*x"
+        record["template"]["variables"].append("n")
+        record["template"]["parameters"]["n"] = ["integer", "positive"]
+        record["template"]["domains"]["n"] = [2**53, 2**53 + 4]
+        inputs = []
+        original_lambdify = sp.lambdify
+
+        def observe_inputs(*args, **kwargs):
+            function = original_lambdify(*args, **kwargs)
+
+            def evaluate(n):
+                inputs.append(n)
+                return function(n)
+
+            return evaluate
+
+        with patch("pdecert.atlas_baselines.sympy.lambdify", side_effect=observe_inputs):
+            result = FixedCollocationBaseline(decimal_precision=30).evaluate_record(record)
+
+        self.assertEqual(result.outcome, BaselineOutcome.FAIL)
+        self.assertEqual(inputs, list(range(2**53, 2**53 + 5)))
+        self.assertTrue(all(type(value) is int for value in inputs))
+
+    def test_failure_witness_replays_the_exact_binary_float_coordinate(self):
+        record = _cancellation_record()
+        upper = math.nextafter(0.1, 1.0)
+        record["artifact"]["fields"]["u"] = "x"
+        record["template"]["domains"]["x"] = [0.1, upper]
+        record["template"]["pde_residuals"][0]["expression"] = "100000000000000000*(u - 1/10)"
+        expected = float(10**17 * (sp.Rational(upper) - sp.Rational(1, 10)))
+
+        result = FixedCollocationBaseline(decimal_precision=60, points_per_axis=2).evaluate_record(
+            record
+        )
+
+        self.assertEqual(result.outcome, BaselineOutcome.FAIL)
+        self.assertEqual(result.max_absolute_residual, expected)
+        witness = result.witness
+        assert witness is not None
+        self.assertEqual(witness.sampled_inputs, {"x": upper})
+        self.assertEqual(witness.absolute_residual, expected)
+        self.assertEqual(json.loads(json.dumps(witness.to_dict()))["sampled_inputs"], {"x": upper})
+
+    def test_evaluation_restores_the_callers_mpmath_precision_on_every_exit(self):
+        record = _cancellation_record()
+        original_precision = mpmath.mp.dps
+        with mpmath.workdps(47):
+            for field, outcome in (("0", BaselineOutcome.PASS), ("x", BaselineOutcome.FAIL)):
+                with self.subTest(outcome=outcome):
+                    record["artifact"]["fields"]["u"] = field
+                    result = FixedCollocationBaseline(decimal_precision=30).evaluate_record(record)
+                    self.assertEqual(result.outcome, outcome)
+                    self.assertEqual(mpmath.mp.dps, 47)
+            with patch(
+                "pdecert.atlas_baselines.sympy.lambdify", side_effect=NotImplementedError("compile")
+            ):
+                result = FixedCollocationBaseline(decimal_precision=30).evaluate_record(record)
+            self.assertEqual(result.outcome, BaselineOutcome.UNSUPPORTED)
+            self.assertEqual(mpmath.mp.dps, 47)
+            with patch(
+                "pdecert.atlas_baselines.sympy.lambdify", side_effect=RuntimeError("compile")
+            ):
+                with self.assertRaisesRegex(RuntimeError, "compile"):
+                    FixedCollocationBaseline(decimal_precision=30).evaluate_record(record)
+            self.assertEqual(mpmath.mp.dps, 47)
+        self.assertEqual(mpmath.mp.dps, original_precision)
 
     def test_wide_finite_domain_uses_overflow_safe_grid_interpolation(self):
         template = {
