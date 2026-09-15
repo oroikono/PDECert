@@ -1,0 +1,4 @@
+# Optional consumer check only; not a core or training dependency.
+datasets==5.0.1
+huggingface_hub==1.27.0
+pyarrow==25.0.1
