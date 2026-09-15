@@ -115,6 +115,14 @@ identity.
 
 ## Numerical and implementation limitations
 
+- The direct SymPy baseline reports CAS results for represented residuals and
+  conditions only. It omits candidate singularity and regularity checks, so
+  cancellation can yield all-zero expressions for a field with a pole. Its
+  exact-input policy abstains on float literals, nonfinite or non-real
+  residuals, and undecidable expressions. Per-binding and per-obligation signal
+  deadlines begin after Atlas validation; they are not an end-to-end timeout
+  or a memory/isolation guarantee. See the
+  [baseline contract](docs/baseline-adapters.md) for the supported scope.
 - The Atlas fixed-collocation baseline is a finite-grid diagnostic. A `pass`
   means only that represented residuals and conditions stayed within tolerance
   at those points. It can miss localized defects, between-grid singularities,

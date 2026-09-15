@@ -20,6 +20,7 @@ from .atlas_evaluation import (
 from .atlas_baselines import (
     AtlasBaselineError,
     FixedCollocationBaseline,
+    DirectSympyBaseline,
     evaluate_atlas_baseline,
 )
 from .corpus import CorpusError, load_atlas_coverage, load_corpus_source
@@ -174,12 +175,12 @@ def _build_parser() -> argparse.ArgumentParser:
     summarize_parser.add_argument("-o", "--output", type=Path, help="write the JSON summary")
     baseline_parser = corpus_commands.add_parser(
         "baseline",
-        help="run a method-specific empirical baseline over Atlas v2 records",
+        help="run a method-specific baseline over Atlas v2 records",
     )
     baseline_parser.add_argument("corpus", type=Path, help="path to an Atlas v2 directory")
     baseline_parser.add_argument(
         "--method",
-        choices=("fixed-collocation",),
+        choices=("fixed-collocation", "direct-sympy"),
         default="fixed-collocation",
         help="baseline adapter to run (default: fixed-collocation)",
     )
@@ -193,20 +194,32 @@ def _build_parser() -> argparse.ArgumentParser:
     baseline_parser.add_argument(
         "--decimal-precision",
         type=_positive_integer,
-        default=30,
+        default=None,
         help="mpmath decimal digits used for evaluation (default: 30; maximum: 100)",
     )
     baseline_parser.add_argument(
         "--points-per-axis",
         type=_integer_at_least_two,
-        default=5,
+        default=None,
         help="uniform samples per variable axis (default: 5)",
     )
     baseline_parser.add_argument(
         "--tolerance",
         type=_positive_float,
-        default=1e-9,
+        default=None,
         help="absolute residual threshold (default: 1e-9)",
+    )
+    baseline_parser.add_argument(
+        "--symbolic-timeout",
+        type=_positive_float,
+        default=None,
+        help="direct-sympy deadline per binding/check (default: 2 seconds; range: 0.001–3600)",
+    )
+    baseline_parser.add_argument(
+        "--max-expression-ops",
+        type=_positive_integer,
+        default=None,
+        help="direct-sympy input operation budget per check (default: 10000)",
     )
     template_parser = subcommands.add_parser(
         "template", help="inspect candidate-free PDE problem templates"
@@ -382,16 +395,38 @@ def _run_corpus_summarize_evaluation(arguments: argparse.Namespace) -> int:
 
 def _run_corpus_baseline(arguments: argparse.Namespace) -> int:
     try:
-        if arguments.method != "fixed-collocation":  # guarded by argparse choices
-            raise AtlasBaselineError(f"unsupported baseline method {arguments.method!r}")
+        if arguments.method == "direct-sympy":
+            if any(
+                value is not None
+                for value in (
+                    arguments.decimal_precision,
+                    arguments.points_per_axis,
+                    arguments.tolerance,
+                )
+            ):
+                raise AtlasBaselineError("collocation options do not apply to direct-sympy")
+            adapter = DirectSympyBaseline(
+                symbolic_timeout=arguments.symbolic_timeout
+                if arguments.symbolic_timeout is not None
+                else 2.0,
+                max_expression_ops=arguments.max_expression_ops
+                if arguments.max_expression_ops is not None
+                else 10_000,
+            )
+        else:
+            if arguments.symbolic_timeout is not None or arguments.max_expression_ops is not None:
+                raise AtlasBaselineError("symbolic options do not apply to fixed-collocation")
+            adapter = FixedCollocationBaseline(
+                decimal_precision=arguments.decimal_precision
+                if arguments.decimal_precision is not None
+                else 30,
+                points_per_axis=arguments.points_per_axis
+                if arguments.points_per_axis is not None
+                else 5,
+                tolerance=arguments.tolerance if arguments.tolerance is not None else 1e-9,
+            )
         payload = evaluate_atlas_baseline(
-            arguments.corpus,
-            FixedCollocationBaseline(
-                decimal_precision=arguments.decimal_precision,
-                points_per_axis=arguments.points_per_axis,
-                tolerance=arguments.tolerance,
-            ),
-            record_ids=arguments.record_ids,
+            arguments.corpus, adapter, record_ids=arguments.record_ids
         )
     except (AtlasBaselineError, OSError, ValueError) as error:
         print(f"pdecert: {error}", file=sys.stderr)

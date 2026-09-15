@@ -159,6 +159,20 @@ Roundoff-sensitive failures require independent or precision-stability checks.
 See the
 [`baseline adapter contract`](docs/baseline-adapters.md).
 
+Compare the same obligations with direct symbolic simplification:
+
+```bash
+pdecert corpus baseline corpus/matched \
+  --method direct-sympy --symbolic-timeout 2 --max-expression-ops 10000 \
+  --output direct-sympy.json
+```
+
+This emits version-2 per-obligation `zero`, `nonzero`, or `undecided` results;
+callable records remain unsupported. Exact CAS results address only the
+represented residuals and conditions. Domain singularities and regularity are
+not checked, so an all-zero baseline result is not a full solution certificate.
+The existing fixed-collocation version-1 report remains unchanged.
+
 Open-model batches follow a
 [predeclared, resumable collection protocol](docs/atlas-open-model-collection.md)
 that retains raw responses and accounts for outputs that cannot be materialized.
