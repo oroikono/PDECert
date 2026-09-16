@@ -90,6 +90,8 @@ jobs:
           "$RUNNER_TEMP/pdecert-wheel/bin/python" -c "import pdecert"
           "$RUNNER_TEMP/pdecert-wheel/bin/pdecert" --help
           "$RUNNER_TEMP/pdecert-wheel/bin/pdecert" quickstart --json
+          "$RUNNER_TEMP/pdecert-wheel/bin/python" -I \
+            "$GITHUB_WORKSPACE/tests/test_candidate_walkthrough.py"
           "$RUNNER_TEMP/pdecert-wheel/bin/pdecert" verify \
             "$GITHUB_WORKSPACE/examples/exact_heat.json"
           cd "$GITHUB_WORKSPACE"
@@ -99,3 +101,5 @@ jobs:
           "$RUNNER_TEMP/pdecert-sdist/bin/python" -c "import pdecert"
           "$RUNNER_TEMP/pdecert-sdist/bin/pdecert" --help
           "$RUNNER_TEMP/pdecert-sdist/bin/pdecert" quickstart --json
+          "$RUNNER_TEMP/pdecert-sdist/bin/python" -I \
+            "$GITHUB_WORKSPACE/tests/test_candidate_walkthrough.py"
