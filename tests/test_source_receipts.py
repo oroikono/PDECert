@@ -152,6 +152,50 @@ class CurrentSourceReceiptTests(unittest.TestCase):
 
 
 class CurrentFisherKppReceiptTests(unittest.TestCase):
+    def test_reduced_historical_inventory_is_rejected_before_validation_or_materialization(self):
+        integrity = json.loads(historical.DEFAULT_INTEGRITY.read_text())
+        integrity["source_files_sha256"].pop("src/pdecert/autodiff.py")
+        with tempfile.TemporaryDirectory(dir=ROOT) as directory:
+            copied = Path(directory) / "integrity.json"
+            copied.write_text(json.dumps(integrity))
+            with (
+                patch.object(
+                    current,
+                    "validate_frozen_callable_integrity",
+                    wraps=validate_frozen_callable_integrity,
+                ) as validate,
+                patch.object(
+                    historical,
+                    "build_case",
+                    side_effect=AssertionError("invalid history must not materialize the model"),
+                ) as materialize,
+            ):
+                for evaluate in (False, True):
+                    with (
+                        self.subTest(evaluate=evaluate),
+                        self.assertRaisesRegex(FrozenCallableError, "historical integrity digest"),
+                    ):
+                        current.run(
+                            evaluate=evaluate, historical_source_root=HISTORY, integrity=copied
+                        )
+                validate.assert_not_called()
+                materialize.assert_not_called()
+
+    def test_byte_identical_integrity_copy_preserves_all_source_bindings(self):
+        with tempfile.TemporaryDirectory(dir=ROOT) as directory:
+            copied = Path(directory) / "integrity.json"
+            copied.write_bytes(historical.DEFAULT_INTEGRITY.read_bytes())
+            receipt = current.run(historical_source_root=HISTORY, integrity=copied)
+            self.assertEqual(
+                receipt["historical_integrity"]["source_files_sha256"],
+                json.loads(historical.DEFAULT_INTEGRITY.read_text())["source_files_sha256"],
+            )
+            self.assertEqual(
+                receipt["historical_integrity"]["file"]["path"],
+                copied.relative_to(ROOT).as_posix(),
+            )
+            current.validate_receipt(receipt, historical_source_root=HISTORY, integrity=copied)
+
     def test_inspection_checks_identity_without_torch_or_evaluation(self):
         original_import = builtins.__import__
 

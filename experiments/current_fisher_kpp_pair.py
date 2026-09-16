@@ -44,6 +44,8 @@ CONFIGURATION = {
     "trained-pinn": {"tolerance": 1e-3, "samples_per_axis": 6, "symbolic_timeout": None},
 }
 DEFAULT_HISTORY = Path("benchmarks/historical/fisher-kpp-source-v1")
+# Bind the original 18-source record as a whole, including its exact inventory.
+EXPECTED_INTEGRITY_SHA256 = "cbc76980b4d1ae431bdb438e6b071bde766af83546faf69cf5635ecbe44103d4"
 
 
 def _canonical_sha256(value: object) -> str:
@@ -73,6 +75,8 @@ def inspect_inputs(
     """Validate all historical bytes and bind the active evaluator, without Torch."""
     root = Path(repository_root).resolve()
     require_active_source_root(root, (__file__, historical.__file__))
+    if _file_sha256(Path(integrity)) != EXPECTED_INTEGRITY_SHA256:
+        raise FrozenCallableError("historical integrity digest differs from the preserved record")
     integrity_record = validate_frozen_callable_integrity(
         fixture, integrity, root, historical_source_root=historical_source_root
     )

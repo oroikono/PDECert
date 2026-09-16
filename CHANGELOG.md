@@ -6,6 +6,9 @@ All notable changes to PDECert are documented here.
 
 ### Fixed
 
+- The current Fisher--KPP pair runner pins the preserved integrity record before
+  validation, rejecting altered source inventories before model materialization.
+
 - Report loading and the public JSON schema reject `PROVED` or `INCONCLUSIVE`
   summaries containing refuting evidence. Refutation keeps precedence over
   discharged obligations, including in saved Atlas evaluations; legitimate
