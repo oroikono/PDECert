@@ -121,6 +121,20 @@ exposes exactly 20 rows in the `test` split, and shows the same corpus digest as
 the local manifest. Then link the immutable Hub commit from the GitHub release
 notes.
 
+### Installed Hugging Face consumer gate
+
+Before treating a pilot release as consumable through Hugging Face Datasets,
+run the [optional consumer check](docs/hub-integration.md). It loads the actual
+JSON/Arrow data, checks complete record fidelity, and runs the ordinary verifier.
+The local mode is network-disabled; `--from-hub` explicitly checks the immutable
+first public pilot anonymously. It does not test a new upload automatically:
+a different release needs its own reviewed revision and corpus digest.
+
+Do not substitute mocked transport tests or a working Dataset Viewer for the
+live consumer check. Neither a transport pass nor a digest match is a proof of
+candidate correctness. Preserve the output and the tested source Git commit
+separately from historical benchmark files.
+
 ## First public release
 
 - Dataset: <https://huggingface.co/datasets/oroikono/pdecert-pilot>
