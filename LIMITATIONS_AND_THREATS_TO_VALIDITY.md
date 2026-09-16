@@ -115,6 +115,14 @@ identity.
 
 ## Numerical and implementation limitations
 
+- The direct SymPy baseline reports CAS results for represented residuals and
+  conditions only. It omits candidate singularity and regularity checks, so
+  cancellation can yield all-zero expressions for a field with a pole. Its
+  exact-input policy abstains on float literals, nonfinite or non-real
+  residuals, and undecidable expressions. Per-binding and per-obligation signal
+  deadlines begin after Atlas validation; they are not an end-to-end timeout
+  or a memory/isolation guarantee. See the
+  [baseline contract](docs/baseline-adapters.md) for the supported scope.
 - The Atlas fixed-collocation baseline is a finite-grid diagnostic. A `pass`
   means only that represented residuals and conditions stayed within tolerance
   at those points. It can miss localized defects, between-grid singularities,
@@ -124,6 +132,14 @@ identity.
   itself be caused by finite-precision roundoff when the tolerance is too small;
   it should not be interpreted as a mathematical counterexample without
   precision-stability or independent reproduction.
+- Fixed collocation promotes float grid coordinates to mpmath numbers at the
+  configured precision. This does not refine the grid, restore missing input
+  digits, or guarantee accuracy for ill-conditioned residuals. Exact integer
+  parameter inputs are preserved, but integer-only division or negative powers
+  may still introduce native-float intermediates in generated functions; more
+  digits do not fix every arithmetic path. Reported magnitudes are converted
+  back to JSON floats, where extreme values can underflow or overflow. Different
+  mpmath precisions in concurrent threads are not isolated; use separate processes.
 - Callable evaluation assumes that each output row depends only on the
   corresponding input row. Training-mode batch operations, cross-sample
   attention, mutable state, randomness, and hidden preprocessing can invalidate
@@ -240,6 +256,12 @@ one accuracy number.
   and cleanup policies are actually enforced.
 - PDECert reports are evidence records, not authorization decisions for safety-
   critical systems.
+- Report loading rejects contradictions such as refuting events under a
+  `PROVED` or `INCONCLUSIVE` summary. This is internal consistency validation,
+  not proof checking: a standalone report does not provide the trusted problem's
+  complete obligation set or independently establish that its events are true.
+  Keep the problem and replay the evaluator rather than trusting a status or
+  successful schema validation alone.
 
 ## Reproduction requirements
 
