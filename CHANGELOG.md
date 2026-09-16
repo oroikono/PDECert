@@ -4,7 +4,35 @@ All notable changes to PDECert are documented here.
 
 ## Unreleased
 
+### Fixed
+
+- Report loading and the public JSON schema reject `PROVED` or `INCONCLUSIVE`
+  summaries containing refuting evidence. Refutation keeps precedence over
+  discharged obligations, including in saved Atlas evaluations; legitimate
+  abstention and sampled-pass history remains readable.
+
+- Atlas fixed collocation now promotes float coordinates to mpmath numbers at
+  the requested decimal precision before evaluating polynomial residuals.
+  This fixes cancellation-driven false passes while preserving exact integer
+  inputs, saved sample coordinates, and empirical-only evidence semantics.
+
 ### Added
+
+- A direct SymPy Atlas baseline with exact-input checks, bounded symbolic
+  operations, complete per-obligation zero/nonzero/undecided results, and a
+  version-2 report schema. Fixed-collocation version-1 output remains unchanged;
+  the symbolic baseline does not check candidate domains or regularity.
+
+- A supplied reference-field comparison API with per-field RMSE, discrete
+  relative L2, maximum-discrepancy locations, explicit reference uncertainty,
+  normalized-input digests, and an empirical-only versioned report schema.
+  A trained Fisher--KPP walkthrough consumes that API beside fresh, separate
+  PDE and trace diagnostics, with retained samples and checked source identity.
+
+- An optional Hugging Face pilot consumer check with pinned dependencies,
+  immutable anonymous Hub loading, exact nested-record fidelity checks,
+  per-record verifier reports, offline integration tests, and an opt-in live
+  CI check. No core dependency, frozen record, label, or evidence rule changes.
 
 - A self-contained own-candidate walkthrough using the public template and
   symbolic verification APIs, with executable-documentation tests for exact,
