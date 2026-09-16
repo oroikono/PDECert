@@ -73,9 +73,10 @@ be copied into new modules.
 | `schema.py` | Restricted, versioned problem serialization | Never execute arbitrary code from a case file. Schema changes require migration and compatibility tests. |
 | `corpus.py` | Versioned candidate and Atlas records with provenance | Raw model or solver outputs remain unedited. Annotation state stays distinct from machine evidence. |
 | `atlas_evaluation.py` | Versioned per-record execution, strict report loading, and descriptive summaries for typed symbolic and frozen-callable Atlas artifacts | Validate the full Atlas first; keep evidence per record and never aggregate unlike guarantees or infer labels. |
-| `atlas_baselines.py` | Explicit method adapters and versioned diagnostic reports for reproducible Atlas comparisons | Keep method-local pass/fail/unsupported outcomes separate from PDECert statuses; finite passes never become proof. |
+| `atlas_baselines.py` | Explicit empirical and symbolic method adapters with versioned reports for reproducible Atlas comparisons | Preserve evidence per obligation; sampled passes never become proof, and CAS residual identities do not imply domain or regularity checks. |
 | `labeling.py` | Blind review, artifact-aware review basis, and guarded label import | Machine proposals, training loss, and sampled passes are never represented as independent human ground truth. |
 | `benchmark.py` | Evaluator comparisons and aggregate metrics | Report abstention and failure, not only accuracy. |
+| `reference_fields.py` | Empirical per-field comparisons of supplied aligned columns | Preserve declared reference uncertainty and sample identity; do not execute models, issue PDE verdicts, or imply solution-error bounds. |
 | `release.py` | Digest-bound public artifacts | Releases must rebuild deterministically from committed inputs. |
 | `manifests.py` | Digest-bound identity for one problem, candidate, evaluator, and report | Treat hashes as content integrity only; never infer correctness, authorship, or trusted execution. |
 | `cli.py` | Stable command behavior and machine-readable output | CLI exit codes and report fields are public contracts. |

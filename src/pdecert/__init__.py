@@ -30,8 +30,16 @@ from .atlas_evaluation import (
     summarize_atlas_evaluation,
     validate_atlas_evaluation,
 )
+from .reference_fields import (
+    REFERENCE_COMPARISON_VERSION,
+    REFERENCE_COMPARISON_MAX_VALUES,
+    ReferenceComparisonError,
+    compare_reference_fields,
+)
 from .atlas_baselines import (
     ATLAS_BASELINE_REPORT_VERSION,
+    ATLAS_SYMBOLIC_BASELINE_REPORT_VERSION,
+    DIRECT_SYMPY_BASELINE_VERSION,
     FIXED_COLLOCATION_MAX_EVALUATIONS,
     FIXED_COLLOCATION_BASELINE_VERSION,
     AtlasBaselineAdapter,
@@ -40,6 +48,9 @@ from .atlas_baselines import (
     BaselineResult,
     BaselineWitness,
     FixedCollocationBaseline,
+    DirectSympyBaseline,
+    SymbolicBaselineCheck,
+    SymbolicBaselineResult,
     evaluate_atlas_baseline,
 )
 from .artifacts import (
@@ -211,6 +222,10 @@ from .templates import (
 )
 
 __all__ = [
+    "REFERENCE_COMPARISON_VERSION",
+    "REFERENCE_COMPARISON_MAX_VALUES",
+    "ReferenceComparisonError",
+    "compare_reference_fields",
     "AGGREGATION_POLICY_VERSION",
     "AGENT_TOOL_VERSION",
     "ANNOTATION_STATUSES",
@@ -224,6 +239,11 @@ __all__ = [
     "AgentTrace",
     "ATLAS_VERSION",
     "ATLAS_BASELINE_REPORT_VERSION",
+    "ATLAS_SYMBOLIC_BASELINE_REPORT_VERSION",
+    "DIRECT_SYMPY_BASELINE_VERSION",
+    "DirectSympyBaseline",
+    "SymbolicBaselineCheck",
+    "SymbolicBaselineResult",
     "ATLAS_EVALUATION_VERSION",
     "ATLAS_EVALUATION_SUMMARY_VERSION",
     "AtlasEvaluationError",

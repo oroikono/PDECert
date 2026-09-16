@@ -159,6 +159,20 @@ Roundoff-sensitive failures require independent or precision-stability checks.
 See the
 [`baseline adapter contract`](docs/baseline-adapters.md).
 
+Compare the same obligations with direct symbolic simplification:
+
+```bash
+pdecert corpus baseline corpus/matched \
+  --method direct-sympy --symbolic-timeout 2 --max-expression-ops 10000 \
+  --output direct-sympy.json
+```
+
+This emits version-2 per-obligation `zero`, `nonzero`, or `undecided` results;
+callable records remain unsupported. Exact CAS results address only the
+represented residuals and conditions. Domain singularities and regularity are
+not checked, so an all-zero baseline result is not a full solution certificate.
+The existing fixed-collocation version-1 report remains unchanged.
+
 Open-model batches follow a
 [predeclared, resumable collection protocol](docs/atlas-open-model-collection.md)
 that retains raw responses and accounts for outputs that cannot be materialized.
@@ -615,6 +629,35 @@ ordinary verifier. PDECert currently ships the contract and disabled default,
 not a production sandbox backend. See the
 [generated-program guide](docs/generated-programs.md) and
 [isolation decision](docs/adr/0005-generated-program-isolation.md).
+
+## Reference-field comparisons
+
+`compare_reference_fields()` compares already evaluated predictions with supplied
+reference values: per-field RMSE, discrete relative L2, and the largest sampled
+discrepancy with its coordinates. It records reference uncertainty and normalized
+input identity, adds no dependencies, and returns empirical metrics without a
+PDE verdict or solution-error guarantee.
+
+Run the deliberately perturbed analytical example from a checkout:
+
+```bash
+python -m examples.reference_field_comparison
+```
+
+See the [reference-field guide](docs/reference-fields.md) for the Python API,
+explicit array conversion, numerical limits, and reproduction requirements.
+This is not yet an external-model loader or an Atlas reference-field adapter.
+
+With the existing `autodiff` extra, run the same comparison on the frozen trained
+Fisher--KPP PINN and inspect all PDE, initial, and boundary diagnostics:
+
+```bash
+python -m experiments.trained_fisher_kpp_reference
+```
+
+The [trained-model walkthrough](docs/trained-reference-comparison.md) explains
+the separate metrics, integrity checks, and replayable samples. No retraining
+is performed, and passing samples remain inconclusive.
 
 ## Current limits
 

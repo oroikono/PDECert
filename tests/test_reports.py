@@ -4,6 +4,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import pytest
+from jsonschema import Draft202012Validator, ValidationError
+
 from experiments.adversarial_heat import build_cases
 from pdecert import (
     BoundEvidence,
@@ -16,11 +19,158 @@ from pdecert import (
     Report,
     ReportSchemaError,
     Status,
+    Witness,
     dump_report,
     load_report,
     report_from_dict,
     verify,
 )
+
+
+@pytest.fixture
+def decision_events():
+    """Synthetic records that exercise report consistency, not PDE correctness."""
+
+    witness = Witness("synthetic residual", {"x": 0.5}, 1.0, "synthetic nonzero residual")
+    common = {"obligation_id": "constraint:0", "checker": "synthetic-checker"}
+    return {
+        "discharged": EvidenceEvent(
+            **common,
+            kind=EvidenceKind.EXACT_CERTIFICATE,
+            outcome=EvidenceOutcome.DISCHARGED,
+            level=EvidenceLevel.EXACT,
+            detail="synthetic exact discharge",
+        ),
+        "bound": EvidenceEvent(
+            **common,
+            kind=EvidenceKind.RIGOROUS_BOUND,
+            outcome=EvidenceOutcome.DISCHARGED,
+            level=EvidenceLevel.RIGOROUS_BOUND,
+            detail="synthetic bound discharge",
+            bound=BoundEvidence(
+                bound_type=BoundType.UNIFORM_RESIDUAL,
+                quantity="synthetic residual",
+                upper_bound=0.0,
+                norm="L_inf",
+                scope="synthetic test domain",
+            ),
+        ),
+        "abstained": EvidenceEvent(
+            **common,
+            kind=EvidenceKind.ABSTENTION,
+            outcome=EvidenceOutcome.ABSTAINED,
+            level=None,
+            detail="synthetic earlier abstention",
+        ),
+        "observed_pass": EvidenceEvent(
+            **common,
+            kind=EvidenceKind.EMPIRICAL_PASS,
+            outcome=EvidenceOutcome.OBSERVED_PASS,
+            level=EvidenceLevel.EMPIRICAL,
+            detail="synthetic sampled pass",
+        ),
+        "exact_refutation": EvidenceEvent(
+            **common,
+            kind=EvidenceKind.EXACT_CERTIFICATE,
+            outcome=EvidenceOutcome.REFUTED,
+            level=EvidenceLevel.EXACT,
+            detail="synthetic exact refutation",
+            witness=witness,
+        ),
+        "empirical_refutation": EvidenceEvent(
+            **common,
+            kind=EvidenceKind.EMPIRICAL_COUNTEREXAMPLE,
+            outcome=EvidenceOutcome.REFUTED,
+            level=EvidenceLevel.EMPIRICAL,
+            detail="synthetic empirical refutation",
+            witness=witness,
+        ),
+    }
+
+
+@pytest.fixture(scope="module")
+def report_validator():
+    schema = json.loads(Path("schema/report-v1.schema.json").read_text())
+    Draft202012Validator.check_schema(schema)
+    return Draft202012Validator(schema)
+
+
+@pytest.mark.parametrize("status", [Status.PROVED, Status.INCONCLUSIVE])
+@pytest.mark.parametrize("refutation", ["exact_refutation", "empirical_refutation"])
+@pytest.mark.parametrize("refutation_first", [False, True])
+@pytest.mark.parametrize("reader", ["dictionary", "file", "schema"])
+def test_non_refuted_report_rejects_refuting_evidence(
+    status, refutation, refutation_first, reader, decision_events, report_validator, tmp_path
+):
+    events = [decision_events["discharged"], decision_events[refutation]]
+    if refutation_first:
+        events.reverse()
+    payload = Report(
+        status=status,
+        decision_evidence=EvidenceLevel.EXACT if status is Status.PROVED else None,
+        evidence_events=events,
+    ).to_dict()
+
+    if reader == "schema":
+        with pytest.raises(ValidationError):
+            report_validator.validate(payload)
+    else:
+        path = tmp_path / "contradictory-report.json"
+        if reader == "file":
+            path.write_text(json.dumps(payload, allow_nan=False))
+        with pytest.raises(
+            ReportSchemaError,
+            match=r"^\$\.evidence_events: refuting evidence requires a REFUTED report$",
+        ):
+            if reader == "file":
+                load_report(path)
+            else:
+                report_from_dict(payload)
+
+
+@pytest.mark.parametrize(
+    ("status", "level", "history"),
+    [
+        (
+            Status.REFUTED,
+            EvidenceLevel.EXACT,
+            ("abstained", "discharged", "exact_refutation"),
+        ),
+        (
+            Status.REFUTED,
+            EvidenceLevel.EMPIRICAL,
+            ("abstained", "discharged", "empirical_refutation"),
+        ),
+        (Status.PROVED, EvidenceLevel.EXACT, ("abstained", "observed_pass", "discharged")),
+        (Status.INCONCLUSIVE, None, ("discharged", "abstained", "observed_pass")),
+        (Status.INCONCLUSIVE, None, ("discharged",)),
+        (Status.INCONCLUSIVE, None, ("abstained",)),
+        (Status.INCONCLUSIVE, None, ("observed_pass",)),
+        (Status.INCONCLUSIVE, None, ()),
+        (Status.PROVED, EvidenceLevel.EXACT, ("bound", "discharged")),
+        (Status.PROVED, EvidenceLevel.EXACT, ("discharged", "bound")),
+        (Status.PROVED, EvidenceLevel.RIGOROUS_BOUND, ("bound",)),
+    ],
+)
+def test_report_accepts_compatible_evidence_history(
+    status, level, history, decision_events, report_validator, tmp_path
+):
+    events = [decision_events[name] for name in history]
+    payload = Report(
+        status=status,
+        decision_evidence=level,
+        witness=next((event.witness for event in events if event.witness is not None), None),
+        incomplete_reasons=(
+            {"synthetic residual": "synthetic earlier abstention"} if "abstained" in history else {}
+        ),
+        evidence_events=events,
+    ).to_dict()
+
+    report_validator.validate(payload)
+    assert report_from_dict(payload).to_dict() == payload
+    path = tmp_path / "compatible-report.json"
+    path.write_text(json.dumps(payload, allow_nan=False))
+    assert load_report(path).to_dict() == payload
 
 
 class EvidenceReportTests(unittest.TestCase):
