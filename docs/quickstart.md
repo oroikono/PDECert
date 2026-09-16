@@ -1,45 +1,53 @@
-# Five-minute offline quickstart
+# Quickstart
 
-This demonstration exercises PDECert's three-way decision and a recorded
-proposal-repair trace without cloning the repository, downloading benchmark
-assets, contacting a model provider, or installing an agent framework.
+Run a small heat-equation example to see a proof, a counterexample, and an
+inconclusive result. You need Python 3.10–3.14. Paste these commands into a
+terminal on macOS or Linux:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install pdecert==0.1.1rc2
 pdecert quickstart
+```
+
+Installation needs network access. After that, the demonstration runs offline
+using the core package, with no repository checkout, benchmark download, or
+model account.
+
+## What to expect
+
+The command checks three symbolic expressions against the same equation,
+initial data, and boundary data:
+
+| Candidate | Result | Evidence |
+| --- | --- | --- |
+| Exact solution | `PROVED` | `EXACT`: the encoded equation, conditions, and domain checks hold symbolically. |
+| Correct PDE, wrong initial and right boundary data | `REFUTED` | `EMPIRICAL`: a sampled point shows a violation you can replay. |
+| Nonzero residual below the numerical tolerance | `INCONCLUSIVE` | Passing the sampled checks does not prove correctness. |
+
+Next, [check your own symbolic candidate](check-your-candidate.md). That guide
+provides a complete example and shows which expression to change.
+
+## Save the full reports
+
+```bash
 pdecert quickstart --json > pdecert-quickstart.json
 ```
 
-The command checks one trusted classical heat-equation problem against three
-symbolic artifacts:
+The JSON includes each report, its evidence and counterexample, and the
+evaluation settings. It also records two linked proposals: a rejected
+`attempt-1` and a repaired `attempt-2` that is proved. These are fixed examples;
+the command does not run a live language model. The trace keeps proposal
+provenance separate from verifier evidence and includes proposal hashes and
+the parent link. Raw proposal text is excluded from the default JSON trace.
 
-1. An exact solution receives `PROVED` with `EXACT` decision evidence.
-2. A candidate that satisfies the PDE but violates its initial and right
-   boundary data receives `REFUTED` with an empirical, replayable witness.
-3. A real error below the configured floating-point tolerance produces sampled
-   passes but remains `INCONCLUSIVE`.
+Exit code `0` means the demonstration reproduced all expected results. Exit
+code `70` means an expected outcome changed. The JSON also contains these
+self-checks, so the command can serve as an installation check.
 
-The same rejected and repaired candidates form a framework-neutral agent trace:
-`attempt-1` is `REFUTED`, and its linked `attempt-2` repair is `PROVED`. These
-are deterministic recorded fixtures, not claims about a live language model.
-PDECert hashes the retained raw proposal text and excludes it from the default
-JSON trace; the verifier report remains separate from proposal provenance.
-
-The JSON output contains the complete versioned reports, evidence events,
-counterexample, proposal digests, parent link, evaluation settings, and
-quickstart self-checks. A successful demonstration exits with code `0`. Exit
-code `70` means an expected outcome changed, which makes the command suitable
-as a release or installation smoke test.
-
-This command demonstrates the evidence contract, not broad PDE coverage or
-model quality. The exact result applies only to the represented classical
-strong-form obligations. The sampled pass is explicitly not a certificate. See
-the project-wide
-[limitations and threats-to-validity statement](../LIMITATIONS_AND_THREATS_TO_VALIDITY.md)
-before using a report in an evaluation or publication.
-
-Next, [check your own symbolic candidate](check-your-candidate.md). The complete
-copy-paste recipe defines the trusted problem inline and shows which expression
-to change; it needs no repository files or optional dependencies.
+These examples do not measure broad PDE coverage or model quality. The exact
+result applies only to the encoded classical strong-form checks; the sampled
+pass is not a certificate. Read the
+[limitations](../LIMITATIONS_AND_THREATS_TO_VALIDITY.md) before using a report
+in an evaluation or publication.

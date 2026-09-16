@@ -135,3 +135,10 @@ validates report structure and local metric/reason consistency. It does not
 recompute metrics, establish reference quality, or check all cross-field
 relations in an edited report. Existing verifier reports and Atlas baseline
 formats are unchanged.
+
+The [trained Fisher--KPP consumer](trained-reference-comparison.md) evaluates the
+preserved weights with an explicit historical source root. Its version-2 suite
+report binds historical training inputs and current evaluator files separately,
+while each reference comparison still uses this version-1 metric contract.
+Content inspection is available without PyTorch; numerical evaluation remains
+an optional, explicit invocation and does not claim historical replay.

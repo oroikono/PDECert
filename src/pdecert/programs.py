@@ -1,4 +1,4 @@
-"""Deny-by-default execution contract for generated solver programs."""
+"""Require an external sandbox before running generated solver programs."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from .artifacts import ProgramCandidate, SymbolicCandidate
 
 
 class ProgramError(Exception):
-    """Base class for generated-program boundary errors."""
+    """Base error for generated-program validation and execution."""
 
 
 class ProgramIsolationError(ProgramError):
@@ -27,7 +27,7 @@ class ProgramExecutionError(ProgramError):
 
 @dataclass(frozen=True)
 class ProgramLimits:
-    """Resource ceilings every configured sandbox must enforce."""
+    """Resource limits that the sandbox must enforce."""
 
     wall_time_seconds: float = 10.0
     cpu_time_seconds: float = 5.0
@@ -102,7 +102,7 @@ class SandboxCapabilities:
 
 @dataclass(frozen=True)
 class SandboxResult:
-    """Raw bounded result returned by an external isolation backend."""
+    """Exit status, bounded output, and timing returned by a sandbox."""
 
     exit_code: int
     stdout: str
@@ -128,7 +128,7 @@ class SandboxResult:
 
 @runtime_checkable
 class ProgramSandbox(Protocol):
-    """External executor contract; implementations provide the isolation."""
+    """Interface for a backend responsible for enforcing process isolation."""
 
     name: str
     capabilities: SandboxCapabilities
@@ -190,7 +190,7 @@ class ProgramOutput:
 
 
 class DisabledProgramSandbox:
-    """Explicit default that can never execute candidate source."""
+    """Default backend that refuses to execute source code."""
 
     name = "disabled"
     capabilities = SandboxCapabilities()

@@ -50,8 +50,17 @@ jobs:
       - run: python -m examples.autodiff_heat
       - run: python -m examples.matched_heat
       - run: python -m experiments.trained_burgers_pair
-      - run: python -m experiments.trained_fisher_kpp_pair
-      - run: python -m experiments.trained_fisher_kpp_reference
+      - run: >-
+          python -m experiments.current_fisher_kpp_pair
+          --historical-source-root benchmarks/historical/fisher-kpp-source-v1
+          --evaluate --output "$RUNNER_TEMP/fisher-kpp-current-evaluation.json"
+      - run: >-
+          python -m experiments.current_fisher_kpp_pair
+          --historical-source-root benchmarks/historical/fisher-kpp-source-v1
+          --validate "$RUNNER_TEMP/fisher-kpp-current-evaluation.json"
+      - run: >-
+          python -m experiments.trained_fisher_kpp_reference
+          --historical-source-root benchmarks/historical/fisher-kpp-source-v1
       - run: >-
           pdecert corpus evaluate corpus/matched
           --callable-tolerance 0.001

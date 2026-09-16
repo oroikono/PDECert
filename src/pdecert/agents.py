@@ -1,4 +1,4 @@
-"""Framework-neutral records and tools for agent-generated PDE candidates."""
+"""Record agent proposals and check them against a trusted PDE problem."""
 
 from __future__ import annotations
 
@@ -21,11 +21,10 @@ AGENT_TOOL_VERSION = 1
 
 @dataclass(frozen=True)
 class AgentProposal:
-    """One materialized candidate proposed by an LLM or scientific agent.
+    """A proposed candidate together with the original model response.
 
-    The raw output remains distinct from the parsed solution artifact. A host
-    application, not PDECert, is responsible for materializing model output
-    into a supported artifact without silently editing it.
+    The caller converts the response into a supported artifact and keeps the
+    original text unchanged. Neither the proposal nor its hash is a human label.
     """
 
     proposal_id: str
@@ -56,7 +55,7 @@ class AgentProposal:
 
     @property
     def raw_output_sha256(self) -> str:
-        """Return a stable digest without treating the raw output as a label."""
+        """Hash the original response as UTF-8 text."""
 
         return hashlib.sha256(self.raw_output.encode("utf-8")).hexdigest()
 
@@ -79,7 +78,7 @@ class AgentProposal:
 
 @dataclass(frozen=True)
 class AgentEvaluation:
-    """Machine evidence for one proposal, kept separate from provenance."""
+    """A proposal and its verifier report, stored separately."""
 
     proposal: AgentProposal
     report: Report
@@ -149,12 +148,11 @@ def evaluate_agent_proposal(
     symbolic_timeout: float | None = None,
     max_expression_ops: int | None = None,
 ) -> AgentEvaluation:
-    """Evaluate one host-materialized proposal against a trusted problem.
+    """Check a supplied candidate against the caller's fixed problem.
 
-    Symbolic proposals require a versioned case whose constraint sources retain
-    references to the declared fields. This allows each new expression to be
-    substituted into the trusted PDE instead of accidentally reusing residuals
-    materialized for an earlier candidate.
+    A symbolic case must retain field references in its constraints. Each new
+    candidate is substituted into those constraints, so a repair cannot reuse
+    residuals calculated for an earlier proposal.
     """
 
     if isinstance(trusted_problem, VerificationCase) and isinstance(
@@ -222,7 +220,7 @@ class SymbolicAgentTool:
             raise ValueError("max_payload_bytes must be positive")
 
     def evaluate(self, candidate_fields_json: str) -> dict[str, object]:
-        """Return stable tool feedback without executing generated code."""
+        """Check the submitted fields without executing generated code."""
 
         try:
             artifact = self.materialize(candidate_fields_json)

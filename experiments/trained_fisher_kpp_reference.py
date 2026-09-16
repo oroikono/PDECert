@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import importlib
 import json
 import math
 import platform
@@ -24,6 +23,7 @@ from pdecert import (
     validate_frozen_callable_integrity,
     verify_callable,
 )
+from pdecert.source_receipts import capture_source_receipt, require_active_source_root
 
 ROOT = Path(__file__).resolve().parents[1]
 CASE_ID = "fisher-kpp-classical-01"
@@ -31,6 +31,14 @@ FIXTURE = Path("benchmarks/matched/fisher-kpp-classical-01/pinn.json")
 INTEGRITY = FIXTURE.with_name("integrity.json")
 TEMPLATE = FIXTURE.with_name("template.json")
 EXPECTED_TEMPLATE_SHA256 = "8d6248c31072d4bc7e109f697ce2637c00420683a68edab7ae99624bc1f6d4a6"
+# Bind the original 18-source record as a whole, including its exact inventory.
+EXPECTED_INTEGRITY_SHA256 = "cbc76980b4d1ae431bdb438e6b071bde766af83546faf69cf5635ecbe44103d4"
+RUNNER_PATHS = (
+    "experiments/__init__.py",
+    "experiments/trained_fisher_kpp_reference.py",
+    "schema/reference-comparison-v1.schema.json",
+    "schema/source-receipt-v1.schema.json",
+)
 FRACTIONS = (0.113, 0.271, 0.419, 0.613, 0.787, 0.937)
 TOLERANCE = 1e-3
 REGIONS = ("interior", "initial", "left_boundary", "right_boundary")
@@ -46,11 +54,24 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def load_inputs(repository_root: str | Path = ROOT):
-    """Validate the bundled problem and trained artifact before materialization."""
+def load_inputs(
+    repository_root: str | Path = ROOT,
+    *,
+    historical_source_root: str | Path | None = None,
+):
+    """Validate the preserved artifact and historical files without materialization.
+
+    Omitting the historical root retains strict source checks in the repository
+    root. Current evaluation supplies an explicit archive of the original bytes.
+    """
     root = Path(repository_root).resolve()
+    if _sha256(root / INTEGRITY) != EXPECTED_INTEGRITY_SHA256:
+        raise FrozenCallableError("historical integrity digest differs from the preserved record")
     integrity = validate_frozen_callable_integrity(
-        root / FIXTURE, root / INTEGRITY, repository_root=root
+        root / FIXTURE,
+        root / INTEGRITY,
+        repository_root=root,
+        historical_source_root=historical_source_root,
     )
     template_digest = _sha256(root / TEMPLATE)
     if (
@@ -82,34 +103,34 @@ def sample_coordinates(problem, constraint) -> dict[str, list[float]]:
     }
 
 
-def _source_digests(integrity) -> dict[str, str]:
-    """Bind the runner and actually imported evaluator source, not just copies."""
-    result = {"experiments/trained_fisher_kpp_reference.py": _sha256(Path(__file__))}
-    for name in (
-        "artifacts",
-        "autodiff",
-        "checks",
-        "compiler",
-        "core",
-        "evidence",
-        "frozen_callable",
-        "schema",
-        "templates",
-        "reference_fields",
-    ):
-        module = importlib.import_module(f"pdecert.{name}")
-        relative = f"src/pdecert/{name}.py"
-        actual = _sha256(Path(module.__file__))
-        if name != "reference_fields" and integrity["source_files_sha256"].get(relative) != actual:
-            raise FrozenCallableError(f"{relative}: imported source differs from fixture integrity")
-        result[relative] = actual
-    return result
+def _provenance(repository_root: str | Path, integrity) -> dict[str, object]:
+    """Bind current package files separately from the preserved historical record."""
+    root = Path(repository_root).resolve()
+    require_active_source_root(root, (__file__,))
+    return {
+        "integrity": integrity,
+        "active_inputs": {
+            name: {"path": path.as_posix(), "sha256": _sha256(root / path)}
+            for name, path in (
+                ("fixture", FIXTURE),
+                ("integrity", INTEGRITY),
+                ("template", TEMPLATE),
+            )
+        },
+        "current_evaluator": capture_source_receipt(root, runner_paths=RUNNER_PATHS),
+    }
 
 
-def run(repository_root: str | Path = ROOT) -> dict[str, object]:
-    """Run fresh predictions and separate empirical diagnostics without retraining."""
-    template, frozen, integrity = load_inputs(repository_root)
-    source_digests = _source_digests(integrity)
+def inspect_inputs(
+    repository_root: str | Path = ROOT, *, historical_source_root: str | Path
+) -> dict[str, object]:
+    """Check historical and current source identity without importing PyTorch."""
+    _, _, integrity = load_inputs(repository_root, historical_source_root=historical_source_root)
+    return _provenance(repository_root, integrity)
+
+
+def _evaluate(template, frozen, integrity) -> dict[str, object]:
+    """Compute the existing reference and obligation diagnostics with current code."""
     try:
         import torch
     except ImportError as error:
@@ -175,7 +196,6 @@ def run(repository_root: str | Path = ROOT) -> dict[str, object]:
             }
         )
     return {
-        "suite": "trained-fisher-kpp-reference-v1",
         "problem_id": CASE_ID,
         "solution_semantics": template.solution_semantics,
         "evidence_note": (
@@ -200,8 +220,6 @@ def run(repository_root: str | Path = ROOT) -> dict[str, object]:
             "weights_sha256": integrity["weights_sha256"],
             "training": payload["training"],
         },
-        "integrity": integrity,
-        "source_digests": source_digests,
         "runtime": {
             "python_version": platform.python_version(),
             "platform": platform.platform(),
@@ -214,11 +232,33 @@ def run(repository_root: str | Path = ROOT) -> dict[str, object]:
     }
 
 
+def run(
+    repository_root: str | Path = ROOT, *, historical_source_root: str | Path
+) -> dict[str, object]:
+    """Evaluate preserved weights with separately bound current sources, without retraining."""
+    template, frozen, integrity = load_inputs(
+        repository_root, historical_source_root=historical_source_root
+    )
+    provenance = _provenance(repository_root, integrity)
+    result = _evaluate(template, frozen, integrity)
+    if inspect_inputs(repository_root, historical_source_root=historical_source_root) != provenance:
+        raise FrozenCallableError("inputs or evaluator sources changed during the operation")
+    return {
+        "suite": "trained-fisher-kpp-reference-v2",
+        "integrity_scope": "content_identity_only",
+        "historical_replay": False,
+        **provenance,
+        **result,
+    }
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repository-root", type=Path, default=ROOT)
+    parser.add_argument("--historical-source-root", type=Path, required=True)
     arguments = parser.parse_args(argv)
-    print(json.dumps(run(arguments.repository_root), indent=2, sort_keys=True, allow_nan=False))
+    result = run(arguments.repository_root, historical_source_root=arguments.historical_source_root)
+    print(json.dumps(result, indent=2, sort_keys=True, allow_nan=False))
     return 0
 
 

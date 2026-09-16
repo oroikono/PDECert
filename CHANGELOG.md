@@ -6,6 +6,9 @@ All notable changes to PDECert are documented here.
 
 ### Fixed
 
+- The current Fisher--KPP pair runner pins the preserved integrity record before
+  validation, rejecting altered source inventories before model materialization.
+
 - Report loading and the public JSON schema reject `PROVED` or `INCONCLUSIVE`
   summaries containing refuting evidence. Refutation keeps precedence over
   discharged obligations, including in saved Atlas evaluations; legitimate
@@ -16,7 +19,16 @@ All notable changes to PDECert are documented here.
   This fixes cancellation-driven false passes while preserving exact integer
   inputs, saved sample coordinates, and empirical-only evidence semantics.
 
+- Symbolic coordinate budgets above six now add deterministic dyadic midpoint
+  samples instead of repeating six points. Budgets through six retain their
+  exact prefix; finite passing samples still cannot prove an obligation.
+  Frozen history is preserved through the explicit source-replay boundary.
+
 ### Added
+
+- A read-only benchmark coverage audit for origin/verdict counts, pending
+  annotations, and reviewer IDs. It exposes confounding without treating stored
+  labels or multiple reviewer IDs as independent ground truth.
 
 - A direct SymPy Atlas baseline with exact-input checks, bounded symbolic
   operations, complete per-obligation zero/nonzero/undecided results, and a
@@ -37,6 +49,15 @@ All notable changes to PDECert are documented here.
 - A self-contained own-candidate walkthrough using the public template and
   symbolic verification APIs, with executable-documentation tests for exact,
   refuted, inconclusive, and rejected-input cases in clean package installs.
+
+- An explicit historical-source root for frozen callable integrity validation,
+  an exact Fisher--KPP source snapshot, and separate versioned current-evaluator
+  receipts. Every historical hash remains mandatory; current diagnostics bind
+  their own source, inputs, configuration and output without changing frozen
+  artifacts, integrity records or results.
+  The trained reference comparison now emits suite version 2 and requires an
+  explicit historical source root; current evaluator hashes are recorded
+  separately from the original integrity record.
 
 - An explicit Atlas baseline-adapter contract and deterministic full-condition
   fixed-collocation runner for symbolic records, with empirical-only pass/fail
@@ -67,6 +88,12 @@ All notable changes to PDECert are documented here.
   trains a separate PINN from PDE and trace targets, digest-binds the resulting
   artifact and sources, and records the held-out empirical counterexample
   without transferring exact symbolic evidence to the callable lane.
+
+### Changed
+
+- Shortened the README, clarified the first-candidate guides, and simplified
+  API docstrings. Contributor guidance now covers plain wording and preserving
+  historical source, raw outputs, and review records during maintenance.
 
 ## 0.1.1rc2 - 2026-09-01
 

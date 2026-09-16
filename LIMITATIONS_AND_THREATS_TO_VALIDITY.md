@@ -123,6 +123,13 @@ identity.
   deadlines begin after Atlas validation; they are not an end-to-end timeout
   or a memory/isolation guarantee. See the
   [baseline contract](docs/baseline-adapters.md) for the supported scope.
+
+- Symbolic coordinate budgets above six extend the historical six-point prefix
+  with deterministic dyadic midpoints. Finite samples can still miss defects;
+  floating-point rounding can collapse distinct fractions on extreme domains.
+  Historical higher-budget runs require their original evaluator for replay.
+  See [symbolic sampling](docs/symbolic-sampling.md).
+
 - The Atlas fixed-collocation baseline is a finite-grid diagnostic. A `pass`
   means only that represented residuals and conditions stayed within tolerance
   at those points. It can miss localized defects, between-grid singularities,
@@ -157,6 +164,12 @@ identity.
   but do not prove platform-independent optimization or evaluation.
 - Content digests establish byte identity, not scientific correctness,
   reproducibility of stochastic training, or equivalence of two artifacts.
+- Historical frozen-source validation can use an explicit archived source
+  root; every original digest remains mandatory. Current evaluation has its
+  own source receipt and never inherits a historical-replay claim. The bundled
+  historical source snapshot is data, not a complete executable environment.
+  Source origins and pre/post hashes do not attest in-memory execution or the
+  full external dependency closure. See [source replay](docs/source-replay.md).
 - Atlas v2 transport validation checks that a frozen callable is consistent
   with its declared artifact, configuration, weight, and source-file digests.
   It does not prove that the referenced training run occurred. Full repository
@@ -209,6 +222,13 @@ The trained Fisher--KPP reference example pairs those metrics with separate
 per-obligation callable reports. Its template-pinned analytical reference and
 finite samples do not establish continuous-domain solution error. Its training
 metadata is retained, not rerun or independently audited; no labels are changed.
+
+The [coverage audit](docs/benchmark-coverage.md) recounts stored annotations,
+not independent ground truth. In the pilot, all ten solver records are labeled
+valid and all ten open-model records invalid, with one annotator ID across all
+20. Origin and verdict are therefore confounded. Pending community and matched
+records do not fill that gap; multiple IDs alone would not establish independent
+review either.
 
 Machine reports, model critiques, and user-approved amendments are not
 independent labels. Benchmark claims require the published blind-review and

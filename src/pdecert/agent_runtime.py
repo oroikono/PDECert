@@ -1,4 +1,4 @@
-"""Framework-neutral runtime records for verifier-guided PDE agents."""
+"""Record agent tool calls, repairs, and verifier outcomes."""
 
 from __future__ import annotations
 
@@ -42,13 +42,13 @@ class AgentToolCall:
 
     @property
     def payload_sha256(self) -> str:
-        """Return a stable digest for the exact agent-supplied payload."""
+        """Hash the exact JSON text submitted by the agent."""
 
         return hashlib.sha256(self.candidate_fields_json.encode("utf-8")).hexdigest()
 
     @property
     def status(self) -> Status | None:
-        """Return the verifier status when the payload materialized."""
+        """Return the status, or None when there is no evaluation."""
 
         return self.evaluation.report.status if self.evaluation is not None else None
 
@@ -98,13 +98,13 @@ class AgentRun:
 
     @property
     def evaluations(self) -> tuple[AgentEvaluation, ...]:
-        """Return materialized proposals, excluding rejected tool payloads."""
+        """Return evaluated proposals, excluding rejected inputs."""
 
         return tuple(call.evaluation for call in self.tool_calls if call.evaluation is not None)
 
     @property
     def trace(self) -> AgentTrace | None:
-        """Return the proposal/repair trace when at least one proposal materialized."""
+        """Return the repair history, or None if no proposal was evaluated."""
 
         evaluations = self.evaluations
         if not evaluations:
@@ -118,7 +118,7 @@ class AgentRun:
         return hashlib.sha256(self.final_output.encode("utf-8")).hexdigest()
 
     def to_dict(self, *, include_raw_outputs: bool = False) -> dict[str, object]:
-        """Serialize provenance, calls, and the optional materialized trace."""
+        """Serialize run metadata, tool calls, and any repair history."""
 
         payload: dict[str, object] = {
             "run_id": self.run_id,
@@ -142,7 +142,7 @@ class AgentRun:
 
 @dataclass
 class SymbolicAgentSession:
-    """Record a provider-neutral verifier-guided symbolic agent session."""
+    """Track a symbolic agent's proposals against one fixed problem."""
 
     run_id: str
     problem_id: str
@@ -153,7 +153,7 @@ class SymbolicAgentSession:
     _closed: bool = field(default=False, init=False, repr=False)
 
     def __post_init__(self) -> None:
-        # AgentRun performs the shared text and metadata validation.
+        # Use the same metadata validation for open sessions and completed runs.
         AgentRun(self.run_id, self.problem_id, self.generator, (), "", self.metadata)
         if not isinstance(self.verifier, SymbolicAgentTool):
             raise TypeError("verifier must be a SymbolicAgentTool")
@@ -201,7 +201,7 @@ class SymbolicAgentSession:
 
     @property
     def evaluations(self) -> tuple[AgentEvaluation, ...]:
-        """Return the materialized evaluations accumulated so far."""
+        """Return the evaluations recorded so far."""
 
         return tuple(call.evaluation for call in self._calls if call.evaluation is not None)
 
@@ -223,7 +223,7 @@ class SymbolicAgentSession:
 
 @dataclass(frozen=True)
 class AgentModelMetrics:
-    """Verifier-grounded behavioral metrics for one generator identity."""
+    """Verifier outcomes and call counts for one generator."""
 
     generator: str
     runs: int

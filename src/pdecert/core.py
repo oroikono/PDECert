@@ -211,8 +211,20 @@ def _run_bounded(
 
 
 def _interior_points(lower: float, upper: float, count: int) -> list[float]:
-    fractions = (0.113, 0.271, 0.419, 0.613, 0.787, 0.937)
-    return [lower + (upper - lower) * fractions[index % len(fractions)] for index in range(count)]
+    """Extend the legacy sample prefix without recycling its six fractions."""
+
+    fractions = [0.113, 0.271, 0.419, 0.613, 0.787, 0.937][:count]
+    denominator = 2
+    while len(fractions) < count:
+        # Dyadic levels keep earlier samples when the requested budget grows.
+        for numerator in range(1, denominator, 2):
+            fractions.append(numerator / denominator)
+            if len(fractions) == count:
+                break
+        denominator *= 2
+    # Roundoff may still collapse coordinates in very narrow/large domains.
+    # Bound work by count, not by a search for unique floating-point values.
+    return [lower + (upper - lower) * fraction for fraction in fractions]
 
 
 def _parameter_points(problem: Problem, variable: sp.Symbol, count: int) -> list[float]:

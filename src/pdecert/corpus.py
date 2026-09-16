@@ -1,4 +1,4 @@
-"""Versioned, provenance-bearing corpus records for generated PDE candidates."""
+"""Load and validate candidate records, their sources, and review status."""
 
 from __future__ import annotations
 
@@ -135,7 +135,7 @@ def _error(path: str, message: str) -> CorpusError:
 
 
 def typed_review_bases(artifact_type: str, verdict: str) -> tuple[str, ...]:
-    """Return review bases accepted for one typed artifact decision."""
+    """Return the review methods allowed for this artifact and verdict."""
 
     return tuple(sorted(_REVIEW_BASES_BY_DECISION.get(artifact_type, {}).get(verdict, ())))
 
@@ -475,7 +475,7 @@ def load_atlas_coverage(path: str | Path, record_ids: set[str]) -> dict[str, Any
 
 
 def load_record_bundle(path: str | Path) -> dict[str, Any]:
-    """Load one modular atlas record and reconstruct its corpus representation."""
+    """Read a record's files into the common corpus format."""
 
     source = Path(path)
     entries = {entry.name: entry for entry in source.iterdir()}
