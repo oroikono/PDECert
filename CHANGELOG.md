@@ -23,6 +23,12 @@ All notable changes to PDECert are documented here.
   version-2 report schema. Fixed-collocation version-1 output remains unchanged;
   the symbolic baseline does not check candidate domains or regularity.
 
+- A supplied reference-field comparison API with per-field RMSE, discrete
+  relative L2, maximum-discrepancy locations, explicit reference uncertainty,
+  normalized-input digests, and an empirical-only versioned report schema.
+  A trained Fisher--KPP walkthrough consumes that API beside fresh, separate
+  PDE and trace diagnostics, with retained samples and checked source identity.
+
 - An explicit Atlas baseline-adapter contract and deterministic full-condition
   fixed-collocation runner for symbolic records, with empirical-only pass/fail
   semantics, replayable numerical-threshold witnesses, structured callable
