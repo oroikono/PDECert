@@ -4,6 +4,18 @@ All notable changes to PDECert are documented here.
 
 ## Unreleased
 
+### Fixed
+
+- Report loading and the public JSON schema reject `PROVED` or `INCONCLUSIVE`
+  summaries containing refuting evidence. Refutation keeps precedence over
+  discharged obligations, including in saved Atlas evaluations; legitimate
+  abstention and sampled-pass history remains readable.
+
+- Atlas fixed collocation now promotes float coordinates to mpmath numbers at
+  the requested decimal precision before evaluating polynomial residuals.
+  This fixes cancellation-driven false passes while preserving exact integer
+  inputs, saved sample coordinates, and empirical-only evidence semantics.
+
 ### Added
 
 - A direct SymPy Atlas baseline with exact-input checks, bounded symbolic
