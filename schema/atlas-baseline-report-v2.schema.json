@@ -1,0 +1,835 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/oroikono/PDECert/blob/main/schema/atlas-baseline-report-v2.schema.json",
+  "title": "PDECert Atlas baseline report version 2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "adapter",
+    "atlas",
+    "baseline_report_version",
+    "evidence_policy",
+    "records",
+    "runtime"
+  ],
+  "properties": {
+    "adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "accepted_artifact_types",
+        "accepted_solution_semantics",
+        "configuration",
+        "id",
+        "version"
+      ],
+      "properties": {
+        "accepted_artifact_types": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "accepted_solution_semantics": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "configuration": {
+          "type": "object"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "id": {
+                "const": "fixed_collocation"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "then": {
+            "properties": {
+              "accepted_artifact_types": {
+                "const": [
+                  "symbolic_expression"
+                ]
+              },
+              "accepted_solution_semantics": {
+                "const": [
+                  "classical_strong"
+                ]
+              },
+              "configuration": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "decimal_precision",
+                  "include_conditions",
+                  "max_evaluations",
+                  "points_per_axis",
+                  "sampling",
+                  "tolerance"
+                ],
+                "properties": {
+                  "decimal_precision": {
+                    "type": "integer",
+                    "minimum": 15,
+                    "maximum": 100
+                  },
+                  "include_conditions": {
+                    "const": true
+                  },
+                  "max_evaluations": {
+                    "const": 1000000
+                  },
+                  "points_per_axis": {
+                    "type": "integer",
+                    "minimum": 2
+                  },
+                  "sampling": {
+                    "const": "uniform_tensor_grid_including_endpoints"
+                  },
+                  "tolerance": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                }
+              },
+              "version": {
+                "const": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "id": {
+                "const": "direct_sympy"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "then": {
+            "properties": {
+              "accepted_artifact_types": {
+                "const": [
+                  "symbolic_expression"
+                ]
+              },
+              "accepted_solution_semantics": {
+                "const": [
+                  "classical_strong"
+                ]
+              },
+              "configuration": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "pipeline",
+                  "nonzero_policy",
+                  "float_policy",
+                  "include_conditions",
+                  "domain_checks",
+                  "symbolic_timeout_seconds",
+                  "max_expression_ops",
+                  "deadline_scope"
+                ],
+                "properties": {
+                  "pipeline": {
+                    "const": [
+                      "simplify",
+                      "cancel",
+                      "trigsimp"
+                    ]
+                  },
+                  "nonzero_policy": {
+                    "const": "finite_real_constant_only"
+                  },
+                  "float_policy": {
+                    "const": "abstain_on_inexact_literals"
+                  },
+                  "include_conditions": {
+                    "const": true
+                  },
+                  "domain_checks": {
+                    "const": false
+                  },
+                  "symbolic_timeout_seconds": {
+                    "type": "number",
+                    "minimum": 0.001,
+                    "maximum": 3600
+                  },
+                  "max_expression_ops": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "deadline_scope": {
+                    "const": "binding_and_each_obligation_after_atlas_validation"
+                  }
+                }
+              },
+              "version": {
+                "const": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "atlas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "atlas_version",
+        "name",
+        "sha256"
+      ],
+      "properties": {
+        "atlas_version": {
+          "const": 2
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "baseline_report_version": {
+      "const": 2
+    },
+    "evidence_policy": {
+      "const": "method_specific_obligation_diagnostics_no_global_verdict"
+    },
+    "records": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/empirical_record"
+          },
+          {
+            "$ref": "#/$defs/symbolic_record"
+          }
+        ]
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mpmath_version",
+        "pdecert_version",
+        "python_version",
+        "sympy_version"
+      ],
+      "properties": {
+        "mpmath_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pdecert_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "python_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sympy_version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  },
+  "$defs": {
+    "witness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "absolute_residual",
+        "constraint",
+        "constraint_source",
+        "sampled_inputs"
+      ],
+      "properties": {
+        "absolute_residual": {
+          "oneOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "const": "infinity"
+            }
+          ]
+        },
+        "constraint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "constraint_source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sampled_inputs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "empirical_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "artifact_type",
+        "evidence_kind",
+        "evidence_level",
+        "evaluations",
+        "max_absolute_residual",
+        "outcome",
+        "problem_id",
+        "reason",
+        "record_id",
+        "witness"
+      ],
+      "properties": {
+        "artifact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_type": {
+          "enum": [
+            "symbolic_expression",
+            "callable_model"
+          ]
+        },
+        "evidence_kind": {
+          "enum": [
+            "EMPIRICAL_PASS",
+            "NUMERICAL_THRESHOLD_EXCEEDANCE",
+            "ABSTENTION"
+          ]
+        },
+        "evidence_level": {
+          "enum": [
+            "EMPIRICAL",
+            null
+          ]
+        },
+        "evaluations": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "max_absolute_residual": {
+          "oneOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "const": "infinity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outcome": {
+          "enum": [
+            "pass",
+            "fail",
+            "unsupported"
+          ]
+        },
+        "problem_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "witness": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/witness"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "pass"
+              }
+            },
+            "required": [
+              "outcome"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evidence_kind": {
+                "const": "EMPIRICAL_PASS"
+              },
+              "evidence_level": {
+                "const": "EMPIRICAL"
+              },
+              "evaluations": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "max_absolute_residual": {
+                "type": "number",
+                "minimum": 0
+              },
+              "reason": {
+                "type": "null"
+              },
+              "witness": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "fail"
+              }
+            },
+            "required": [
+              "outcome"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evidence_kind": {
+                "const": "NUMERICAL_THRESHOLD_EXCEEDANCE"
+              },
+              "evidence_level": {
+                "const": "EMPIRICAL"
+              },
+              "evaluations": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "max_absolute_residual": {
+                "oneOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  {
+                    "const": "infinity"
+                  }
+                ]
+              },
+              "reason": {
+                "type": "null"
+              },
+              "witness": {
+                "$ref": "#/$defs/witness"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "unsupported"
+              }
+            },
+            "required": [
+              "outcome"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evidence_kind": {
+                "const": "ABSTENTION"
+              },
+              "evidence_level": {
+                "type": "null"
+              },
+              "evaluations": {
+                "type": "null"
+              },
+              "max_absolute_residual": {
+                "type": "null"
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "witness": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "symbolic_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "artifact_type",
+        "problem_id",
+        "record_id",
+        "result_type",
+        "scope",
+        "outcome",
+        "checks"
+      ],
+      "properties": {
+        "artifact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_type": {
+          "const": "symbolic_expression"
+        },
+        "problem_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "result_type": {
+          "const": "symbolic_residuals"
+        },
+        "scope": {
+          "const": "represented_residuals_and_conditions_only"
+        },
+        "outcome": {
+          "enum": [
+            "zero",
+            "nonzero",
+            "undecided"
+          ]
+        },
+        "checks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/symbolic_check"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "zero"
+              }
+            },
+            "required": [
+              "outcome"
+            ]
+          },
+          "then": {
+            "properties": {
+              "checks": {
+                "items": {
+                  "properties": {
+                    "outcome": {
+                      "const": "zero"
+                    }
+                  },
+                  "required": [
+                    "outcome"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "nonzero"
+              }
+            },
+            "required": [
+              "outcome"
+            ]
+          },
+          "then": {
+            "properties": {
+              "checks": {
+                "contains": {
+                  "properties": {
+                    "outcome": {
+                      "const": "nonzero"
+                    }
+                  },
+                  "required": [
+                    "outcome"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "undecided"
+              }
+            },
+            "required": [
+              "outcome"
+            ]
+          },
+          "then": {
+            "properties": {
+              "checks": {
+                "contains": {
+                  "properties": {
+                    "outcome": {
+                      "const": "undecided"
+                    }
+                  },
+                  "required": [
+                    "outcome"
+                  ]
+                },
+                "not": {
+                  "contains": {
+                    "properties": {
+                      "outcome": {
+                        "const": "nonzero"
+                      }
+                    },
+                    "required": [
+                      "outcome"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "symbolic_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "obligation_id",
+        "constraint",
+        "constraint_source",
+        "materialized_residual",
+        "simplified_residual",
+        "outcome",
+        "reason",
+        "evidence_kind",
+        "evidence_level"
+      ],
+      "properties": {
+        "obligation_id": {
+          "type": "string",
+          "pattern": "^(pde_residuals|conditions)\\[[0-9]+\\]$"
+        },
+        "constraint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "constraint_source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "materialized_residual": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "simplified_residual": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "outcome": {
+          "enum": [
+            "zero",
+            "nonzero",
+            "undecided"
+          ]
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence_kind": {
+          "enum": [
+            "CAS_RESIDUAL_ZERO",
+            "CAS_CONSTANT_NONZERO",
+            "ABSTENTION"
+          ]
+        },
+        "evidence_level": {
+          "enum": [
+            "EXACT",
+            null
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "zero"
+              }
+            },
+            "required": [
+              "outcome"
+            ]
+          },
+          "then": {
+            "properties": {
+              "materialized_residual": {
+                "type": "string",
+                "minLength": 1
+              },
+              "simplified_residual": {
+                "const": "0"
+              },
+              "reason": {
+                "type": "null"
+              },
+              "evidence_kind": {
+                "const": "CAS_RESIDUAL_ZERO"
+              },
+              "evidence_level": {
+                "const": "EXACT"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "nonzero"
+              }
+            },
+            "required": [
+              "outcome"
+            ]
+          },
+          "then": {
+            "properties": {
+              "materialized_residual": {
+                "type": "string",
+                "minLength": 1
+              },
+              "simplified_residual": {
+                "type": "string",
+                "minLength": 1,
+                "not": {"const": "0"}
+              },
+              "reason": {
+                "type": "null"
+              },
+              "evidence_kind": {
+                "const": "CAS_CONSTANT_NONZERO"
+              },
+              "evidence_level": {
+                "const": "EXACT"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "undecided"
+              }
+            },
+            "required": [
+              "outcome"
+            ]
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "evidence_kind": {
+                "const": "ABSTENTION"
+              },
+              "evidence_level": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
