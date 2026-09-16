@@ -228,6 +228,12 @@ one accuracy number.
   and cleanup policies are actually enforced.
 - PDECert reports are evidence records, not authorization decisions for safety-
   critical systems.
+- Report loading rejects contradictions such as refuting events under a
+  `PROVED` or `INCONCLUSIVE` summary. This is internal consistency validation,
+  not proof checking: a standalone report does not provide the trusted problem's
+  complete obligation set or independently establish that its events are true.
+  Keep the problem and replay the evaluator rather than trusting a status or
+  successful schema validation alone.
 
 ## Reproduction requirements
 
