@@ -137,6 +137,16 @@ later changes to an adapter's working dictionary cannot alter saved evidence.
 These checks enforce the report contract; Python adapters are trusted code and
 are not sandboxed or independently verified by the runner.
 
+For an empirical failure, the witness's `constraint` and `constraint_source`
+must match the name and expression of the same PDE residual or condition in
+the trusted template. The runner rejects invented names, rewritten expressions,
+and names paired with another obligation's expression. This applies to both
+report versions. For example, an adapter reporting a failure of the first
+condition should take both strings from `record["template"]["conditions"][0]`.
+This checks source identity only: it does not replay the residual, verify the
+sample coordinates, or establish that the reported value is correct. The result
+remains empirical.
+
 ## Direct SymPy residual comparison
 
 Run the second adapter on the same matched Atlas without PyTorch:
