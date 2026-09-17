@@ -193,18 +193,82 @@ class BaselineExtensionTests(unittest.TestCase):
     def test_external_failure_result_matches_the_schema(self):
         class ThresholdAdapter(_ExampleAdapter):
             def evaluate_record(self, record):
+                constraint = record["template"]["pde_residuals"][0]
                 return BaselineResult(
                     BaselineOutcome.FAIL,
                     "NUMERICAL_THRESHOLD_EXCEEDANCE",
                     "EMPIRICAL",
                     evaluations=1,
                     max_absolute_residual=2.0,
-                    witness=BaselineWitness("PDE", "D(u, x)", {"x": 0.5}, 2.0),
+                    witness=BaselineWitness(
+                        constraint["name"], constraint["expression"], {"x": 0.5}, 2.0
+                    ),
                 )
 
         report = evaluate_atlas_baseline(ATLAS, ThresholdAdapter())
         self.assertEqual([row["outcome"] for row in report["records"]], ["fail", "unsupported"])
         self.assertEqual(list(_validator().iter_errors(report)), [])
+
+    def test_failure_witness_must_match_one_complete_source_obligation(self):
+        for version in (1, 2):
+            for mismatch in ("name", "source", "crossed_pair"):
+                with self.subTest(version=version, mismatch=mismatch):
+
+                    class UnrelatedWitnessAdapter(_ExampleAdapter):
+                        report_version = version
+
+                        def evaluate_record(self, record):
+                            pde = record["template"]["pde_residuals"][0]
+                            condition = record["template"]["conditions"][0]
+                            name = "invented obligation" if mismatch == "name" else pde["name"]
+                            source = pde["expression"]
+                            if mismatch == "source":
+                                source = "0"
+                            elif mismatch == "crossed_pair":
+                                source = condition["expression"]
+                            return BaselineResult(
+                                BaselineOutcome.FAIL,
+                                "NUMERICAL_THRESHOLD_EXCEEDANCE",
+                                "EMPIRICAL",
+                                evaluations=1,
+                                max_absolute_residual=2.0,
+                                witness=BaselineWitness(name, source, {"x": 0.5}, 2.0),
+                            )
+
+                    with self.assertRaisesRegex(AtlasBaselineError, "witness.*name and source"):
+                        evaluate_atlas_baseline(ATLAS, UnrelatedWitnessAdapter())
+
+    def test_pde_and_condition_witnesses_keep_empirical_evidence_in_both_versions(self):
+        for version in (1, 2):
+            schema = json.loads(
+                Path(f"schema/atlas-baseline-report-v{version}.schema.json").read_text()
+            )
+            for group in ("pde_residuals", "conditions"):
+                with self.subTest(version=version, group=group):
+
+                    class BoundWitnessAdapter(_ExampleAdapter):
+                        report_version = version
+
+                        def evaluate_record(self, record):
+                            constraint = record["template"][group][0]
+                            return BaselineResult(
+                                BaselineOutcome.FAIL,
+                                "NUMERICAL_THRESHOLD_EXCEEDANCE",
+                                "EMPIRICAL",
+                                evaluations=1,
+                                max_absolute_residual=2.0,
+                                witness=BaselineWitness(
+                                    constraint["name"], constraint["expression"], {"x": 0.5}, 2.0
+                                ),
+                            )
+
+                    report = evaluate_atlas_baseline(ATLAS, BoundWitnessAdapter())
+                    self.assertEqual(
+                        [row["outcome"] for row in report["records"]], ["fail", "unsupported"]
+                    )
+                    self.assertEqual(report["records"][0]["evidence_level"], "EMPIRICAL")
+                    self.assertIsNone(report["records"][1]["witness"])
+                    self.assertEqual(list(Draft202012Validator(schema).iter_errors(report)), [])
 
 
 class AtlasBaselineTests(unittest.TestCase):

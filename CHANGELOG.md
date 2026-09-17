@@ -6,6 +6,11 @@ All notable changes to PDECert are documented here.
 
 ### Fixed
 
+- Atlas baseline runners reject empirical failure witnesses whose name and
+  operator source do not match the same represented obligation. Both report
+  versions retain empirical evidence; this checks source identity, not the
+  numerical calculation or sample coordinates.
+
 - Report loading and the public JSON schema reject `PROVED` or `INCONCLUSIVE`
   summaries containing refuting evidence. Refutation keeps precedence over
   discharged obligations, including in saved Atlas evaluations; legitimate
