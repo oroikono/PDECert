@@ -18,6 +18,11 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- A versioned JSON input and `compare-reference` command for saved field
+  comparisons. The bounded reader rejects ambiguous or unsupported inputs and
+  reuses the existing empirical metrics without loading models or issuing PDE
+  verdicts. The Python entry point is `compare_reference_file()`.
+
 - A direct SymPy Atlas baseline with exact-input checks, bounded symbolic
   operations, complete per-obligation zero/nonzero/undecided results, and a
   version-2 report schema. Fixed-collocation version-1 output remains unchanged;

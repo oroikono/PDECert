@@ -33,6 +33,8 @@ from .manifests import (
     validate_run_bundle,
 )
 from .quickstart import render_quickstart, run_quickstart
+from .reference_fields import ReferenceComparisonError
+from .reference_io import compare_reference_file
 from .schema import SCHEMA_VERSION, SchemaError, load_case
 from .templates import TEMPLATE_VERSION, TemplateError, load_template
 
@@ -73,6 +75,13 @@ def _build_parser() -> argparse.ArgumentParser:
         description="Evaluate PDE solution artifacts without treating sampling as proof.",
     )
     subcommands = parser.add_subparsers(dest="command", required=True)
+    reference_parser = subcommands.add_parser(
+        "compare-reference", help="compare supplied field values without issuing a PDE verdict"
+    )
+    reference_parser.add_argument("input", type=Path, help="path to a versioned sample JSON file")
+    reference_parser.add_argument(
+        "-o", "--output", type=Path, help="write the empirical JSON report"
+    )
     quickstart_parser = subcommands.add_parser(
         "quickstart",
         help="run the deterministic offline evidence demonstration",
@@ -236,6 +245,26 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     run_validate.add_argument("manifest", type=Path, help="path to a run manifest JSON file")
     return parser
+
+
+def _run_reference_comparison(arguments: argparse.Namespace) -> int:
+    try:
+        if (
+            arguments.output is not None
+            and arguments.output.exists()
+            and arguments.input.samefile(arguments.output)
+        ):
+            raise ReferenceComparisonError("output must not overwrite the reference input file")
+        payload = compare_reference_file(arguments.input)
+        rendered = json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"
+        if arguments.output is None:
+            print(rendered, end="")
+        else:
+            arguments.output.write_text(rendered, encoding="utf-8")
+    except (OSError, ReferenceComparisonError) as error:
+        print(f"pdecert: {error}", file=sys.stderr)
+        return INPUT_ERROR
+    return 0
 
 
 def _run_quickstart(arguments: argparse.Namespace) -> int:
@@ -489,6 +518,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     parser = _build_parser()
     arguments = parser.parse_args(argv)
+    if arguments.command == "compare-reference":
+        return _run_reference_comparison(arguments)
     if arguments.command == "quickstart":
         return _run_quickstart(arguments)
     if arguments.command == "verify":
