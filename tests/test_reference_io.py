@@ -400,7 +400,7 @@ def test_cli_cleanup_failure_does_not_mask_the_report_write_error(tmp_path, monk
     source = write_input(tmp_path)
     output = tmp_path / "report.json"
     output.write_bytes(b"existing report")
-    real_unlink = cli.os.unlink
+    real_unlink = Path.unlink
     cleanup_attempts = []
 
     def fail_replace(*args, **kwargs):
@@ -414,11 +414,13 @@ def test_cli_cleanup_failure_does_not_mask_the_report_write_error(tmp_path, monk
         raise OSError("injected cleanup failure")
 
     monkeypatch.setattr(cli.os, "replace", fail_replace)
-    monkeypatch.setattr(cli.os, "unlink", fail_unlink)
+    monkeypatch.setattr(Path, "unlink", fail_unlink)
     try:
         assert main(["compare-reference", str(source), "-o", str(output)]) == INPUT_ERROR
         captured = capsys.readouterr()
         assert captured.out == ""
+        assert "could not remove temporary report" in captured.err
+        assert "injected cleanup failure" in captured.err
         assert "pdecert: injected replace failure\n" in captured.err
         assert "Traceback" not in captured.err
         assert len(captured.err.splitlines()) <= 2
