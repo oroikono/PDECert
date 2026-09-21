@@ -5,7 +5,10 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
+import stat
 import sys
+import tempfile
 from collections import Counter
 from collections.abc import Sequence
 from pathlib import Path
@@ -247,6 +250,42 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _write_reference_report(output: Path, rendered: str) -> None:
+    """Replace a report only after the new file has been written and closed."""
+    try:
+        mode = output.lstat().st_mode
+    except FileNotFoundError:
+        pass
+    else:
+        if not stat.S_ISREG(mode):
+            raise ReferenceComparisonError("output must be a regular file, not a link or directory")
+
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=output.parent,
+            prefix=".pdecert-report-",
+            suffix=".tmp",
+            delete=False,
+        ) as temporary:
+            temporary_path = Path(temporary.name)
+            temporary.write(rendered)
+            temporary.flush()
+            os.fsync(temporary.fileno())
+        os.replace(temporary_path, output)
+    finally:
+        if temporary_path is not None:
+            try:
+                temporary_path.unlink(missing_ok=True)
+            except OSError as error:
+                print(
+                    f"pdecert: could not remove temporary report {temporary_path}: {error}",
+                    file=sys.stderr,
+                )
+
+
 def _run_reference_comparison(arguments: argparse.Namespace) -> int:
     try:
         if (
@@ -260,7 +299,7 @@ def _run_reference_comparison(arguments: argparse.Namespace) -> int:
         if arguments.output is None:
             print(rendered, end="")
         else:
-            arguments.output.write_text(rendered, encoding="utf-8")
+            _write_reference_report(arguments.output, rendered)
     except (OSError, ReferenceComparisonError) as error:
         print(f"pdecert: {error}", file=sys.stderr)
         return INPUT_ERROR

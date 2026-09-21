@@ -63,8 +63,19 @@ Exit `0` means the comparison completed, including when values disagree or a
 metric is unavailable. It never means `PROVED`. Invalid input and file-write
 errors return `64` with a message on stderr. Argument-usage errors return `2`.
 With `--output`, successful execution writes JSON to that file and leaves stdout
-empty. Invalid input does not replace an existing report. Output may replace an
-existing report, but must not name the input itself or a symlink/hardlink alias.
+empty. The command writes and syncs a temporary file in the destination directory,
+closes it, then replaces the destination. Invalid input or a failed write, sync,
+close, or replacement leaves an existing report unchanged. Temporary-file cleanup
+is best effort; a cleanup failure is reported without hiding the original error.
+
+Output must name a new file or an existing regular file, not a symlink, directory,
+or special file. It must not name the input itself or a hardlink alias. The
+destination directory must already exist and allow temporary-file creation and
+replacement. On success, replacement creates a new file with temporary-file
+permissions (owner-only on POSIX); previous permissions and other file metadata
+are not preserved, and other hardlinks keep their old contents. These protections
+assume a stable destination directory, not a concurrently modified or hostile
+filesystem. They do not guarantee recovery after a power loss.
 
 Keep the input file to replay a report. Its `input_sha256` still binds the
 normalized binary64 columns and declared metadata, not the input file's raw

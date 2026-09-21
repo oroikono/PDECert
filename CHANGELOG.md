@@ -6,6 +6,10 @@ All notable changes to PDECert are documented here.
 
 ### Fixed
 
+- `compare-reference --output` stages completed reports before replacement, so
+  failed writes leave the previous report intact. Symlinks and special-file
+  destinations are rejected; successful replacement uses a new private file.
+
 - Report loading and the public JSON schema reject `PROVED` or `INCONCLUSIVE`
   summaries containing refuting evidence. Refutation keeps precedence over
   discharged obligations, including in saved Atlas evaluations; legitimate

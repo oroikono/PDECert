@@ -9,7 +9,7 @@ import pytest
 from jsonschema import Draft202012Validator, ValidationError
 
 from pdecert import ReferenceComparisonError, compare_reference_fields, compare_reference_file
-from pdecert import reference_io
+from pdecert import cli, reference_io
 from pdecert.cli import INPUT_ERROR, main
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -200,10 +200,281 @@ def test_cli_success_is_empirical_even_with_large_error_or_undefined_relative(
 @pytest.mark.parametrize("option", ["-o", "--output"])
 def test_cli_writes_a_report_file(tmp_path, capsys, option):
     source = write_input(tmp_path)
+    before = source.read_bytes()
     output = tmp_path / "report.json"
     assert main(["compare-reference", str(source), option, str(output)]) == 0
-    assert capsys.readouterr().out == ""
+    captured = capsys.readouterr()
+    assert captured.out == captured.err == ""
     assert json.loads(output.read_text()) == compare_reference_file(source)
+    assert source.read_bytes() == before
+    assert set(tmp_path.iterdir()) == {source, output}
+
+
+class _ReportFileProbe:
+    """Use a real staging file while recording or failing one operation."""
+
+    def __init__(self, stream, events, failure=None):
+        self.stream = stream
+        self.events = events
+        self.failure = failure
+
+    def __getattr__(self, name):
+        return getattr(self.stream, name)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_):
+        self.close()
+
+    def write(self, rendered):
+        self.events.append("write")
+        if self.failure == "write_partial":
+            self.stream.write(rendered[:20])
+            self.stream.flush()
+        if self.failure in {"write_empty", "write_partial"}:
+            raise OSError(f"injected {self.failure} failure")
+        return self.stream.write(rendered)
+
+    def flush(self):
+        self.events.append("flush")
+        if self.failure == "flush":
+            raise OSError("injected flush failure")
+        return self.stream.flush()
+
+    def close(self):
+        self.events.append("close")
+        self.stream.close()
+        if self.failure == "close":
+            raise OSError("injected close failure")
+
+
+def test_cli_stages_a_complete_report_before_replacing_an_existing_file(
+    tmp_path, monkeypatch, capsys
+):
+    source = write_input(tmp_path)
+    source_before = source.read_bytes()
+    output = tmp_path / "report.json"
+    previous = b"existing report\n"
+    output.write_bytes(previous)
+    output.chmod(0o644)
+    previous_inode = output.stat().st_ino
+    expected = compare_reference_file(source)
+    real_create = cli.tempfile.NamedTemporaryFile
+    real_fsync = cli.os.fsync
+    real_replace = cli.os.replace
+    events = []
+    staged = []
+
+    def create(**kwargs):
+        assert kwargs == {
+            "mode": "w",
+            "encoding": "utf-8",
+            "dir": output.parent,
+            "delete": False,
+            "prefix": ".pdecert-report-",
+            "suffix": ".tmp",
+        }
+        events.append("create")
+        probe = _ReportFileProbe(real_create(**kwargs), events)
+        staged.append(probe)
+        return probe
+
+    def fsync(descriptor):
+        events.append("fsync")
+        assert descriptor == staged[0].fileno()
+        assert not staged[0].closed
+        assert json.loads(Path(staged[0].name).read_text()) == expected
+        return real_fsync(descriptor)
+
+    def replace(temporary, destination):
+        events.append("replace")
+        assert Path(temporary) == Path(staged[0].name)
+        assert Path(temporary).parent == output.parent
+        assert Path(destination) == output
+        assert staged[0].closed
+        assert output.read_bytes() == previous
+        assert json.loads(Path(temporary).read_text()) == expected
+        return real_replace(temporary, destination)
+
+    monkeypatch.setattr(cli.tempfile, "NamedTemporaryFile", create)
+    monkeypatch.setattr(cli.os, "fsync", fsync)
+    monkeypatch.setattr(cli.os, "replace", replace)
+    assert main(["compare-reference", str(source), "-o", str(output)]) == 0
+    captured = capsys.readouterr()
+    assert captured.out == captured.err == ""
+    assert events == ["create", "write", "flush", "fsync", "close", "replace"]
+    assert json.loads(output.read_text()) == expected
+    assert output.stat().st_ino != previous_inode
+    if os.name == "posix":
+        assert output.stat().st_mode & 0o777 == 0o600
+    assert source.read_bytes() == source_before
+    assert set(tmp_path.iterdir()) == {source, output}
+
+
+def test_cli_replacing_a_report_preserves_its_other_hardlinks(tmp_path, capsys):
+    source = write_input(tmp_path)
+    before = source.read_bytes()
+    output = tmp_path / "report.json"
+    output.write_bytes(b"previous report")
+    other_link = tmp_path / "other-report.json"
+    os.link(output, other_link)
+    previous_inode = other_link.stat().st_ino
+
+    assert main(["compare-reference", str(source), "-o", str(output)]) == 0
+
+    captured = capsys.readouterr()
+    assert captured.out == captured.err == ""
+    assert json.loads(output.read_text()) == compare_reference_file(source)
+    assert other_link.read_bytes() == b"previous report"
+    assert other_link.stat().st_ino == previous_inode
+    assert output.stat().st_ino != previous_inode
+    assert source.read_bytes() == before
+    assert set(tmp_path.iterdir()) == {source, output, other_link}
+
+
+@pytest.mark.skipif(not hasattr(os, "pathconf"), reason="requires POSIX filename limits")
+def test_cli_report_name_can_reach_the_filesystem_limit(tmp_path, capsys):
+    source = write_input(tmp_path)
+    name_limit = os.pathconf(tmp_path, "PC_NAME_MAX")
+    if name_limit <= 5:
+        pytest.skip("filesystem does not declare a usable filename limit")
+    output = tmp_path / ("r" * (name_limit - 5) + ".json")
+    output.write_bytes(b"previous report")
+
+    assert main(["compare-reference", str(source), "-o", str(output)]) == 0
+
+    captured = capsys.readouterr()
+    assert captured.out == captured.err == ""
+    assert json.loads(output.read_text()) == compare_reference_file(source)
+    assert set(tmp_path.iterdir()) == {source, output}
+
+
+@pytest.mark.parametrize("existing", [False, True], ids=["new-output", "existing-output"])
+@pytest.mark.parametrize(
+    "failure", ["create", "write_empty", "write_partial", "flush", "fsync", "close", "replace"]
+)
+def test_cli_failed_report_writes_preserve_destination_and_clean_staging(
+    tmp_path, monkeypatch, capsys, existing, failure
+):
+    source = write_input(tmp_path)
+    source_before = source.read_bytes()
+    output = tmp_path / "report.json"
+    previous = b"existing report\n"
+    if existing:
+        output.write_bytes(previous)
+    before = set(tmp_path.iterdir())
+    real_create = cli.tempfile.NamedTemporaryFile
+    events = []
+    staged = []
+
+    def fail(*args, **kwargs):
+        events.append(failure)
+        raise OSError(f"injected {failure} failure")
+
+    def create(**kwargs):
+        probe = _ReportFileProbe(real_create(**kwargs), events, failure)
+        staged.append(probe)
+        return probe
+
+    monkeypatch.setattr(cli.tempfile, "NamedTemporaryFile", fail if failure == "create" else create)
+    if failure in {"fsync", "replace"}:
+        monkeypatch.setattr(cli.os, failure, fail)
+
+    assert main(["compare-reference", str(source), "-o", str(output)]) == INPUT_ERROR == 64
+
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err == f"pdecert: injected {failure} failure\n"
+    assert failure in events or failure in {"write_empty", "write_partial"}
+    if existing:
+        assert output.read_bytes() == previous
+    else:
+        assert not output.exists()
+    assert source.read_bytes() == source_before
+    assert all(probe.closed for probe in staged)
+    assert set(tmp_path.iterdir()) == before
+
+
+def test_cli_cleanup_failure_does_not_mask_the_report_write_error(tmp_path, monkeypatch, capsys):
+    source = write_input(tmp_path)
+    output = tmp_path / "report.json"
+    output.write_bytes(b"existing report")
+    real_unlink = cli.os.unlink
+    cleanup_attempts = []
+
+    def fail_replace(*args, **kwargs):
+        raise OSError("injected replace failure")
+
+    def fail_unlink(path, *args, **kwargs):
+        path = Path(path)
+        assert path.parent == output.parent
+        assert path.name.startswith(".pdecert-report-")
+        cleanup_attempts.append(path)
+        raise OSError("injected cleanup failure")
+
+    monkeypatch.setattr(cli.os, "replace", fail_replace)
+    monkeypatch.setattr(cli.os, "unlink", fail_unlink)
+    try:
+        assert main(["compare-reference", str(source), "-o", str(output)]) == INPUT_ERROR
+        captured = capsys.readouterr()
+        assert captured.out == ""
+        assert "pdecert: injected replace failure\n" in captured.err
+        assert "Traceback" not in captured.err
+        assert len(captured.err.splitlines()) <= 2
+        assert output.read_bytes() == b"existing report"
+        assert cleanup_attempts
+    finally:
+        for temporary in set(cleanup_attempts):
+            if temporary.exists():
+                real_unlink(temporary)
+
+
+@pytest.mark.parametrize(
+    "kind", ["symlink", "dangling_symlink", "loop_symlink", "directory", "fifo"]
+)
+def test_cli_rejects_nonregular_report_destinations_without_following_links(
+    tmp_path, monkeypatch, capsys, kind
+):
+    source = write_input(tmp_path)
+    source_before = source.read_bytes()
+    output = tmp_path / "report.json"
+    target = tmp_path / "linked-report.json"
+    if kind == "symlink":
+        target.write_bytes(b"linked report")
+        output.symlink_to(target)
+    elif kind == "dangling_symlink":
+        output.symlink_to(target)
+    elif kind == "loop_symlink":
+        output.symlink_to(output.name)
+    elif kind == "directory":
+        output.mkdir()
+    else:
+        if not hasattr(os, "mkfifo"):
+            pytest.skip("FIFO creation is unavailable on this platform")
+        os.mkfifo(output)
+    before = set(tmp_path.iterdir())
+    destination_before = output.lstat()
+
+    def unexpected_staging(**kwargs):
+        pytest.fail("an unsupported destination must be rejected before staging")
+
+    monkeypatch.setattr(cli.tempfile, "NamedTemporaryFile", unexpected_staging)
+    assert main(["compare-reference", str(source), "-o", str(output)]) == INPUT_ERROR
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err and "Traceback" not in captured.err
+    assert len(captured.err.splitlines()) == 1
+    assert output.lstat().st_ino == destination_before.st_ino
+    assert output.lstat().st_mode == destination_before.st_mode
+    assert source.read_bytes() == source_before
+    assert set(tmp_path.iterdir()) == before
+    if kind == "symlink":
+        assert output.is_symlink()
+        assert target.read_bytes() == b"linked report"
+    elif kind == "dangling_symlink":
+        assert output.is_symlink()
+        assert not target.exists()
 
 
 @pytest.mark.parametrize("failure", ["missing", "malformed", "output_directory"])
