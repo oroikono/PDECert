@@ -6,6 +6,10 @@ All notable changes to PDECert are documented here.
 
 ### Fixed
 
+- `compare-reference --output` stages completed reports before replacement, so
+  failed writes leave the previous report intact. Symlinks and special-file
+  destinations are rejected; successful replacement uses a new private file.
+
 - Report loading and the public JSON schema reject `PROVED` or `INCONCLUSIVE`
   summaries containing refuting evidence. Refutation keeps precedence over
   discharged obligations, including in saved Atlas evaluations; legitimate
@@ -17,6 +21,13 @@ All notable changes to PDECert are documented here.
   inputs, saved sample coordinates, and empirical-only evidence semantics.
 
 ### Added
+
+- A versioned JSON input and `compare-reference` command for saved field
+  comparisons. The bounded reader rejects ambiguous or unsupported inputs and
+  reuses the existing empirical metrics without loading models or issuing PDE
+  verdicts. The Python entry point is `compare_reference_file()`.
+  Its copy-paste guide creates the input without repository fixtures and is
+  tested against core-only wheel and source-distribution installs.
 
 - A direct SymPy Atlas baseline with exact-input checks, bounded symbolic
   operations, complete per-obligation zero/nonzero/undecided results, and a

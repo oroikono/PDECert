@@ -178,6 +178,10 @@ Test exact and discrepant values, zero reference norms, numerical extremes,
 unsupported inputs, sample identity, and the recorded maximum-error location.
 Keep optional model loaders separate from this pure-Python comparison primitive.
 
+The saved-sample guide is also tested from an empty working directory. When
+editing its marked command block, run `python tests/test_reference_walkthrough.py`.
+CI repeats it with core-only wheel and source-distribution installs.
+
 The own-candidate guide is executable documentation. When editing its marked
 command block or expected outcomes, run `python tests/test_candidate_walkthrough.py`.
 These tests execute the documented Python code from an empty working directory

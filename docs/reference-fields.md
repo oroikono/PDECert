@@ -13,6 +13,9 @@ an implementation of the gridded-artifact lane.
 
 ## Minimal use
 
+For saved JSON sample columns, use the [file and CLI guide](reference-files.md).
+It wraps this API without changing the metrics or evidence strength.
+
 ```python
 from pdecert import compare_reference_fields
 
