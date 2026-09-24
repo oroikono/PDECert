@@ -5,22 +5,77 @@ values at the same points. It runs the existing [reference-field metrics](refere
 from a JSON file, without loading a model or importing an optional framework.
 It is not an Atlas adapter or a gridded PDE checker.
 
-From a checkout of this development version:
+## Try your own saved values
+
+Install a development build containing `compare-reference` first; the older
+PyPI release does not have this command. For example, from this checkout run
+`python -m pip install .`. Then open an empty working directory. The following
+block needs only the installed core package, not the checkout or any model
+framework. It creates `samples.json`, compares the saved values, and prints one
+field's metrics from `comparison.json`.
+
+These are three made-up values to show the file format, not a trained model or
+PDE benchmark. Replace the columns and metadata with your own aligned data.
+
+<!-- tested-reference-walkthrough:start -->
+```bash
+python - <<'PY' &&
+import json
+
+samples = {
+    "reference_input_version": 1,
+    "coordinates": {"x": [0.0, 0.5, 1.0]},
+    "candidate": {"u": [1.0, 2.0, 4.0]},
+    "reference": {"u": [1.0, 2.0, 3.0]},
+    "problem_id": "supplied-field-demo",
+    "candidate_id": "deliberate-last-row-perturbation",
+    "reference_id": "supplied-linear-values",
+    "reference_description": "Values of 1 + 2*x at the supplied points",
+    "reference_uncertainty": "Illustrative values, not a certified PDE solution",
+    "sampling_description": "Three supplied points, equal row weights; no interpolation",
+}
+with open("samples.json", "x", encoding="utf-8") as destination:
+    json.dump(samples, destination, indent=2, allow_nan=False)
+PY
+python -m pdecert.cli compare-reference samples.json --output comparison.json &&
+python - <<'PY'
+import json
+
+with open("comparison.json", encoding="utf-8") as source:
+    report = json.load(source)
+print(json.dumps(report["fields"][0], indent=2, allow_nan=False))
+PY
+```
+<!-- tested-reference-walkthrough:end -->
+
+Each step runs only if the previous one succeeded. The input-creation step
+refuses to overwrite an existing `samples.json`. Use a
+fresh directory to repeat the whole block. The comparison command can replace an
+existing `comparison.json` as described below. Keep `samples.json` with the report
+so someone else can repeat the calculation.
+
+The example returns RMSE `0.5773502691896257`, relative L2 approximately
+`0.26726124`, and maximum error `1.0` at `x=1.0`. These are sample discrepancies,
+not PDE counterexamples. Try these changes in the input dictionary:
+
+| Change | Expected result |
+| --- | --- |
+| Set candidate values to `[1.0, 2.0, 3.0]` | Zero discrepancies, still empirical and not a proof |
+| Set both value lists to `[0.0, 0.0, 0.0]` | RMSE zero; relative L2 is `null` with `zero_reference_norm` |
+| Supply only two candidate values | Input error, exit `64`; no new report |
+| Set `reference_input_version` to `2` | Unsupported version, exit `64`; no new report |
+
+You can also compare the repository fixture from a checkout:
 
 ```bash
-python -m pip install -e .
 pdecert compare-reference examples/reference-input.json
 pdecert compare-reference examples/reference-input.json --output comparison.json
 ```
 
-The example deliberately changes the last of three values. It returns RMSE
-`0.5773502691896257`, relative L2 approximately `0.26726124`, and maximum error
-`1.0` at `x=1.0`. These are sample discrepancies, not PDE counterexamples.
-
 You can use the same command from any working directory with an absolute input
 path. The Python entry point is `pdecert.compare_reference_file(path)`. Both
 paths produce the same report as `compare_reference_fields()` with the saved
-columns and metadata. The new command is not part of the older PyPI release.
+columns and metadata.
 
 ## Input contract
 

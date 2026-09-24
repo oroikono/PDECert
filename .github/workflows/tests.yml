@@ -92,6 +92,8 @@ jobs:
           "$RUNNER_TEMP/pdecert-wheel/bin/pdecert" quickstart --json
           "$RUNNER_TEMP/pdecert-wheel/bin/python" -I \
             "$GITHUB_WORKSPACE/tests/test_candidate_walkthrough.py"
+          "$RUNNER_TEMP/pdecert-wheel/bin/python" -I \
+            "$GITHUB_WORKSPACE/tests/test_reference_walkthrough.py"
           "$RUNNER_TEMP/pdecert-wheel/bin/pdecert" verify \
             "$GITHUB_WORKSPACE/examples/exact_heat.json"
           "$RUNNER_TEMP/pdecert-wheel/bin/pdecert" compare-reference \
@@ -105,5 +107,7 @@ jobs:
           "$RUNNER_TEMP/pdecert-sdist/bin/pdecert" quickstart --json
           "$RUNNER_TEMP/pdecert-sdist/bin/python" -I \
             "$GITHUB_WORKSPACE/tests/test_candidate_walkthrough.py"
+          "$RUNNER_TEMP/pdecert-sdist/bin/python" -I \
+            "$GITHUB_WORKSPACE/tests/test_reference_walkthrough.py"
           "$RUNNER_TEMP/pdecert-sdist/bin/pdecert" compare-reference \
             "$GITHUB_WORKSPACE/examples/reference-input.json"
