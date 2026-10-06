@@ -240,6 +240,10 @@ one accuracy number.
 
 ## Security and trust boundaries
 
+- Standalone review imports stage a complete JSON corpus and publish it without
+  overwriting existing paths. This requires hard-link support on the output
+  filesystem; it is not a power-loss guarantee or protection from a hostile
+  process controlling the parent directory. See the [labeling protocol](corpus/LABELING.md).
 - Baseline adapters are trusted Python code. Scope checks, defensive record
   copies, mutation detection, and result validation prevent common contract
   mistakes; they do not sandbox an adapter or establish that it performed the

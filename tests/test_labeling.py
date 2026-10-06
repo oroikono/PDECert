@@ -1,9 +1,11 @@
 import copy
 import hashlib
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from experiments.apply_review import main as apply_review_main
 from pdecert import (
@@ -144,6 +146,142 @@ class LabelingTests(unittest.TestCase):
                 annotator="second-reviewer",
                 confirmed_independent_review=True,
             )
+
+    def _review_command_files(self, root):
+        source = copy.deepcopy(self.corpus)
+        source["records"] = source["records"][:1]
+        review = {
+            "review_version": 1,
+            "records": [
+                {
+                    "id": source["records"][0]["id"],
+                    "verdict": "unclear",
+                    "failure_modes": [],
+                    "rationale": "Synthetic import test, not a scientific judgment.",
+                }
+            ],
+        }
+        source_path, review_path = root / "source.json", root / "review.json"
+        source_path.write_text(json.dumps(source))
+        review_path.write_text(json.dumps(review))
+        return source_path, review_path
+
+    def _run_review_command(self, source, review, output, *, confirmed=True):
+        arguments = [
+            str(review),
+            "--corpus",
+            str(source),
+            "--output",
+            str(output),
+            "--annotator",
+            "synthetic-test-reviewer",
+        ]
+        if confirmed:
+            arguments.append("--confirm-independent-review")
+        apply_review_main(arguments)
+
+    def test_review_command_writes_a_complete_new_json_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source, review = self._review_command_files(root)
+            original = {path: path.read_bytes() for path in (source, review)}
+            output = root / "labeled.json"
+            self._run_review_command(source, review, output)
+            labeled = load_corpus(output)
+            self.assertEqual(labeled["records"][0]["annotation"]["verdict"], "unclear")
+            self.assertEqual(
+                labeled["records"][0]["annotation"]["annotators"], ["synthetic-test-reviewer"]
+            )
+            for path, content in original.items():
+                self.assertEqual(path.read_bytes(), content)
+            self.assertEqual(set(root.iterdir()), {source, review, output})
+
+    def test_review_command_refuses_existing_json_destinations_and_aliases(self):
+        targets = ("source", "review", "unrelated", "directory", "symlink", "hardlink", "dangling")
+        for target in targets:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                source, review = self._review_command_files(root)
+                output = root / "labeled.json"
+                if target in {"source", "review"}:
+                    output = source if target == "source" else review
+                elif target == "unrelated":
+                    output.write_bytes(b"previous work\n")
+                elif target == "directory":
+                    output.mkdir()
+                elif target == "symlink":
+                    output.symlink_to(review)
+                elif target == "hardlink":
+                    os.link(source, output)
+                else:
+                    output.symlink_to(root / "absent.json")
+                original = {path: path.read_bytes() for path in root.iterdir() if path.is_file()}
+                entries = set(root.iterdir())
+                with self.assertRaisesRegex(ReviewError, "refusing to overwrite"):
+                    self._run_review_command(source, review, output)
+                for path, content in original.items():
+                    self.assertEqual(path.read_bytes(), content)
+                self.assertEqual(set(root.iterdir()), entries)
+                if target == "dangling":
+                    self.assertTrue(output.is_symlink())
+                    self.assertFalse((root / "absent.json").exists())
+
+    def test_review_command_does_not_publish_unconfirmed_or_invalid_review(self):
+        for invalid in (False, True):
+            with self.subTest(invalid=invalid), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                source, review = self._review_command_files(root)
+                if invalid:
+                    data = json.loads(review.read_text())
+                    data["records"][0]["rationale"] = ""
+                    review.write_text(json.dumps(data))
+                original = {path: path.read_bytes() for path in (source, review)}
+                with self.assertRaises(ReviewError):
+                    self._run_review_command(
+                        source, review, root / "labeled.json", confirmed=invalid
+                    )
+                self.assertEqual(set(root.iterdir()), {source, review})
+                for path, content in original.items():
+                    self.assertEqual(path.read_bytes(), content)
+
+    def test_review_command_does_not_publish_a_partial_json_write(self):
+        def fail_write(value, path):
+            Path(path).write_text('{"partial":')
+            raise OSError("synthetic disk-full error")
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source, review = self._review_command_files(root)
+            with patch("experiments.apply_review.dump_corpus", side_effect=fail_write):
+                with self.assertRaisesRegex(OSError, "disk-full"):
+                    self._run_review_command(source, review, root / "labeled.json")
+            self.assertEqual(set(root.iterdir()), {source, review})
+
+    def test_review_command_preserves_a_destination_created_during_publication(self):
+        def competing_writer(staged, destination):
+            # The complete file must be staged before the destination becomes visible.
+            load_corpus(staged)
+            Path(destination).write_bytes(b"another review\n")
+            raise FileExistsError("synthetic concurrent creation")
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source, review = self._review_command_files(root)
+            output = root / "labeled.json"
+            with patch("experiments.apply_review.os.link", side_effect=competing_writer):
+                with self.assertRaisesRegex(ReviewError, "refusing to overwrite"):
+                    self._run_review_command(source, review, output)
+            self.assertEqual(output.read_bytes(), b"another review\n")
+            self.assertEqual(set(root.iterdir()), {source, review, output})
+
+    def test_review_command_has_no_overwrite_fallback_when_links_are_unsupported(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source, review = self._review_command_files(root)
+            with patch("experiments.apply_review.os.link", side_effect=OSError("unsupported link")):
+                with self.assertRaisesRegex(OSError, "unsupported link"):
+                    self._run_review_command(source, review, root / "labeled.json")
+            self.assertEqual(set(root.iterdir()), {source, review})
 
     def test_review_command_writes_a_new_modular_atlas(self):
         source = copy.deepcopy(self.corpus)

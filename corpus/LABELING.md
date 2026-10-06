@@ -114,6 +114,20 @@ annotations are rewritten in the new directory.
 Review the resulting file or directory before making it canonical. The importer
 never overwrites the source corpus or Atlas implicitly.
 
+For standalone JSON, `--output` must also name a new file in an existing
+directory. Existing files, directories, and symlinks are refused, including
+aliases of the source corpus or completed review. Choose a fresh output name
+when repeating an import; there is no overwrite flag.
+
+The standalone importer writes and validates the full corpus in a temporary
+directory beside the destination, then publishes it with a no-overwrite hard
+link. A failed write leaves no partial destination. The output filesystem must
+support hard links; if it does not, use a local filesystem that does and copy
+the completed file afterward. There is no overwrite fallback. This protects
+ordinary imports and concurrent destination creation, not power-loss durability
+or a directory controlled by a hostile process. It does not change the review
+requirements or make a declared human judgment independently verified.
+
 ## Provisional file
 
 `results/provisional-review.json` is machine-assisted preparation, not ground

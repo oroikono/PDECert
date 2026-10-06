@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import tempfile
 from collections.abc import Sequence
 from pathlib import Path
 
 from pdecert import (
     CROSS_ARTIFACT_ATLAS_VERSION,
+    ReviewError,
     apply_review,
     dump_atlas,
     dump_cross_artifact_atlas,
@@ -16,6 +19,23 @@ from pdecert import (
     load_atlas_coverage,
     load_corpus_source,
 )
+
+
+def _dump_new_corpus(value: object, destination: Path) -> None:
+    """Publish a complete corpus without replacing an existing path."""
+
+    if destination.exists() or destination.is_symlink():
+        raise ReviewError(f"{destination}: refusing to overwrite an existing path")
+    with tempfile.TemporaryDirectory(
+        dir=destination.parent, prefix=".pdecert-review-"
+    ) as directory:
+        staged = Path(directory) / "corpus.json"
+        dump_corpus(value, staged)
+        try:
+            # Unlike replace(), link() refuses even a concurrently created destination.
+            os.link(staged, destination)
+        except FileExistsError as exc:
+            raise ReviewError(f"{destination}: refusing to overwrite an existing path") from exc
 
 
 def main(argv: Sequence[str] | None = None) -> None:
@@ -51,7 +71,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         dump_atlas(labeled, arguments.output, coverage=coverage)
         kind = "atlas"
     else:
-        dump_corpus(labeled, arguments.output)
+        _dump_new_corpus(labeled, arguments.output)
         kind = "corpus"
     print(f"Wrote labeled {kind} to {arguments.output}")
 

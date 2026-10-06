@@ -6,6 +6,11 @@ All notable changes to PDECert are documented here.
 
 ### Fixed
 
+- Standalone review imports refuse existing output paths, including the source
+  corpus, completed review, and their aliases. Output is staged before
+  no-overwrite publication so a failed write does not leave a partial corpus.
+  The general-purpose `dump_corpus` API is unchanged.
+
 - Report loading and the public JSON schema reject `PROVED` or `INCONCLUSIVE`
   summaries containing refuting evidence. Refutation keeps precedence over
   discharged obligations, including in saved Atlas evaluations; legitimate
