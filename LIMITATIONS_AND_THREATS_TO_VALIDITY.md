@@ -240,6 +240,12 @@ one accuracy number.
 
 ## Security and trust boundaries
 
+- Saved baseline loading checks transport and internal consistency only. It
+  does not verify the declared Atlas digest against source files, recover the
+  complete trusted obligation set, bind witnesses to a template, or replay the
+  mathematical calculation. Its canonical digest identifies report content,
+  not authenticated execution. The 64 MiB read limit is not a process memory
+  or hostile-filesystem guarantee. See [saved-report loading](docs/baseline-adapters.md#loading-saved-reports).
 - Baseline adapters are trusted Python code. Scope checks, defensive record
   copies, mutation detection, and result validation prevent common contract
   mistakes; they do not sandbox an adapter or establish that it performed the

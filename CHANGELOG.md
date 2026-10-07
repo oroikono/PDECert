@@ -18,6 +18,11 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- Strict loading, internal-consistency validation and canonical content digests
+  for saved Atlas baseline reports, with a core-only `corpus validate-baseline`
+  command. Empirical and symbolic outcomes stay separate; loading does not
+  verify source identity, replay mathematics, or establish a candidate verdict.
+
 - A direct SymPy Atlas baseline with exact-input checks, bounded symbolic
   operations, complete per-obligation zero/nonzero/undecided results, and a
   version-2 report schema. Fixed-collocation version-1 output remains unchanged;

@@ -1,0 +1,123 @@
+{
+  "adapter": {
+    "accepted_artifact_types": ["symbolic_expression"],
+    "accepted_solution_semantics": ["classical_strong"],
+    "configuration": {
+      "pipeline": ["simplify", "cancel", "trigsimp"],
+      "include_conditions": true,
+      "domain_checks": false,
+      "nonzero_policy": "finite_real_constant_only",
+      "float_policy": "abstain_on_inexact_literals",
+      "symbolic_timeout_seconds": 2.0,
+      "max_expression_ops": 10000,
+      "deadline_scope": "binding_and_each_obligation_after_atlas_validation"
+    },
+    "id": "direct_sympy",
+    "version": 1
+  },
+  "atlas": {
+    "atlas_version": 2,
+    "name": "Synthetic report-loader fixture; no natural data or source Atlas",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "baseline_report_version": 2,
+  "evidence_policy": "method_specific_obligation_diagnostics_no_global_verdict",
+  "records": [
+    {
+      "artifact_id": "synthetic-symbolic-zero-artifact",
+      "artifact_type": "symbolic_expression",
+      "problem_id": "synthetic-loader-problem",
+      "record_id": "synthetic-symbolic-zero",
+      "result_type": "symbolic_residuals",
+      "scope": "represented_residuals_and_conditions_only",
+      "outcome": "zero",
+      "checks": [
+        {
+          "obligation_id": "pde_residuals[0]",
+          "constraint": "synthetic zero residual",
+          "constraint_source": "D(u, x)",
+          "materialized_residual": "0",
+          "simplified_residual": "0",
+          "outcome": "zero",
+          "reason": null,
+          "evidence_kind": "CAS_RESIDUAL_ZERO",
+          "evidence_level": "EXACT"
+        }
+      ]
+    },
+    {
+      "artifact_id": "synthetic-symbolic-nonzero-artifact",
+      "artifact_type": "symbolic_expression",
+      "problem_id": "synthetic-loader-problem",
+      "record_id": "synthetic-symbolic-nonzero",
+      "result_type": "symbolic_residuals",
+      "scope": "represented_residuals_and_conditions_only",
+      "outcome": "nonzero",
+      "checks": [
+        {
+          "obligation_id": "pde_residuals[0]",
+          "constraint": "synthetic nonzero residual",
+          "constraint_source": "D(u, x)",
+          "materialized_residual": "1",
+          "simplified_residual": "1",
+          "outcome": "nonzero",
+          "reason": null,
+          "evidence_kind": "CAS_CONSTANT_NONZERO",
+          "evidence_level": "EXACT"
+        },
+        {
+          "obligation_id": "conditions[0]",
+          "constraint": "synthetic undecided condition",
+          "constraint_source": "u",
+          "materialized_residual": "sin(x)",
+          "simplified_residual": null,
+          "outcome": "undecided",
+          "reason": "Synthetic CAS abstention; no computation was performed.",
+          "evidence_kind": "ABSTENTION",
+          "evidence_level": null
+        }
+      ]
+    },
+    {
+      "artifact_id": "synthetic-symbolic-undecided-artifact",
+      "artifact_type": "symbolic_expression",
+      "problem_id": "synthetic-loader-problem",
+      "record_id": "synthetic-symbolic-undecided",
+      "result_type": "symbolic_residuals",
+      "scope": "represented_residuals_and_conditions_only",
+      "outcome": "undecided",
+      "checks": [
+        {
+          "obligation_id": "pde_residuals[0]",
+          "constraint": "synthetic undecided residual",
+          "constraint_source": "D(u, x)",
+          "materialized_residual": null,
+          "simplified_residual": null,
+          "outcome": "undecided",
+          "reason": "Synthetic CAS abstention; no computation was performed.",
+          "evidence_kind": "ABSTENTION",
+          "evidence_level": null
+        }
+      ]
+    },
+    {
+      "artifact_id": "synthetic-callable-artifact",
+      "artifact_type": "callable_model",
+      "evidence_kind": "ABSTENTION",
+      "evidence_level": null,
+      "evaluations": null,
+      "max_absolute_residual": null,
+      "outcome": "unsupported",
+      "problem_id": "synthetic-loader-problem",
+      "reason": "Synthetic callable is outside direct_sympy artifact scope.",
+      "record_id": "synthetic-symbolic-unsupported",
+      "witness": null
+    }
+  ],
+  "runtime": {
+    "mpmath_version": "synthetic-fixture",
+    "pdecert_version": "synthetic-fixture",
+    "python_version": "synthetic-fixture",
+    "sympy_version": "synthetic-fixture"
+  }
+}

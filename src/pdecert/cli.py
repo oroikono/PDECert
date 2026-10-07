@@ -23,6 +23,7 @@ from .atlas_baselines import (
     DirectSympyBaseline,
     evaluate_atlas_baseline,
 )
+from .atlas_baseline_reports import atlas_baseline_report_sha256, load_atlas_baseline_report
 from .corpus import CorpusError, load_atlas_coverage, load_corpus_source
 from .core import Status, verify
 from .manifests import (
@@ -178,6 +179,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="run a method-specific baseline over Atlas v2 records",
     )
     baseline_parser.add_argument("corpus", type=Path, help="path to an Atlas v2 directory")
+    baseline_validate = corpus_commands.add_parser(
+        "validate-baseline", help="check a saved baseline report without verifying its mathematics"
+    )
+    baseline_validate.add_argument(
+        "report", type=Path, help="path to a baseline v1 or v2 JSON report"
+    )
     baseline_parser.add_argument(
         "--method",
         choices=("fixed-collocation", "direct-sympy"),
@@ -444,6 +451,25 @@ def _run_corpus_baseline(arguments: argparse.Namespace) -> int:
     return 0
 
 
+def _run_corpus_validate_baseline(arguments: argparse.Namespace) -> int:
+    try:
+        report = load_atlas_baseline_report(arguments.report)
+        summary = {
+            "adapter": report["adapter"],
+            "atlas": report["atlas"],
+            "baseline_report_version": report["baseline_report_version"],
+            "outcomes": _counts([record["outcome"] for record in report["records"]]),
+            "records": len(report["records"]),
+            "report_sha256": atlas_baseline_report_sha256(report),
+            "validation_scope": "report_internal_consistency_only",
+        }
+    except (AtlasBaselineError, OSError, ValueError) as error:
+        print(f"pdecert: {error}", file=sys.stderr)
+        return INPUT_ERROR
+    print(json.dumps(summary, indent=2, sort_keys=True, allow_nan=False))
+    return 0
+
+
 def _run_template_validate(arguments: argparse.Namespace) -> int:
     try:
         template = load_template(arguments.template)
@@ -501,6 +527,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run_corpus_summarize_evaluation(arguments)
     if arguments.command == "corpus" and arguments.corpus_command == "baseline":
         return _run_corpus_baseline(arguments)
+    if arguments.command == "corpus" and arguments.corpus_command == "validate-baseline":
+        return _run_corpus_validate_baseline(arguments)
     if arguments.command == "template" and arguments.template_command == "validate":
         return _run_template_validate(arguments)
     if arguments.command == "run" and arguments.run_command == "validate":

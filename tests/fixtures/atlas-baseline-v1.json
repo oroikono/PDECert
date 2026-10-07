@@ -1,0 +1,75 @@
+{
+  "adapter": {
+    "accepted_artifact_types": ["symbolic_expression"],
+    "accepted_solution_semantics": ["classical_strong"],
+    "configuration": {
+      "decimal_precision": 30,
+      "include_conditions": true,
+      "max_evaluations": 1000000,
+      "points_per_axis": 5,
+      "sampling": "uniform_tensor_grid_including_endpoints",
+      "tolerance": 1e-9
+    },
+    "id": "fixed_collocation",
+    "version": 1
+  },
+  "atlas": {
+    "atlas_version": 2,
+    "name": "Synthetic report-loader fixture; no natural data or source Atlas",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "baseline_report_version": 1,
+  "evidence_policy": "method_specific_empirical_diagnostics_no_proof",
+  "records": [
+    {
+      "artifact_id": "synthetic-empirical-pass-artifact",
+      "artifact_type": "symbolic_expression",
+      "evidence_kind": "EMPIRICAL_PASS",
+      "evidence_level": "EMPIRICAL",
+      "evaluations": 5,
+      "max_absolute_residual": 0.0,
+      "outcome": "pass",
+      "problem_id": "synthetic-loader-problem",
+      "reason": null,
+      "record_id": "synthetic-empirical-pass",
+      "witness": null
+    },
+    {
+      "artifact_id": "synthetic-empirical-fail-artifact",
+      "artifact_type": "symbolic_expression",
+      "evidence_kind": "NUMERICAL_THRESHOLD_EXCEEDANCE",
+      "evidence_level": "EMPIRICAL",
+      "evaluations": 5,
+      "max_absolute_residual": 2.0,
+      "outcome": "fail",
+      "problem_id": "synthetic-loader-problem",
+      "reason": null,
+      "record_id": "synthetic-empirical-fail",
+      "witness": {
+        "absolute_residual": 2.0,
+        "constraint": "synthetic PDE residual",
+        "constraint_source": "D(u, x)",
+        "sampled_inputs": {"n": 9007199254740993, "x": 0.5}
+      }
+    },
+    {
+      "artifact_id": "synthetic-callable-artifact",
+      "artifact_type": "callable_model",
+      "evidence_kind": "ABSTENTION",
+      "evidence_level": null,
+      "evaluations": null,
+      "max_absolute_residual": null,
+      "outcome": "unsupported",
+      "problem_id": "synthetic-loader-problem",
+      "reason": "Synthetic callable is outside fixed_collocation artifact scope.",
+      "record_id": "synthetic-empirical-unsupported",
+      "witness": null
+    }
+  ],
+  "runtime": {
+    "mpmath_version": "synthetic-fixture",
+    "pdecert_version": "synthetic-fixture",
+    "python_version": "synthetic-fixture",
+    "sympy_version": "synthetic-fixture"
+  }
+}
