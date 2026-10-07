@@ -292,3 +292,7 @@ upgrades empirical evidence into proof.
 The fixtures in `tests/fixtures/atlas-baseline-v1.json` and
 `tests/fixtures/atlas-baseline-v2.json` are synthetic transport examples, not
 benchmark runs or scientific judgments.
+
+To inspect these results beside a saved PDECert evaluation, use the
+[saved-report comparison](saved-report-comparison.md). It requires exact declared
+Atlas and record identities while keeping both methods' native evidence intact.

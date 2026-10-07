@@ -232,6 +232,11 @@ configuration can change.
 
 ### Baseline fairness
 
+Saved-report comparison checks matching declared identities, not actual Atlas
+membership or mathematical correctness. It keeps native method evidence and
+settings separate without aligning obligations or calculating accuracy. See
+[the comparison contract](docs/saved-report-comparison.md).
+
 Baselines must receive the same represented PDE, domain, conditions, parameters,
 and artifact information. Comparing a PDE-only checker with a full
 initial-boundary verifier measures obligation coverage as well as algorithmic

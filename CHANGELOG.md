@@ -18,6 +18,11 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- A saved Atlas report comparison API and core-only `corpus compare-reports`
+  command. Exact declared Atlas and record identities are required; full native
+  evidence, settings and source digests stay separate. No inference, accuracy
+  metric, truth label or aggregate verdict is added.
+
 - Strict loading, internal-consistency validation and canonical content digests
   for saved Atlas baseline reports, with a core-only `corpus validate-baseline`
   command. Empirical and symbolic outcomes stay separate; loading does not
