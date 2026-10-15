@@ -6,19 +6,18 @@
 
 <p align="center"><strong>Evidence-carrying PDE solution artifacts.</strong></p>
 
-Machine-generated PDE solution artifacts should come with explicit evidence, a
-concrete counterexample, or an honest abstention.
+PDECert checks whether a proposed solution satisfies a stated partial differential equation (PDE), its initial and boundary conditions, and the domain obligations represented by the input problem. It supports symbolic expressions and differentiable callable fields, with reports that distinguish proof evidence, counterexamples, and unresolved checks.
 
-PDECert is an extensible verification framework for symbolic expressions and
-differentiable callable fields. It checks the PDE residual together with initial
-and boundary conditions and returns one of three outcomes:
+The research prototype returns one of three outcomes:
 
 - `PROVED` when every current obligation has exact or rigorous-bound evidence;
 - `REFUTED` when it finds a singularity or a numerical counterexample;
 - `INCONCLUSIVE` when the available checks cannot decide.
 
-Numerical sampling is only used to refute. Passing sampled points is never
-treated as a proof.
+Passing numerical samples never proves a solution; a proof applies only to the
+obligations and mathematical semantics represented in the checked problem.
+
+[Quickstart](docs/quickstart.md) · [Evidence reports](docs/evidence-reports.md) · [Limitations](LIMITATIONS_AND_THREATS_TO_VALIDITY.md) · [Citation](#citation)
 
 Every decisive report also states its `decision_evidence`: `EXACT`,
 `RIGOROUS_BOUND`, or `EMPIRICAL`. Exact identities and future validated bounds
@@ -686,6 +685,18 @@ workstreams. Contributions that follow the focused workflow in
 
 If PDECert or the pilot benchmark supports your work, cite the software using
 [`CITATION.cff`](CITATION.cff). GitHub can render that file as APA or BibTeX.
+A copyable software citation is also available in [`CITATION.bib`](CITATION.bib).
+
+```bibtex
+@software{oikonomou2026pdecert,
+  author = {Oikonomou, Orestis},
+  title = {{PDECert}: Conservative verification for machine-generated {PDE} solution artifacts},
+  version = {0.1.1rc2},
+  date = {2026-09-01},
+  year = {2026},
+  url = {https://github.com/oroikono/PDECert}
+}
+```
 
 Release history is recorded in [CHANGELOG.md](CHANGELOG.md).
 
