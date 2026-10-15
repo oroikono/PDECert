@@ -4,20 +4,23 @@ from __future__ import annotations
 
 import math
 from collections.abc import Mapping
+from pathlib import Path
 
 from .atlas_baseline_reports import (
     atlas_baseline_report_sha256,
     validate_atlas_baseline_report,
 )
 from .atlas_evaluation import atlas_evaluation_sha256, validate_atlas_evaluation
+from .corpus import cross_artifact_atlas_sha256, load_cross_artifact_atlas
 
 
 ATLAS_COMPARISON_VERSION = 1
+ATLAS_BOUND_COMPARISON_VERSION = 2
 _IDENTITY_FIELDS = ("record_id", "problem_id", "artifact_id", "artifact_type")
 
 
 class AtlasComparisonError(ValueError):
-    """Raised when saved reports cannot be compared under the same declared identity."""
+    """Raised when saved reports do not satisfy the requested comparison scope."""
 
 
 def _json_copy(value: object) -> object:
@@ -34,13 +37,125 @@ def _json_copy(value: object) -> object:
     raise AtlasComparisonError("reports must contain only finite, strict JSON values")
 
 
-def compare_atlas_reports(evaluation: object, baseline: object) -> dict[str, object]:
+def _bind_source_atlas(comparison: dict[str, object], atlas_path: str | Path) -> None:
+    """Check source identity and obligation references without replaying methods."""
+
+    try:
+        atlas = load_cross_artifact_atlas(atlas_path)
+        identity = {
+            "atlas_version": atlas["atlas_version"],
+            "name": atlas["name"],
+            "sha256": cross_artifact_atlas_sha256(atlas),
+        }
+    except (OSError, TypeError, ValueError, RecursionError, OverflowError) as error:
+        raise AtlasComparisonError(f"invalid source Atlas: {error}") from error
+    if comparison["atlas"] != identity:
+        raise AtlasComparisonError(
+            "declared Atlas identity does not match the supplied source Atlas"
+        )
+
+    source_records = {record["id"]: record for record in atlas["records"]}
+    adapter = comparison["sources"]["baseline"]["adapter"]
+    for row in comparison["records"]:
+        record_id = row["record_id"]
+        if record_id not in source_records:
+            raise AtlasComparisonError(f"record {record_id!r} is not in the supplied source Atlas")
+        source = source_records[record_id]
+        expected_identity = {
+            "record_id": source["id"],
+            "problem_id": source["problem_id"],
+            "artifact_id": source["artifact"]["artifact_id"],
+            "artifact_type": source["artifact_type"],
+        }
+        for field in _IDENTITY_FIELDS:
+            if row[field] != expected_identity[field]:
+                raise AtlasComparisonError(
+                    f"record {record_id!r}: {field} differs from source Atlas"
+                )
+
+        template = source["template"]
+        constraints = [
+            (f"{group}[{index}]", constraint["name"], constraint["expression"])
+            for group in ("pde_residuals", "conditions")
+            for index, constraint in enumerate(template[group])
+        ]
+        obligations = {
+            f"constraint:{index}": name for index, (_, name, _) in enumerate(constraints)
+        }
+        if source["artifact_type"] == "symbolic_expression":
+            obligations.update(
+                {
+                    f"domain:{field}:{variable}": f"{field} domain"
+                    for field in template["field_names"]
+                    for variable in template["variables"]
+                }
+            )
+        report = row["pdecert"]["report"]
+        for event in report["evidence_events"]:
+            obligation_id = event["obligation_id"]
+            if obligation_id not in obligations:
+                raise AtlasComparisonError(
+                    f"record {record_id!r}: unknown evaluation obligation {obligation_id!r}"
+                )
+            witness = event["witness"]
+            if witness is not None and witness["constraint"] != obligations[obligation_id]:
+                raise AtlasComparisonError(
+                    f"record {record_id!r}: witness constraint does not match {obligation_id!r}"
+                )
+        if report["status"] == "PROVED":
+            discharged = {
+                event["obligation_id"]
+                for event in report["evidence_events"]
+                if event["outcome"] == "DISCHARGED"
+            }
+            missing = sorted(obligations.keys() - discharged)
+            if missing:
+                raise AtlasComparisonError(
+                    f"record {record_id!r}: PROVED report lacks discharged obligations: {missing}"
+                )
+
+        baseline = row["baseline"]
+        if baseline["outcome"] != "unsupported" and (
+            template["solution_semantics"] not in adapter["accepted_solution_semantics"]
+        ):
+            raise AtlasComparisonError(
+                f"record {record_id!r}: baseline does not accept the source solution semantics"
+            )
+        if "checks" in baseline:
+            observed = [
+                (check["obligation_id"], check["constraint"], check["constraint_source"])
+                for check in baseline["checks"]
+            ]
+            if observed != constraints:
+                raise AtlasComparisonError(
+                    f"record {record_id!r}: symbolic baseline must cover every source obligation "
+                    "in order, with matching names and expressions"
+                )
+        elif baseline["witness"] is not None:
+            witness = baseline["witness"]
+            if (witness["constraint"], witness["constraint_source"]) not in {
+                (name, expression) for _, name, expression in constraints
+            }:
+                raise AtlasComparisonError(
+                    f"record {record_id!r}: baseline witness does not match a source obligation"
+                )
+
+    comparison["comparison_version"] = ATLAS_BOUND_COMPARISON_VERSION
+    comparison["comparison_scope"] = "source_atlas_identity_and_obligation_scope_only"
+
+
+def compare_atlas_reports(
+    evaluation: object, baseline: object, *, atlas_path: str | Path | None = None
+) -> dict[str, object]:
     """Compare one saved PDECert evaluation and one saved baseline report.
 
     Both reports must declare the same Atlas and contain exactly the same
     nonempty set of records, including problem and artifact identities. Native
-    results stay separate. This checks report consistency and declared identity,
-    not the source Atlas, mathematical correctness, or execution provenance.
+    results stay separate. Without atlas_path, version 1 checks declared identity
+    only. Supplying an Atlas v2 directory also checks source identity, record
+    membership and obligation scope, and emits version 2. A bad source is an
+    error, never a fallback to version 1. Neither mode checks mathematical
+    correctness or execution provenance.
     Source digests identify the validated, normalized documents, not file bytes.
     """
 
@@ -83,7 +198,7 @@ def compare_atlas_reports(evaluation: object, baseline: object) -> dict[str, obj
             }
         )
 
-    return {
+    comparison = {
         "atlas": evaluated["atlas"],
         "comparison_scope": "declared_identity_and_native_evidence_only",
         "comparison_version": ATLAS_COMPARISON_VERSION,
@@ -106,3 +221,6 @@ def compare_atlas_reports(evaluation: object, baseline: object) -> dict[str, obj
             },
         },
     }
+    if atlas_path is not None:
+        _bind_source_atlas(comparison, atlas_path)
+    return comparison

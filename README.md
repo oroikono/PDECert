@@ -181,7 +181,10 @@ The existing fixed-collocation version-1 report remains unchanged.
 
 Join saved evaluation and baseline reports with `pdecert corpus compare-reports`.
 It requires identical declared Atlas and record identities, retains both methods'
-native evidence, and never infers accuracy or an overall verdict. See the
+native evidence, and never infers accuracy or an overall verdict. Supply
+`--atlas corpus/matched` to check source content, record membership and obligation
+references as well. Binding does not replay mathematics or authenticate a run.
+See the
 [core-only comparison walkthrough](docs/saved-report-comparison.md).
 
 Open-model batches follow a

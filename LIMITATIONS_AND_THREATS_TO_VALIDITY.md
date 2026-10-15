@@ -232,9 +232,15 @@ configuration can change.
 
 ### Baseline fairness
 
-Saved-report comparison checks matching declared identities, not actual Atlas
-membership or mathematical correctness. It keeps native method evidence and
-settings separate without aligning obligations or calculating accuracy. See
+Saved-report comparison checks matching declared identities by default. Its
+explicit source-Atlas mode also checks the actual content digest, selected-record
+membership and obligation references. It requires complete discharged coverage
+for a saved `PROVED` claim and complete ordered symbolic-baseline checks, but
+does not establish that those claims are true. It does not replay calculations,
+check witness coordinates or magnitudes, authenticate execution, or calculate
+accuracy. The version-1 empirical baseline cannot establish per-obligation
+coverage because it does not retain it. Native evidence and settings stay
+separate in both modes. See
 [the comparison contract](docs/saved-report-comparison.md).
 
 Baselines must receive the same represented PDE, domain, conditions, parameters,

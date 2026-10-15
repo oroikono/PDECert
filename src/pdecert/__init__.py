@@ -60,6 +60,7 @@ from .atlas_baseline_reports import (
     validate_atlas_baseline_report,
 )
 from .atlas_comparison import (
+    ATLAS_BOUND_COMPARISON_VERSION,
     ATLAS_COMPARISON_VERSION,
     AtlasComparisonError,
     compare_atlas_reports,
@@ -233,6 +234,7 @@ from .templates import (
 )
 
 __all__ = [
+    "ATLAS_BOUND_COMPARISON_VERSION",
     "ATLAS_COMPARISON_VERSION",
     "AtlasComparisonError",
     "compare_atlas_reports",

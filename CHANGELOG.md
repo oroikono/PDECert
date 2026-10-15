@@ -18,6 +18,11 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- Explicit source-Atlas binding for saved-report comparisons through `--atlas`
+  and `atlas_path`. Version-2 comparisons check actual source identity, record
+  membership and obligation scope without changing native evidence or replaying
+  mathematics. The original declared-identity version-1 output is unchanged.
+
 - A saved Atlas report comparison API and core-only `corpus compare-reports`
   command. Exact declared Atlas and record identities are required; full native
   evidence, settings and source digests stay separate. No inference, accuracy

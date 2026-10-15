@@ -128,6 +128,13 @@ obligations through `SymbolicBaselineResult`; evidence about residual identities
 must not imply that candidate singularities or regularity were checked. Keep
 version-1 empirical output compatibility covered when extending this interface.
 
+For saved-report comparisons, use `corpus compare-reports EVALUATION BASELINE
+--atlas ATLAS_DIRECTORY` to check actual source identity and obligation scope.
+Add mismatched-source and unknown-obligation regressions when changing this
+boundary. Keep the original declared-identity mode compatible, fail on an
+invalid supplied Atlas, and never present source binding as mathematical replay
+or authenticated execution. See [the comparison guide](docs/saved-report-comparison.md).
+
 Symbolic complexity limits must preserve counterexample search where practical.
 Skipping an over-budget exact check is an incomplete proof attempt, not evidence
 that a candidate is valid or invalid.

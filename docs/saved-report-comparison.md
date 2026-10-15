@@ -19,9 +19,11 @@ pdecert corpus baseline corpus/matched --record qwen3-fisher-kpp-01 \
 pdecert corpus baseline corpus/matched --record qwen3-fisher-kpp-01 \
   --method direct-sympy --output "$comparison_dir/sympy.json"
 pdecert corpus compare-reports "$comparison_dir/evaluation.json" \
-  "$comparison_dir/collocation.json" --output "$comparison_dir/compare-collocation.json"
+  "$comparison_dir/collocation.json" --atlas corpus/matched \
+  --output "$comparison_dir/compare-collocation.json"
 pdecert corpus compare-reports "$comparison_dir/evaluation.json" \
-  "$comparison_dir/sympy.json" --output "$comparison_dir/compare-sympy.json"
+  "$comparison_dir/sympy.json" --atlas corpus/matched \
+  --output "$comparison_dir/compare-sympy.json"
 ```
 
 Each comparison has one joined record. Fixed collocation reports an empirical
@@ -35,6 +37,8 @@ Without `--output`, the command prints JSON. Exit code `0` means that the join
 succeeded, not that the candidate is correct. Invalid reports or mismatched
 identities return `64` with a diagnostic on stderr. An output file must be new;
 the command will not overwrite a report, symlink or earlier comparison.
+An invalid `--atlas` is an error; the command never drops source binding and
+tries the weaker declared-identity comparison instead.
 
 ## Python interface
 
@@ -43,7 +47,7 @@ from pdecert import compare_atlas_reports, load_atlas_baseline_report, load_atla
 
 evaluation = load_atlas_evaluation("evaluation.json")
 baseline = load_atlas_baseline_report("collocation.json")
-comparison = compare_atlas_reports(evaluation, baseline)
+comparison = compare_atlas_reports(evaluation, baseline, atlas_path="corpus/matched")
 for row in comparison["records"]:
     print(row["record_id"], row["pdecert"]["report"]["status"], row["baseline"]["outcome"])
 ```
@@ -51,6 +55,42 @@ for row in comparison["records"]:
 The API accepts an evaluation version 1 and a baseline report version 1 or 2.
 Both inputs are validated through their native report contracts. Returned data
 is a defensive copy, so changes to it cannot alter either input.
+
+## Binding to the source Atlas
+
+Supply `--atlas PATH` or `atlas_path=PATH` to check the reports against an actual
+Atlas v2 directory. The whole Atlas is validated before its canonical digest is
+compared with the reports. Its template, artifact and retained provenance must
+match the saved identity; merely copying a digest into both reports is not
+enough. This uses the existing Atlas loader without importing PyTorch or
+materializing a callable.
+
+The reports may select a subset of the Atlas, but every selected record must
+exist and match its problem ID, artifact ID and artifact type. Their record sets
+must still match each other exactly. Binding also checks:
+
+- every PDECert evidence-event ID refers to a represented residual, condition,
+  or, for symbolic records, field/domain obligation;
+- each event witness names the obligation identified by that event;
+- a saved `PROVED` claim has discharged events for every represented obligation,
+  including symbolic domain checks;
+- symbolic baseline checks cover every template residual and condition in
+  order, with matching IDs, names and source expressions;
+- an empirical baseline witness names a represented constraint and its exact
+  source expression; and
+- a non-unsupported baseline result accepts the source solution semantics.
+
+Refuted or inconclusive evaluations can stop early, so they need not contain an
+event for every obligation. A version-1 empirical baseline does not record
+per-obligation coverage; source binding cannot recover that missing information.
+
+Bound comparisons use `comparison_version: 2` and
+`comparison_scope: source_atlas_identity_and_obligation_scope_only`. The other
+fields and native evidence are unchanged. `ATLAS_BOUND_COMPARISON_VERSION` exposes
+this version through the Python API. Source paths are not included in the output.
+The Atlas digest includes annotations and retained artifact metadata, but not
+its review-neutral README or coverage file. Changing bound source content
+requires new reports; binding does not rewrite old ones to make them match.
 
 ## Identity and evidence contract
 
@@ -60,7 +100,7 @@ not a silently dropped intersection. Every joined record must also match its
 `problem_id`, `artifact_id` and `artifact_type`. Input order may differ; output
 records are sorted by `record_id`.
 
-Version-1 output contains:
+Without a supplied Atlas, the original version-1 output is unchanged and contains:
 
 - `comparison_scope: declared_identity_and_native_evidence_only` and
   `evidence_policy: per_record_no_aggregation`;
@@ -88,11 +128,15 @@ or hashes of raw file bytes.
 
 ## What this does not check
 
-Matching declarations do not establish that either report belongs to the actual
-Atlas or candidate. This join does not load source artifacts, replay a witness,
-establish complete obligation coverage, authenticate execution, or check the
-mathematics independently. A report's internally consistent claim can still be
-wrong. Keep the original Atlas, artifacts, scripts and environment for replay.
+Without source binding, matching declarations do not establish that either
+report belongs to the actual Atlas or candidate. With binding, content identity
+and obligation references are checked, not the truth of the evidence. Neither
+mode replays residual calculations, checks witness coordinates or magnitudes,
+authenticates execution, or establishes a mathematical certificate. Free-text
+certificate details, `exact_checks` and incomplete-reason descriptions are not
+independently interpreted. A fabricated report can still supply known IDs and
+invented evidence. Keep the original Atlas, artifacts, scripts and environment
+for mathematical replay.
 Pending labels remain pending; comparative benchmark claims need independently
 reviewed outcomes and a fairness protocol beyond this descriptive view.
 

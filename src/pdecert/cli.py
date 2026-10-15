@@ -194,6 +194,9 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     comparison_parser.add_argument("baseline", type=Path, help="path to a baseline v1 or v2 report")
     comparison_parser.add_argument(
+        "--atlas", type=Path, help="bind record identities and obligation scope to this Atlas v2"
+    )
+    comparison_parser.add_argument(
         "-o", "--output", type=Path, help="create a new JSON comparison file (never overwrite)"
     )
     baseline_parser.add_argument(
@@ -486,6 +489,7 @@ def _run_corpus_compare_reports(arguments: argparse.Namespace) -> int:
         payload = compare_atlas_reports(
             load_atlas_evaluation(arguments.evaluation),
             load_atlas_baseline_report(arguments.baseline),
+            atlas_path=arguments.atlas,
         )
         rendered = json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"
         if arguments.output is None:
