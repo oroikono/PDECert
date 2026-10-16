@@ -192,6 +192,12 @@ and also run against core-only wheel and source-distribution installs in CI.
 Keep the example self-contained and preserve the distinction between a Python
 process succeeding and a candidate being proved.
 
+Saved Atlas binding tests also run against core-only wheel and source installs
+from outside the checkout. Run `python -I tests/test_atlas_comparison_binding.py`
+after installing the package when changing the comparison boundary or packaging.
+These tests use the checkout's Atlas as external input, not a bundled dataset,
+and include isolated CLI subprocesses and rejected-source cases.
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate

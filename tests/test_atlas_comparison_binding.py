@@ -5,6 +5,8 @@ import copy
 import io
 import json
 import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import ExitStack, redirect_stderr, redirect_stdout
@@ -372,6 +374,50 @@ class AtlasComparisonBindingTests(unittest.TestCase):
                 code, output, errors = self.run_cli(*paths)
                 self.assertEqual((code, errors), (0, ""))
                 self.assertEqual(json.loads(output), compare_atlas_reports(evaluation, baseline))
+
+    def test_cli_module_joins_saved_reports_from_an_empty_working_directory(self):
+        for version in (1, 2):
+            with self.subTest(version=version), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                evaluation, baseline = self.pair(version)
+                paths = _write_pair(root, evaluation, baseline)
+                working_directory = root / "empty"
+                working_directory.mkdir()
+                command = [
+                    sys.executable,
+                    "-I",
+                    "-m",
+                    "pdecert.cli",
+                    "corpus",
+                    "compare-reports",
+                    *(str(path) for path in paths),
+                ]
+                for arguments, expected in (
+                    ([], compare_atlas_reports(evaluation, baseline)),
+                    (["--atlas", str(ATLAS)], self.bound(evaluation, baseline)),
+                ):
+                    result = subprocess.run(
+                        command + arguments,
+                        cwd=working_directory,
+                        capture_output=True,
+                        text=True,
+                        timeout=30,
+                    )
+                    self.assertEqual((result.returncode, result.stderr), (0, ""))
+                    self.assertEqual(json.loads(result.stdout), expected)
+                destination = root / "must-not-exist.json"
+                result = subprocess.run(
+                    command + ["--atlas", str(root / "missing"), "-o", str(destination)],
+                    cwd=working_directory,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
+                self.assertEqual((result.returncode, result.stdout), (INPUT_ERROR, ""))
+                self.assertTrue(result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
+                self.assertFalse(destination.exists())
+                self.assertEqual(list(working_directory.iterdir()), [])
 
     def test_cli_invalid_or_symlink_atlas_returns_64_without_output(self):
         with tempfile.TemporaryDirectory() as directory:

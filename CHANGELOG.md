@@ -6,6 +6,10 @@ All notable changes to PDECert are documented here.
 
 ### Fixed
 
+- Source distributions retain the BibTeX citation linked by the README. Package
+  CI checks its bytes and exercises saved Atlas binding, including isolated CLI
+  calls, against both core-only wheel and source installs.
+
 - Report loading and the public JSON schema reject `PROVED` or `INCONCLUSIVE`
   summaries containing refuting evidence. Refutation keeps precedence over
   discharged obligations, including in saved Atlas evaluations; legitimate

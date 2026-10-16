@@ -71,6 +71,7 @@ packages = ["src/pdecert"]
 include = [
   "/ARCHITECTURE.md",
   "/CHANGELOG.md",
+  "/CITATION.bib",
   "/CITATION.cff",
   "/CONTRIBUTING.md",
   "/LICENSE",
