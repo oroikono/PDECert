@@ -31,6 +31,12 @@ Before publishing:
 6. Install the wheel and sdist into separate empty environments. Run
    `pdecert --help`, `pdecert quickstart --json`, and verify
    `examples/exact_heat.json` from outside the repository checkout.
+   Run `python -I /absolute/path/to/checkout/tests/test_atlas_comparison_binding.py`
+   with each environment's Python as well. This checks both saved baseline
+   versions, source binding, rejection paths and the CLI from an empty working
+   directory without PyTorch. The Atlas is supplied from the checkout; the
+   imported package must come from the installed distribution. Check that the
+   sdist's `CITATION.bib` is byte-identical to the source file.
 7. Publish a GitHub prerelease from the exact tag. Approve the protected `pypi`
    deployment only after the build job succeeds.
 

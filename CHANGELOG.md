@@ -6,6 +6,10 @@ All notable changes to PDECert are documented here.
 
 ### Fixed
 
+- Source distributions retain the BibTeX citation linked by the README. Package
+  CI checks its bytes and exercises saved Atlas binding, including isolated CLI
+  calls, against both core-only wheel and source installs.
+
 - Report loading and the public JSON schema reject `PROVED` or `INCONCLUSIVE`
   summaries containing refuting evidence. Refutation keeps precedence over
   discharged obligations, including in saved Atlas evaluations; legitimate
@@ -17,6 +21,21 @@ All notable changes to PDECert are documented here.
   inputs, saved sample coordinates, and empirical-only evidence semantics.
 
 ### Added
+
+- Explicit source-Atlas binding for saved-report comparisons through `--atlas`
+  and `atlas_path`. Version-2 comparisons check actual source identity, record
+  membership and obligation scope without changing native evidence or replaying
+  mathematics. The original declared-identity version-1 output is unchanged.
+
+- A saved Atlas report comparison API and core-only `corpus compare-reports`
+  command. Exact declared Atlas and record identities are required; full native
+  evidence, settings and source digests stay separate. No inference, accuracy
+  metric, truth label or aggregate verdict is added.
+
+- Strict loading, internal-consistency validation and canonical content digests
+  for saved Atlas baseline reports, with a core-only `corpus validate-baseline`
+  command. Empirical and symbolic outcomes stay separate; loading does not
+  verify source identity, replay mathematics, or establish a candidate verdict.
 
 - A direct SymPy Atlas baseline with exact-input checks, bounded symbolic
   operations, complete per-obligation zero/nonzero/undecided results, and a

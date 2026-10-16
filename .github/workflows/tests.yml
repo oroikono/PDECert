@@ -82,6 +82,21 @@ jobs:
       - run: python -m pip install build twine
       - run: python -m build
       - run: python -m twine check dist/*
+      - name: Check source archive citation
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import tarfile
+
+          archive, = Path("dist").glob("*.tar.gz")
+          with tarfile.open(archive) as bundle:
+              member = bundle.getmember(f"{archive.name.removesuffix('.tar.gz')}/CITATION.bib")
+              if not member.isfile():
+                  raise ValueError("CITATION.bib must be a regular source archive member")
+              with bundle.extractfile(member) as citation:
+                  if citation.read() != Path("CITATION.bib").read_bytes():
+                      raise ValueError("Source archive citation differs from the checkout")
+          PY
       - name: Smoke test wheel and source installs
         run: |
           python -m venv "$RUNNER_TEMP/pdecert-wheel"
@@ -92,6 +107,8 @@ jobs:
           "$RUNNER_TEMP/pdecert-wheel/bin/pdecert" quickstart --json
           "$RUNNER_TEMP/pdecert-wheel/bin/python" -I \
             "$GITHUB_WORKSPACE/tests/test_candidate_walkthrough.py"
+          "$RUNNER_TEMP/pdecert-wheel/bin/python" -I \
+            "$GITHUB_WORKSPACE/tests/test_atlas_comparison_binding.py"
           "$RUNNER_TEMP/pdecert-wheel/bin/pdecert" verify \
             "$GITHUB_WORKSPACE/examples/exact_heat.json"
           cd "$GITHUB_WORKSPACE"
@@ -103,3 +120,5 @@ jobs:
           "$RUNNER_TEMP/pdecert-sdist/bin/pdecert" quickstart --json
           "$RUNNER_TEMP/pdecert-sdist/bin/python" -I \
             "$GITHUB_WORKSPACE/tests/test_candidate_walkthrough.py"
+          "$RUNNER_TEMP/pdecert-sdist/bin/python" -I \
+            "$GITHUB_WORKSPACE/tests/test_atlas_comparison_binding.py"

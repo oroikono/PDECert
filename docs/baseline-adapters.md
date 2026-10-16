@@ -228,3 +228,71 @@ Reproduction requires the unchanged Atlas, adapter ID/version, report version,
 pipeline, exact-input/nonzero policies, symbolic timeout, operation budget, and
 recorded Python/PDECert/SymPy versions. Hashes establish source identity only;
 neither the report nor these contract checks establish independent labels.
+
+## Loading saved reports
+
+Check a report from either built-in method without running the evaluator again:
+
+```bash
+pdecert corpus baseline corpus/matched --method fixed-collocation \
+  --output /tmp/pdecert-collocation.json
+pdecert corpus validate-baseline /tmp/pdecert-collocation.json
+pdecert corpus baseline corpus/matched --method direct-sympy \
+  --output /tmp/pdecert-sympy.json
+pdecert corpus validate-baseline /tmp/pdecert-sympy.json
+```
+
+Both commands work with a core-only installation. Unsupported callable rows
+remain visible; the validation command does not import PyTorch, materialize a
+model, parse symbolic expressions, or rerun a witness. Exit code `0` means that
+the saved report is internally consistent, not that any candidate is correct.
+An invalid report returns `64` and a diagnostic on stderr.
+
+The JSON summary retains the full adapter metadata, declared Atlas identity,
+report version, record count, method-local outcome counts, and canonical report
+digest. Its `validation_scope` is `report_internal_consistency_only`. There are
+no truth labels, accuracy metrics, or overall PDE verdict.
+
+Python consumers can retain all rows and their evidence:
+
+```python
+from pdecert import atlas_baseline_report_sha256, load_atlas_baseline_report
+
+report = load_atlas_baseline_report("/tmp/pdecert-collocation.json")
+print(report["records"])
+print(atlas_baseline_report_sha256(report))
+```
+
+`validate_atlas_baseline_report(value)` performs the same checks on an in-memory
+strict-JSON object and returns a defensive copy. Versions 1 and 2 are supported.
+The loader refuses unknown versions or fields, duplicate record IDs or JSON
+keys, nonfinite numbers (including overflowing numeric literals), invalid
+UTF-8, excessive nesting, symlinks, and files exceeding 64 MiB. The byte limit
+is a read bound, not a process memory or hostile-filesystem isolation guarantee.
+
+Python validation is stronger than the structural schemas. It reconstructs the
+existing result types to check witness/maximum agreement, evidence/outcome
+consistency, unique symbolic obligation IDs, and derived symbolic aggregate
+outcomes. Reserved built-in metadata and report versions must match the runner.
+Out-of-declared-artifact-scope records must abstain. Fixed-collocation outcomes
+must agree with the declared tolerance and evaluation limit. External adapters
+retain their own configuration and method semantics; a version-2 external
+adapter may use both empirical and symbolic rows.
+
+The report digest hashes validated strict JSON with sorted object keys. It
+ignores formatting but preserves array order and integer versus float values,
+including exact integer witness coordinates. It is distinct from the report's
+declared Atlas digest. Without the original Atlas and evaluator replay, neither
+digest nor loading establishes that the rows belong to that Atlas, that every
+trusted obligation was checked, that a witness matches the template, or that
+the mathematical calculation is correct. Residual strings are data, not code
+or independently checked identities. Validation never changes labels or
+upgrades empirical evidence into proof.
+
+The fixtures in `tests/fixtures/atlas-baseline-v1.json` and
+`tests/fixtures/atlas-baseline-v2.json` are synthetic transport examples, not
+benchmark runs or scientific judgments.
+
+To inspect these results beside a saved PDECert evaluation, use the
+[saved-report comparison](saved-report-comparison.md). It requires exact declared
+Atlas and record identities while keeping both methods' native evidence intact.

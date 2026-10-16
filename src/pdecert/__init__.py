@@ -53,6 +53,18 @@ from .atlas_baselines import (
     SymbolicBaselineResult,
     evaluate_atlas_baseline,
 )
+from .atlas_baseline_reports import (
+    ATLAS_BASELINE_MAX_BYTES,
+    atlas_baseline_report_sha256,
+    load_atlas_baseline_report,
+    validate_atlas_baseline_report,
+)
+from .atlas_comparison import (
+    ATLAS_BOUND_COMPARISON_VERSION,
+    ATLAS_COMPARISON_VERSION,
+    AtlasComparisonError,
+    compare_atlas_reports,
+)
 from .artifacts import (
     PROGRAM_SOURCE_MAX_BYTES,
     CallableCandidate,
@@ -222,6 +234,14 @@ from .templates import (
 )
 
 __all__ = [
+    "ATLAS_BOUND_COMPARISON_VERSION",
+    "ATLAS_COMPARISON_VERSION",
+    "AtlasComparisonError",
+    "compare_atlas_reports",
+    "ATLAS_BASELINE_MAX_BYTES",
+    "atlas_baseline_report_sha256",
+    "load_atlas_baseline_report",
+    "validate_atlas_baseline_report",
     "REFERENCE_COMPARISON_VERSION",
     "REFERENCE_COMPARISON_MAX_VALUES",
     "ReferenceComparisonError",
