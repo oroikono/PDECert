@@ -84,6 +84,27 @@ files or symlinked record directories are rejected.
 The monolithic corpus format remains supported for immutable releases and
 backward compatibility.
 
+Corpus and Atlas JSON files reject repeated object keys, including keys that
+decode to the same name through JSON escapes. This applies at every depth, even
+when both values are equal: a loader must not silently choose one declaration of
+an annotation, problem field or format version. For example, this corpus is
+rejected instead of choosing a name:
+
+```json
+{
+  "corpus_version": 1,
+  "name": "first",
+  "name": "second",
+  "description": "Duplicate-key input example.",
+  "records": []
+}
+```
+
+The API raises `CorpusError` naming the repeated key; `corpus validate` returns
+`64` without a summary. No input is rewritten. Keys may repeat in separate
+objects, and JSON-looking text inside a raw-output string remains untouched.
+This is an input-ambiguity check, not authentication of provenance or labels.
+
 Version 2 separates the problem from the candidate and digest-binds each file:
 
 ~~~text

@@ -240,6 +240,9 @@ one accuracy number.
 
 ## Security and trust boundaries
 
+- Corpus and Atlas readers reject repeated decoded JSON object keys before
+  validating records or choosing a format version. This removes last-value
+  ambiguity; it does not authenticate provenance, labels or mathematical claims.
 - Baseline adapters are trusted Python code. Scope checks, defensive record
   copies, mutation detection, and result validation prevent common contract
   mistakes; they do not sandbox an adapter or establish that it performed the
