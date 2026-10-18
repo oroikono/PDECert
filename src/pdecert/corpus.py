@@ -414,7 +414,7 @@ def validate_atlas_coverage(value: object, record_ids: set[str]) -> None:
 
 def _load_json(source: Path) -> object:
     try:
-        payload = json.loads(source.read_text())
+        payload = json.loads(source.read_text(), object_pairs_hook=_duplicate_safe_object)
     except json.JSONDecodeError as error:
         raise CorpusError(f"{source}: invalid JSON: {error.msg}") from error
     return payload

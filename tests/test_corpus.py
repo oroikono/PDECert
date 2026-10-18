@@ -105,6 +105,103 @@ class CorpusTests(unittest.TestCase):
             self.assertTrue(path.read_text().endswith("\n"))
         self.assertEqual(loaded, self.corpus)
 
+    def test_corpus_rejects_duplicate_decoded_keys_at_every_depth(self):
+        mutations = (
+            ('"name": "test corpus"', '"name": "hidden", "name": "test corpus"', "name"),
+            ('"corpus_version": 1', '"corpus_version": 1, "corpus_version": 1', "corpus_version"),
+            ('"name": "test corpus"', '"na\\u006de": "hidden", "name": "test corpus"', "name"),
+            ('"verdict": null', '"verdict": "valid", "verdict": null', "verdict"),
+            ('"kind": "symbolic_solver"', '"kind": "hidden", "kind": "symbolic_solver"', "kind"),
+            ('"schema_version": 3', '"schema_version": 99, "schema_version": 3', "schema_version"),
+        )
+        for original, replacement, key in mutations:
+            with (
+                self.subTest(key=key, replacement=replacement),
+                tempfile.TemporaryDirectory() as directory,
+            ):
+                encoded = json.dumps(self.corpus)
+                self.assertEqual(encoded.count(original), 1)
+                encoded = encoded.replace(original, replacement, 1)
+                path = Path(directory) / "corpus.json"
+                path.write_text(encoded)
+                for loader in (load_corpus, load_corpus_source):
+                    with (
+                        self.subTest(loader=loader.__name__),
+                        self.assertRaisesRegex(CorpusError, f"duplicate JSON field: {key}"),
+                    ):
+                        loader(path)
+                self.assertEqual(path.read_text(), encoded)
+
+    def test_modular_metadata_and_cases_reject_duplicate_keys(self):
+        for filename, key, value in (
+            ("record.json", "id", "hidden"),
+            ("case.json", "schema_version", 99),
+        ):
+            with self.subTest(filename=filename), tempfile.TemporaryDirectory() as directory:
+                bundle = self._write_bundle(Path(directory), self.record)
+                path = bundle / filename
+                encoded = path.read_text()
+                encoded = "{" + json.dumps(key) + ": " + json.dumps(value) + "," + encoded[1:]
+                path.write_text(encoded)
+                with self.assertRaisesRegex(CorpusError, f"duplicate JSON field: {key}"):
+                    load_record_bundle(bundle)
+                self.assertEqual(path.read_text(), encoded)
+
+    def test_atlas_manifest_rejects_duplicate_versions_before_dispatch(self):
+        for first in (1, 2):
+            with self.subTest(first=first), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                self._write_manifest(root)
+                self._write_bundle(root, self.record)
+                path = root / "atlas.json"
+                encoded = '{"atlas_version": ' + str(first) + "," + path.read_text()[1:]
+                path.write_text(encoded)
+                for loader in (load_atlas, load_corpus_source):
+                    with (
+                        self.subTest(loader=loader.__name__),
+                        self.assertRaisesRegex(CorpusError, "duplicate JSON field: atlas_version"),
+                    ):
+                        loader(root)
+                self.assertEqual(path.read_text(), encoded)
+
+    def test_coverage_rejects_duplicate_record_ids_and_dimensions(self):
+        for key, value in ((self.record["id"], {}), ("spatial_dimension", 99)):
+            with self.subTest(key=key), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                self._write_manifest(root)
+                self._write_bundle(root, self.record)
+                self._write_coverage(root, [self.record["id"]])
+                path = root / "coverage.json"
+                encoded = path.read_text()
+                needle = json.dumps(key) + ": "
+                replacement = needle + json.dumps(value) + ", " + needle
+                encoded = encoded.replace(needle, replacement, 1)
+                path.write_text(encoded)
+                with self.assertRaisesRegex(CorpusError, f"duplicate JSON field: {key}"):
+                    load_atlas_coverage(root, {self.record["id"]})
+                with self.assertRaisesRegex(CorpusError, f"duplicate JSON field: {key}"):
+                    load_atlas(root)
+                self.assertEqual(path.read_text(), encoded)
+
+    def test_duplicate_looking_raw_text_and_names_in_separate_objects_are_preserved(self):
+        corpus = copy.deepcopy(self.corpus)
+        raw_output = '{"name": "first", "name": "second"}\r\n'
+        record = corpus["records"][0]
+        record["raw_output"] = raw_output
+        record["output_sha256"] = output_sha256(raw_output)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / "corpus.json"
+            dump_corpus(corpus, path)
+            self.assertEqual(load_corpus(path), corpus)
+            atlas = root / "atlas"
+            dump_atlas(corpus, atlas)
+            self.assertEqual(load_atlas(atlas), corpus)
+            self.assertEqual(
+                (atlas / "records" / record["id"] / "raw-output.txt").read_bytes(),
+                raw_output.encode(),
+            )
+
     def test_modular_record_reconstructs_the_corpus_record(self):
         with tempfile.TemporaryDirectory() as directory:
             bundle = self._write_bundle(Path(directory), self.record)

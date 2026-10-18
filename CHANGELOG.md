@@ -6,6 +6,11 @@ All notable changes to PDECert are documented here.
 
 ### Fixed
 
+- Corpus v1 and modular Atlas loaders reject duplicate decoded JSON keys before
+  schema validation or version dispatch. Conflicting or identical duplicates
+  cannot silently replace metadata, annotations or embedded case fields.
+  Valid documents and raw output bytes are unchanged.
+
 - Report loading and the public JSON schema reject `PROVED` or `INCONCLUSIVE`
   summaries containing refuting evidence. Refutation keeps precedence over
   discharged obligations, including in saved Atlas evaluations; legitimate

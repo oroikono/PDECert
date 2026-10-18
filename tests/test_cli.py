@@ -207,6 +207,31 @@ class CommandLineTests(unittest.TestCase):
         self.assertEqual(exit_code, INPUT_ERROR)
         self.assertIn("invalid JSON", errors.getvalue())
 
+    def test_corpus_validate_rejects_duplicate_keys_without_a_summary(self):
+        for modular in (False, True):
+            with self.subTest(modular=modular), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                if modular:
+                    source = root
+                    path = root / "atlas.json"
+                    encoded = '{"atlas_version": 2, "atlas_version": 1}'
+                    key = "atlas_version"
+                else:
+                    source = path = root / "corpus.json"
+                    encoded = (
+                        '{"corpus_version": 1, "name": "first", "name": "second", '
+                        '"description": "Synthetic duplicate-key test.", "records": []}'
+                    )
+                    key = "name"
+                path.write_text(encoded)
+                output, errors = io.StringIO(), io.StringIO()
+                with redirect_stdout(output), redirect_stderr(errors):
+                    exit_code = main(["corpus", "validate", str(source)])
+                self.assertEqual((exit_code, output.getvalue()), (INPUT_ERROR, ""))
+                self.assertIn(f"duplicate JSON field: {key}", errors.getvalue())
+                self.assertNotIn("Traceback", errors.getvalue())
+                self.assertEqual(path.read_text(), encoded)
+
     def test_corpus_validate_reports_modular_atlas_taxonomy(self):
         output = io.StringIO()
         with redirect_stdout(output):
