@@ -144,6 +144,14 @@ identity.
   corresponding input row. Training-mode batch operations, cross-sample
   attention, mutable state, randomness, and hidden preprocessing can invalidate
   pointwise automatic derivatives.
+- The [own-model audit](docs/audit-your-model.md) retains separate diagnostics
+  for every represented obligation, with the template and actual finite sample
+  coordinates. It does not establish pointwise independence, differentiable
+  preprocessing, coordinate units, or that caller-declared checkpoint metadata
+  matches the live model. Direct modules in training mode and gradient-disabled
+  contexts are rejected; hidden modules and detached predictions inside trusted
+  wrapper functions remain the caller's responsibility. The sample-row budget
+  is not a wall-time, graph-memory or execution-isolation guarantee.
 - Tolerances determine whether a sampled value becomes a counterexample. Values
   below tolerance are observed passes, not evidence that the exact residual is
   zero.

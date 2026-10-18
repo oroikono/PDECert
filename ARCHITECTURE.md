@@ -68,6 +68,7 @@ be copied into new modules.
 | `frozen_callable.py` | Strict non-executing JSON identity, integrity validation, and explicit materialization for a bounded dense-MLP callable class | Keep loading PyTorch-free; hashes establish identity only, and materialized sampled success remains inconclusive. |
 | `checks.py` | Symbolic checker protocol, registry, built-in checks, and evidence aggregation | New symbolic methods implement `Checker`; they do not add branches to the orchestrator. |
 | `autodiff.py` | Callable problem description and PyTorch residual evaluation | Keep PyTorch optional and sampled success inconclusive. |
+| `callable_audit.py` | Own-model workflow over the existing compiler and per-obligation autodiff verifier | Retain all diagnostics and replay inputs; do not load code, change models, authenticate caller provenance, or upgrade sampled evidence. |
 | `compiler.py` | Restricted lowering from retained operator sources to callable residuals | Reject unsupported semantics before evaluation; do not transfer evidence between artifacts. |
 | `templates.py` | Candidate-free problem specifications and explicit symbolic bindings | Keep problem ownership separate from candidate provenance and preserve declared solution semantics. |
 | `schema.py` | Restricted, versioned problem serialization | Never execute arbitrary code from a case file. Schema changes require migration and compatibility tests. |

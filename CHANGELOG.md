@@ -18,6 +18,11 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- An own-model callable audit that runs every represented PDE and condition
+  separately, retains the template, samples, settings and caller-declared model
+  provenance, and returns empirical diagnostics without an overall verdict.
+  Includes a saved trained-model example and a short PyTorch integration guide.
+
 - A direct SymPy Atlas baseline with exact-input checks, bounded symbolic
   operations, complete per-obligation zero/nonzero/undecided results, and a
   version-2 report schema. Fixed-collocation version-1 output remains unchanged;
