@@ -6,6 +6,11 @@ All notable changes to PDECert are documented here.
 
 ### Fixed
 
+- Atlas baseline runs reject failure-witness inputs with undeclared names,
+  out-of-domain values or fractional integer parameters. Partial and empty
+  input maps remain supported; this checks supplied coordinates, not residual
+  replay or mathematical validity.
+
 - Report loading and the public JSON schema reject `PROVED` or `INCONCLUSIVE`
   summaries containing refuting evidence. Refutation keeps precedence over
   discharged obligations, including in saved Atlas evaluations; legitimate

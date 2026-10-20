@@ -782,6 +782,31 @@ def _adapter_metadata(adapter: AtlasBaselineAdapter) -> dict[str, object]:
     }
 
 
+def _validate_witness_inputs(record: Mapping[str, object], witness: BaselineWitness) -> None:
+    """Check supplied coordinates against the task, without replaying the residual."""
+
+    template = record["template"]
+    for name, value in witness.sampled_inputs.items():
+        if name not in template["domains"]:
+            raise AtlasBaselineError(
+                f"record {record['id']!r}: witness input {name!r} is not a declared variable"
+            )
+        lower, upper = template["domains"][name]
+        if not lower <= value <= upper:
+            raise AtlasBaselineError(
+                f"record {record['id']!r}: witness input {name!r}={value} is outside "
+                f"its domain [{lower}, {upper}]"
+            )
+        if (
+            "integer" in template["parameters"].get(name, ())
+            and isinstance(value, float)
+            and not value.is_integer()
+        ):
+            raise AtlasBaselineError(
+                f"record {record['id']!r}: witness input {name!r} must be integer-valued"
+            )
+
+
 def evaluate_atlas_baseline(
     path: str | Path,
     adapter: AtlasBaselineAdapter,
@@ -872,6 +897,8 @@ def evaluate_atlas_baseline(
                 raise AtlasBaselineError(
                     "symbolic result must cover every represented obligation in order"
                 )
+        if isinstance(result, BaselineResult) and result.witness is not None:
+            _validate_witness_inputs(record, result.witness)
         artifact = record["artifact"]
         if not isinstance(artifact, Mapping):  # already guaranteed by Atlas validation
             raise AtlasBaselineError(f"record {record['id']!r}: artifact must be an object")
