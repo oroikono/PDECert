@@ -1,0 +1,12 @@
+{
+  "reference_input_version": 1,
+  "coordinates": {"x": [0.0, 0.5, 1.0]},
+  "candidate": {"u": [1.0, 2.0, 4.0]},
+  "reference": {"u": [1.0, 2.0, 3.0]},
+  "problem_id": "supplied-field-demo",
+  "candidate_id": "deliberate-last-row-perturbation",
+  "reference_id": "supplied-linear-values",
+  "reference_description": "Values of 1 + 2*x evaluated at the supplied points",
+  "reference_uncertainty": "An illustrative reference, not an independently certified PDE solution",
+  "sampling_description": "Three supplied points with equal row weights; no interpolation"
+}

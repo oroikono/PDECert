@@ -36,6 +36,11 @@ from .reference_fields import (
     ReferenceComparisonError,
     compare_reference_fields,
 )
+from .reference_io import (
+    REFERENCE_INPUT_VERSION,
+    REFERENCE_INPUT_MAX_BYTES,
+    compare_reference_file,
+)
 from .atlas_baselines import (
     ATLAS_BASELINE_REPORT_VERSION,
     ATLAS_SYMBOLIC_BASELINE_REPORT_VERSION,
@@ -222,6 +227,9 @@ from .templates import (
 )
 
 __all__ = [
+    "REFERENCE_INPUT_VERSION",
+    "REFERENCE_INPUT_MAX_BYTES",
+    "compare_reference_file",
     "REFERENCE_COMPARISON_VERSION",
     "REFERENCE_COMPARISON_MAX_VALUES",
     "ReferenceComparisonError",
