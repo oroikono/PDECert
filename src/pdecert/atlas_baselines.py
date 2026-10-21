@@ -853,6 +853,20 @@ def evaluate_atlas_baseline(
                 raise AtlasBaselineError(f"baseline adapter modified input record {record['id']!r}")
         if not isinstance(result, (BaselineResult, SymbolicBaselineResult)):
             raise AtlasBaselineError("baseline adapter returned an invalid result object")
+        if isinstance(result, BaselineResult) and result.outcome is BaselineOutcome.FAIL:
+            obligations = {
+                (constraint["name"], constraint["expression"])
+                for group in ("pde_residuals", "conditions")
+                for constraint in record["template"][group]
+            }
+            witness = result.witness
+            if (
+                witness is None
+                or (witness.constraint, witness.constraint_source) not in obligations
+            ):
+                raise AtlasBaselineError(
+                    "baseline failure witness must match a represented obligation's name and source"
+                )
         if isinstance(result, SymbolicBaselineResult):
             if report_version != ATLAS_SYMBOLIC_BASELINE_REPORT_VERSION:
                 raise AtlasBaselineError("symbolic baseline results require report_version 2")
