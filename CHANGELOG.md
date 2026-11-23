@@ -6,6 +6,10 @@ All notable changes to PDECert are documented here.
 
 ### Fixed
 
+- Report readers preserve finite signed witness residuals, matching the public
+  `Witness` type and report schema. Sampled-residual magnitudes and bound upper
+  bounds still require nonnegative values.
+
 - Report loading and the public JSON schema reject `PROVED` or `INCONCLUSIVE`
   summaries containing refuting evidence. Refutation keeps precedence over
   discharged obligations, including in saved Atlas evaluations; legitimate

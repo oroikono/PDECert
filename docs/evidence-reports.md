@@ -30,6 +30,23 @@ The stable obligation identifiers come from the verification context:
 `exact_checks` and `decision_evidence` remain compatibility summaries. New
 integrations should retain and inspect `evidence_events`.
 
+### Signed witness residuals
+
+A checker may record a signed residual rather than its absolute value. For
+example, `Witness("constant residual", {"x": 0.5}, -1.0, "residual is -1")`
+retains `-1.0` when saved and loaded, both in the decision witness and its
+evidence event. The sign does not change the report's evidence level or status.
+`max_sampled_residual` and `BoundEvidence.upper_bound` are magnitudes and must
+remain nonnegative. Numeric witness residuals must be finite in JSON; symbolic
+text and the existing `"infinity"` and `"-infinity"` string forms remain readable.
+
+The constant-residual checker fixture in `tests/test_reports.py` exercises this
+round trip through the checker registry, JSON schema and both Python readers:
+
+```bash
+python -m pytest tests/test_reports.py -k signed_refutation
+```
+
 ## Interpret evidence conservatively
 
 | Kind | Outcome | Can produce `PROVED`? | Required payload |
