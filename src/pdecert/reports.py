@@ -110,7 +110,7 @@ def _witness_from_dict(value: object, path: str) -> Witness:
     if isinstance(residual, str):
         parsed_residual: float | str = _string(residual, f"{path}.residual")
     else:
-        parsed_residual = _finite_number(residual, f"{path}.residual", nonnegative=True)
+        parsed_residual = _finite_number(residual, f"{path}.residual")
     return Witness(
         constraint=_string(payload["constraint"], f"{path}.constraint"),
         point=point,

@@ -5,22 +5,28 @@ import unittest
 from pathlib import Path
 
 import pytest
+import sympy as sp
 from jsonschema import Draft202012Validator, ValidationError
 
 from experiments.adversarial_heat import build_cases
 from pdecert import (
     BoundEvidence,
     BoundType,
+    CheckerRegistry,
+    CheckResult,
+    Constraint,
     EvidenceEvent,
     EvidenceKind,
     EvidenceLevel,
     EvidenceOutcome,
     REPORT_VERSION,
+    Problem,
     Report,
     ReportSchemaError,
     Status,
     Witness,
     dump_report,
+    evidence_event_from_dict,
     load_report,
     report_from_dict,
     verify,
@@ -93,6 +99,88 @@ def report_validator():
     schema = json.loads(Path("schema/report-v1.schema.json").read_text())
     Draft202012Validator.check_schema(schema)
     return Draft202012Validator(schema)
+
+
+@pytest.mark.parametrize("residual", [-1, -0.25, 0.25])
+@pytest.mark.parametrize("level", [EvidenceLevel.EXACT, EvidenceLevel.EMPIRICAL])
+def test_native_signed_refutation_round_trip(residual, level, report_validator, tmp_path):
+    x = sp.Symbol("x", real=True)
+    problem = Problem(
+        name="constant residual",
+        variables=(x,),
+        domains={x: (0.0, 1.0)},
+        pde_residuals=(Constraint("nonzero constant", sp.Rational(str(residual))),),
+    )
+
+    class ConstantResidualChecker:
+        name = "constant-residual"
+
+        def check(self, context):
+            constraint = context.constraints[0]
+            value = float(constraint.residual)
+            return CheckResult(
+                witness=Witness(constraint.name, {"x": 0.5}, value, "nonzero constant"),
+                witness_level=level,
+                max_sampled_residual=abs(value) if level is EvidenceLevel.EMPIRICAL else 0.0,
+            )
+
+    report = verify(
+        problem,
+        (sp.Integer(0),),
+        checker_registry=CheckerRegistry((ConstantResidualChecker(),)),
+    )
+    payload = report.to_dict()
+    assert report.status is Status.REFUTED
+    assert report.decision_evidence is level
+    assert payload["witness"]["residual"] == residual
+    event = payload["evidence_events"][0]
+    assert event["witness"] == payload["witness"]
+    report_validator.validate(payload)
+    assert evidence_event_from_dict(event).to_dict() == event
+    assert report_from_dict(payload).to_dict() == payload
+
+    path = tmp_path / "signed-report.json"
+    dump_report(report, path)
+    original = path.read_bytes()
+    loaded = load_report(path)
+    assert loaded.to_dict() == payload
+    dump_report(loaded, path)
+    assert path.read_bytes() == original
+
+
+@pytest.mark.parametrize("residual", [math.nan, math.inf, -math.inf, True, None, [], {}])
+@pytest.mark.parametrize("location", ["decision", "event"])
+def test_witness_residual_rejects_invalid_numbers(residual, location, decision_events):
+    event = decision_events["empirical_refutation"]
+    payload = Report(
+        status=Status.REFUTED,
+        decision_evidence=EvidenceLevel.EMPIRICAL,
+        witness=event.witness,
+        evidence_events=[event],
+    ).to_dict()
+    witness = (
+        payload["witness"] if location == "decision" else payload["evidence_events"][0]["witness"]
+    )
+    witness["residual"] = residual
+
+    with pytest.raises(ReportSchemaError, match=r"\.witness\.residual: must be a finite number$"):
+        report_from_dict(payload)
+
+
+@pytest.mark.parametrize("quantity", ["max_sampled_residual", "upper_bound"])
+def test_report_magnitudes_remain_nonnegative(quantity, decision_events):
+    payload = Report(
+        status=Status.PROVED,
+        decision_evidence=EvidenceLevel.RIGOROUS_BOUND,
+        evidence_events=[decision_events["bound"]],
+    ).to_dict()
+    if quantity == "max_sampled_residual":
+        payload[quantity] = -0.25
+    else:
+        payload["evidence_events"][0]["bound"][quantity] = -0.25
+
+    with pytest.raises(ReportSchemaError, match=rf"\.{quantity}: must be nonnegative$"):
+        report_from_dict(payload)
 
 
 @pytest.mark.parametrize("status", [Status.PROVED, Status.INCONCLUSIVE])
