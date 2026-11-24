@@ -156,6 +156,41 @@ class CommandLineTests(unittest.TestCase):
         self.assertEqual(exit_code, INPUT_ERROR)
         self.assertIn("digest mismatch", errors.getvalue())
 
+    def test_run_validate_rejects_nested_candidate_field_names(self):
+        for field_names in ([{}], [[]], ["u", {}], ["u", []]):
+            with self.subTest(field_names=field_names), tempfile.TemporaryDirectory() as directory:
+                payload = json.loads(Path("examples/heat-run-manifest.json").read_text())
+                payload["candidate"]["field_names"] = field_names
+                path = Path(directory) / "invalid-manifest.json"
+                source = json.dumps(payload) + "\n"
+                path.write_text(source)
+                output, errors = io.StringIO(), io.StringIO()
+
+                with redirect_stdout(output), redirect_stderr(errors):
+                    exit_code = main(["run", "validate", str(path)])
+
+                self.assertEqual(exit_code, INPUT_ERROR)
+                self.assertEqual(output.getvalue(), "")
+                self.assertIn(
+                    "candidate.field_names: expected Python identifiers", errors.getvalue()
+                )
+                self.assertEqual(path.read_text(), source)
+
+    def test_run_validate_rejects_unsupported_manifest_version(self):
+        with tempfile.TemporaryDirectory() as directory:
+            payload = json.loads(Path("examples/heat-run-manifest.json").read_text())
+            payload["manifest_version"] = 2
+            path = Path(directory) / "unsupported-manifest.json"
+            path.write_text(json.dumps(payload))
+            output, errors = io.StringIO(), io.StringIO()
+
+            with redirect_stdout(output), redirect_stderr(errors):
+                exit_code = main(["run", "validate", str(path)])
+
+        self.assertEqual(exit_code, INPUT_ERROR)
+        self.assertEqual(output.getvalue(), "")
+        self.assertIn("manifest_version: expected 1", errors.getvalue())
+
     def test_non_finite_tolerance_is_rejected_by_argument_parser(self):
         errors = io.StringIO()
         with redirect_stderr(errors), self.assertRaises(SystemExit):
