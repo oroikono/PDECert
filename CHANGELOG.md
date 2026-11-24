@@ -6,6 +6,10 @@ All notable changes to PDECert are documented here.
 
 ### Fixed
 
+- Run manifests reject nested candidate field names with `RunManifestError`
+  instead of leaking a `TypeError`. `pdecert run validate` now returns input-error
+  code `64` for these malformed lists.
+
 - Report loading and the public JSON schema reject `PROVED` or `INCONCLUSIVE`
   summaries containing refuting evidence. Refutation keeps precedence over
   discharged obligations, including in saved Atlas evaluations; legitimate

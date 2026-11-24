@@ -1,5 +1,6 @@
 import json
 import shutil
+from pathlib import Path
 
 import pytest
 
@@ -78,6 +79,40 @@ def test_build_dump_and_validate_run_bundle(tmp_path):
     assert run_manifest_sha256(loaded) == run_manifest_sha256(manifest)
     with pytest.raises(TypeError):
         loaded.evaluator.configuration["tolerance"] = 1.0
+
+
+@pytest.mark.parametrize(
+    ("field_names", "message"),
+    [
+        ([{}], "expected Python identifiers"),
+        ([[]], "expected Python identifiers"),
+        (["u", {}], "expected Python identifiers"),
+        (["u", []], "expected Python identifiers"),
+        ([None], "expected Python identifiers"),
+        ([True], "expected Python identifiers"),
+        ([1], "expected Python identifiers"),
+        (["bad-name"], "expected Python identifiers"),
+        ([], "expected unique field names"),
+        (["u", "u"], "expected unique field names"),
+        ("u", "expected a list"),
+    ],
+)
+def test_manifest_rejects_invalid_candidate_field_names(field_names, message):
+    payload = json.loads(Path("examples/heat-run-manifest.json").read_text())
+    payload["candidate"]["field_names"] = field_names
+
+    with pytest.raises(RunManifestError, match=message):
+        manifest_from_dict(payload)
+
+
+def test_manifest_preserves_candidate_field_names_and_order():
+    payload = json.loads(Path("examples/heat-run-manifest.json").read_text())
+    payload["candidate"]["field_names"] = ["v_2", "_u"]
+
+    manifest = manifest_from_dict(payload)
+
+    assert manifest.candidate.field_names == ("v_2", "_u")
+    assert manifest_to_dict(manifest) == payload
 
 
 def test_candidate_tampering_breaks_bundle_validation(tmp_path):

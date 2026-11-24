@@ -133,12 +133,12 @@ class CandidateReference:
         if not isinstance(self.kind, str) or _KIND_PATTERN.fullmatch(self.kind) is None:
             raise RunManifestError("candidate.kind: expected a lowercase artifact identifier")
         names = tuple(self.field_names)
-        if not names or len(names) != len(set(names)):
-            raise RunManifestError("candidate.field_names: expected unique field names")
         if any(
             not isinstance(name, str) or _FIELD_PATTERN.fullmatch(name) is None for name in names
         ):
             raise RunManifestError("candidate.field_names: expected Python identifiers")
+        if not names or len(names) != len(set(names)):
+            raise RunManifestError("candidate.field_names: expected unique field names")
         if not isinstance(self.file, FileReference):
             raise TypeError("candidate.file must be a FileReference")
         object.__setattr__(self, "field_names", names)

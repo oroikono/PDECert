@@ -24,6 +24,13 @@ checks that every path stays inside the manifest directory, loads the template,
 and confirms that candidate field names match the task. It prints the canonical
 manifest digest and the recorded run identities.
 
+`candidate.field_names` must be a nonempty list of unique strings matching
+`[A-Za-z_][A-Za-z0-9_]*`, in the same order as the template fields. For example,
+`"field_names": ["u"]` is valid for the heat template; `"field_names": [{}]`
+and `"field_names": [["u"]]` are invalid. Invalid names raise `RunManifestError`
+in the Python API. The CLI prints the input error to stderr and returns code
+`64`, with no success summary on stdout. It does not repair the manifest.
+
 If one character in the candidate or report changes, validation fails with the
 expected and actual file digest. Reports must be strict JSON objects; `NaN` and
 other non-standard constants and duplicate object keys are rejected.
