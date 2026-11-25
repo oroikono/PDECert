@@ -134,6 +134,13 @@ that a candidate is valid or invalid.
 
 ## Checker extensions
 
+Grid representations follow the [rectilinear nodal contract](docs/gridded-artifacts.md).
+Include an asymmetric multidimensional fixture that makes axis and flattening
+order observable, plus shape, nonfinite-value, unsupported-layout, and strict
+file-loading tests. A new numerical checker must separately define its
+reconstruction, boundary treatment, and error semantics; stored nodal values
+alone do not define derivatives or satisfy a PDE obligation.
+
 New verification techniques should implement the public `Checker` protocol
 rather than adding a branch to `verify()`. Start from a fresh
 `default_checker_registry()` and add the checker explicitly so the execution

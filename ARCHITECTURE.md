@@ -45,7 +45,7 @@ Representation backends
   symbolic problems       callable/autodiff problems       future grid problems
           |                         |                              |
 Candidate artifacts
-  SymbolicCandidate        CallableCandidate               future GridCandidate
+  SymbolicCandidate        CallableCandidate               GridCandidate (storage only)
           |
 Versioned specifications
   core data types, restricted JSON schemas, stable identifiers
@@ -65,6 +65,7 @@ be copied into new modules.
 | `evidence.py` | Typed obligation evidence, witnesses, and rigorous-bound scope | Keep evidence kinds scientifically distinct and strict-JSON serializable. |
 | `reports.py` | Strict loading and deterministic dumping of versioned evidence reports | Reject unknown versions and inconsistent evidence; preserve conservative summaries. |
 | `artifacts.py` | Representation-neutral candidate identity plus concrete artifact types | Add an artifact only after its native evaluation semantics are understood. |
+| `gridded.py` | Immutable rectilinear nodal fields and strict portable JSON | Preserve axes and storage order; storage validation supplies no derivatives, PDE verdict, or Atlas admission. |
 | `frozen_callable.py` | Strict non-executing JSON identity, integrity validation, and explicit materialization for a bounded dense-MLP callable class | Keep loading PyTorch-free; hashes establish identity only, and materialized sampled success remains inconclusive. |
 | `checks.py` | Symbolic checker protocol, registry, built-in checks, and evidence aggregation | New symbolic methods implement `Checker`; they do not add branches to the orchestrator. |
 | `autodiff.py` | Callable problem description and PyTorch residual evaluation | Keep PyTorch optional and sampled success inconclusive. |
@@ -242,3 +243,5 @@ The preferred sequence is:
 - [`ADR-0010`](docs/adr/0010-typed-cross-artifact-atlas-records.md): typed Atlas
   bundles bind candidate-free problems to symbolic or frozen-callable artifacts
   without turning content identity into verification evidence.
+- [`ADR-0011`](docs/adr/0011-rectilinear-nodal-artifacts.md): rectilinear nodal
+  artifacts preserve coordinates and discrete values before grid PDE checking.

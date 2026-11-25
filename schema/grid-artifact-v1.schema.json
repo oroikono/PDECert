@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/oroikono/PDECert/schema/grid-artifact-v1.schema.json",
+  "title": "PDECert rectilinear nodal grid artifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "artifact_kind", "artifact_id", "problem_id", "axes", "fields",
+    "discretization", "provenance", "value_location", "storage_order", "dtype"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "artifact_kind": { "const": "rectilinear_grid" },
+    "value_location": { "const": "nodes" },
+    "storage_order": { "const": "last_axis_fastest" },
+    "dtype": { "const": "float64" },
+    "artifact_id": { "$ref": "#/$defs/text" },
+    "problem_id": { "$ref": "#/$defs/text" },
+    "discretization": { "$ref": "#/$defs/text" },
+    "axes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 200000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "coordinates"],
+        "properties": {
+          "name": { "$ref": "#/$defs/name" },
+          "coordinates": { "$ref": "#/$defs/numbers" }
+        }
+      }
+    },
+    "fields": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 200000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "values"],
+        "properties": {
+          "name": { "$ref": "#/$defs/name" },
+          "values": { "$ref": "#/$defs/numbers" }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/text" },
+      "additionalProperties": { "$ref": "#/$defs/text" }
+    }
+  },
+  "$defs": {
+    "text": { "type": "string", "pattern": "\\S" },
+    "name": { "type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*(?![\\s\\S])" },
+    "numbers": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 200000,
+      "items": { "type": "number" }
+    }
+  },
+  "$comment": "The Python reader additionally enforces finite binary64 admission, unique names, ascending axes, Cartesian field lengths, the total scalar budget, duplicate-key rejection, and the byte limit. Schema validation alone is insufficient."
+}

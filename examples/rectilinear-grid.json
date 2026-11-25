@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "rectilinear_grid",
+  "artifact_id": "manufactured-affine-grid-01",
+  "problem_id": "manufactured-affine-field-01",
+  "value_location": "nodes",
+  "storage_order": "last_axis_fastest",
+  "dtype": "float64",
+  "axes": [
+    { "name": "x", "coordinates": [0.0, 0.25, 1.0] },
+    { "name": "t", "coordinates": [0.0, 1.0] }
+  ],
+  "fields": [
+    { "name": "u", "values": [0.0, 2.0, 0.25, 2.375, 1.0, 3.0] }
+  ],
+  "discretization": "Nodal samples of u=x+2*t on a nonuniform 3-by-2 grid, with an injected +0.125 defect at (x,t)=(0.25,1). No PDE solver or derivative reconstruction was used. Coordinates and values are dimensionless.",
+  "provenance": {
+    "method": "Manufactured example with one deliberate value perturbation",
+    "source": "examples/rectilinear-grid.json"
+  }
+}
