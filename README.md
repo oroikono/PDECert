@@ -665,6 +665,21 @@ The [trained-model walkthrough](docs/trained-reference-comparison.md) explains
 the separate metrics, integrity checks, and replayable samples. No retraining
 is performed, and passing samples remain inconclusive.
 
+### Store a rectilinear numerical field
+
+`GridCandidate` stores finite nodal fields with ordered coordinate axes,
+explicit flattening order, and discretization metadata. The
+[gridded-artifact guide](docs/gridded-artifacts.md) shows strict loading and
+export without a numerical framework. Run its manufactured comparison:
+
+```bash
+python -m examples.gridded_reference_comparison
+```
+
+This compares the stored values with an analytical reference at the same six
+nodes. Grid PDE checking, derivative reconstruction, and Atlas admission need
+separate extensions; the comparison produces empirical metrics only.
+
 ## Current limits
 
 The prototype does not yet define weak or viscosity solution semantics. It has

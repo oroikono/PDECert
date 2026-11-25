@@ -18,6 +18,11 @@ All notable changes to PDECert are documented here.
 
 ### Added
 
+- A standalone rectilinear nodal `GridCandidate`, strict bounded JSON loading,
+  immutable ordered coordinates and fields, a versioned schema, and deterministic
+  export to new files. A manufactured example compares supplied nodal values
+  empirically; grid PDE checking and Atlas admission remain unsupported.
+
 - A direct SymPy Atlas baseline with exact-input checks, bounded symbolic
   operations, complete per-obligation zero/nonzero/undecided results, and a
   version-2 report schema. Fixed-collocation version-1 output remains unchanged;

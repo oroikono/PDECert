@@ -68,6 +68,13 @@ the symbolic baseline exposes exact or undecided expression checks without
 domain/regularity guarantees. Gate 8 remains incomplete until reference-field
 and applicable established SciML adapters run through the same comparison suite.
 
+A standalone rectilinear nodal artifact now records ordered coordinates,
+flattened scalar fields, discretization metadata, and caller provenance with
+strict no-execution loading. A manufactured example explicitly feeds its nodes
+to the empirical reference-field comparison. Gate 5 remains incomplete: grid
+PDE evaluation, refinement evidence, and Atlas integration still need their own
+contracts and reproducible tests.
+
 ## v0.1: dependable verification interface
 
 The first release should let a user save one fully instantiated verification

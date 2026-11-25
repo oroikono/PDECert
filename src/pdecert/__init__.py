@@ -60,6 +60,17 @@ from .artifacts import (
     SolutionArtifact,
     SymbolicCandidate,
 )
+from .gridded import (
+    GRID_ARTIFACT_VERSION,
+    GRID_ARTIFACT_MAX_VALUES,
+    GRID_ARTIFACT_MAX_BYTES,
+    GridArtifactError,
+    GridCandidate,
+    grid_from_dict,
+    grid_to_dict,
+    load_grid,
+    write_grid,
+)
 from .autodiff import (
     AutodiffCheckContext,
     AutodiffConstraint,
@@ -222,6 +233,15 @@ from .templates import (
 )
 
 __all__ = [
+    "GRID_ARTIFACT_VERSION",
+    "GRID_ARTIFACT_MAX_VALUES",
+    "GRID_ARTIFACT_MAX_BYTES",
+    "GridArtifactError",
+    "GridCandidate",
+    "grid_from_dict",
+    "grid_to_dict",
+    "load_grid",
+    "write_grid",
     "REFERENCE_COMPARISON_VERSION",
     "REFERENCE_COMPARISON_MAX_VALUES",
     "ReferenceComparisonError",
