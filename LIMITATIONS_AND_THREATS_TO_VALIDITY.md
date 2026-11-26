@@ -244,6 +244,11 @@ one accuracy number.
   copies, mutation detection, and result validation prevent common contract
   mistakes; they do not sandbox an adapter or establish that it performed the
   declared calculation.
+- The baseline runner checks supplied failure-witness coordinates for declared
+  names, domain bounds and integer parameter values. It does not establish input
+  completeness, sampling-grid or boundary-surface membership, or correctness of
+  the reported residual. Substitution can remove variables, so partial and empty
+  input maps remain permitted. These checks do not replay numerical evidence.
 - Candidate-free problem templates, problem definitions, evaluator settings,
   and labels are trusted inputs. A candidate must not be allowed to replace
   them.

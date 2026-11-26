@@ -137,6 +137,24 @@ later changes to an adapter's working dictionary cannot alter saved evidence.
 These checks enforce the report contract; Python adapters are trusted code and
 are not sandboxed or independently verified by the runner.
 
+Failure witnesses are also checked against the evaluated record's template.
+Every supplied input name must be a declared variable, its value must lie in
+that variable's closed domain, and an integer parameter must have an
+integer-valued input. For example, the matched Fisher--KPP template declares
+`x` in `[-6, 6]`: `{"x": 7.0}` and `{"undeclared": 0.5}` are rejected with
+`AtlasBaselineError`, while `{"x": -6.0}` is in scope. The same checks apply
+to empirical results in report versions 1 and 2.
+Bounds are checked as declared, without rounding them to floats or adding a
+tolerance. An older adapter that sampled outside a large-integer domain because
+of binary64 rounding now raises an error rather than retaining that witness.
+
+The input map need not list every template variable. Binding a candidate or
+applying `At(...)` can remove free variables, so a subset or even `{}` can be
+valid. This admission check does not establish that all required inputs were
+supplied, that a point belongs to the declared sampling grid or surface, or that
+the reported residual was computed correctly. It does not replay or authenticate
+an adapter, assign a label, or upgrade empirical evidence.
+
 ## Direct SymPy residual comparison
 
 Run the second adapter on the same matched Atlas without PyTorch:
