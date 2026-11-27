@@ -67,6 +67,11 @@ trusted heat-equation problem inline, so it works with the installed package
 without a checkout. Change one expression to reproduce exact proof, a failed
 condition, or conservative abstention, then inspect the complete JSON report.
 
+For an already-loaded differentiable PyTorch model, follow
+[audit your own model](docs/audit-your-model.md). The checkout API checks every
+represented PDE, initial, and boundary obligation separately and records
+empirical evidence; passing samples remain `INCONCLUSIVE`.
+
 ## Why this exists
 
 PDE solvers and language models can produce expressions that look convincing

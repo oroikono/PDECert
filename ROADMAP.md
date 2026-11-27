@@ -127,6 +127,10 @@ Next:
   a frozen Fisher--KPP consumer also compares fresh predictions with reference
   fields beside separate PDE, initial, and boundary diagnostics;
   external-model loaders and the reference-field Atlas adapter remain incomplete;
+- an own-model PyTorch audit workflow with full per-obligation diagnostics,
+  retained finite samples and explicit settings; arbitrary checkpoint loading,
+  external framework adapters and independent outside-user validation remain
+  out of scope for this first workflow;
 - an explicit checker registry with immutable run configuration and validated
   obligation scope;
 - a general solution-artifact protocol with symbolic and PyTorch-callable

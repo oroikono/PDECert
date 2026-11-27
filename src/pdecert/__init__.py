@@ -79,6 +79,7 @@ from .checks import (
     run_checks,
 )
 from .compiler import OperatorCompileError, compile_autodiff_problem
+from .callable_audit import CALLABLE_AUDIT_VERSION, audit_callable
 from .core import (
     AGGREGATION_POLICY_VERSION,
     PARAMETER_ASSUMPTIONS,
@@ -222,6 +223,8 @@ from .templates import (
 )
 
 __all__ = [
+    "CALLABLE_AUDIT_VERSION",
+    "audit_callable",
     "REFERENCE_COMPARISON_VERSION",
     "REFERENCE_COMPARISON_MAX_VALUES",
     "ReferenceComparisonError",

@@ -200,3 +200,10 @@ pip install -e ".[dev,autodiff]"
 python -m pytest tests/test_autodiff.py
 python -m examples.autodiff_heat
 ```
+
+For the [own-model audit workflow](docs/audit-your-model.md), also run
+`python -m pytest tests/test_callable_audit.py` and
+`python -m examples.audit_trained_model > model-audit.json`. Keep tests for
+field and configuration admission, per-obligation coverage, replayable
+empirical witnesses, and sampled passes that remain `INCONCLUSIVE`. The trained
+example reuses frozen weights; it is not a training or benchmark-accuracy test.

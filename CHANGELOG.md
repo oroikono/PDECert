@@ -6,6 +6,10 @@ All notable changes to PDECert are documented here.
 
 ### Fixed
 
+- Own-model audits reject dtype casts that move fixed sample coordinates off
+  their compiled surfaces, including rounding inward within a valid domain.
+  This prevents an off-surface value from becoming a boundary counterexample.
+
 - Report loading and the public JSON schema reject `PROVED` or `INCONCLUSIVE`
   summaries containing refuting evidence. Refutation keeps precedence over
   discharged obligations, including in saved Atlas evaluations; legitimate
@@ -17,6 +21,11 @@ All notable changes to PDECert are documented here.
   inputs, saved sample coordinates, and empirical-only evidence semantics.
 
 ### Added
+
+- An own-model callable audit that runs every represented PDE and condition
+  separately, retains the template, samples, settings and caller-declared model
+  provenance, and returns empirical diagnostics without an overall verdict.
+  Includes a saved trained-model example and a short PyTorch integration guide.
 
 - A direct SymPy Atlas baseline with exact-input checks, bounded symbolic
   operations, complete per-obligation zero/nonzero/undecided results, and a
