@@ -111,12 +111,13 @@ def audit_callable(
                 not math.isfinite(row[column])
                 or not lower <= row[column] <= upper
                 or (not fixed and not lower < row[column] < upper)
+                or (fixed and row[column] != constraint.fixed_coordinates[variable])
                 for row in rows
             ):
                 raise ValueError(
                     f"samples for {constraint.name!r}, coordinate {variable!r}, cannot be "
-                    f"represented in the domain with dtype={artifact.dtype}; use a compatible "
-                    "dtype or domain"
+                    f"represented at the required sample locations with dtype={artifact.dtype}; "
+                    "use a compatible dtype"
                 )
         sampled_coordinates.append(rows)
 

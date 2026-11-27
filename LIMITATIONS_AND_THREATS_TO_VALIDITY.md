@@ -152,6 +152,9 @@ identity.
   contexts are rejected; hidden modules and detached predictions inside trusted
   wrapper functions remain the caller's responsibility. The sample-row budget
   is not a wall-time, graph-memory or execution-isolation guarantee.
+  Dtype conversion must preserve each compiled fixed surface coordinate;
+  rounding an initial or boundary sample into the domain is rejected rather
+  than treated as evidence about that surface.
 - Tolerances determine whether a sampled value becomes a counterexample. Values
   below tolerance are observed passes, not evidence that the exact residual is
   zero.

@@ -6,6 +6,10 @@ All notable changes to PDECert are documented here.
 
 ### Fixed
 
+- Own-model audits reject dtype casts that move fixed sample coordinates off
+  their compiled surfaces, including rounding inward within a valid domain.
+  This prevents an off-surface value from becoming a boundary counterexample.
+
 - Report loading and the public JSON schema reject `PROVED` or `INCONCLUSIVE`
   summaries containing refuting evidence. Refutation keeps precedence over
   discharged obligations, including in saved Atlas evaluations; legitimate

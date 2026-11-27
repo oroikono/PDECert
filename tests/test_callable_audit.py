@@ -105,6 +105,72 @@ def test_all_obligation_grids_are_admitted_before_first_model_call(torch):
     assert calls == []
 
 
+def _fixed_surface_template(bounds, location):
+    return template_from_dict(
+        {
+            "template_version": 1,
+            "name": "fixed surface precision",
+            "solution_semantics": "classical_strong",
+            "variables": ["x"],
+            "domains": {"x": list(bounds)},
+            "parameters": {},
+            "field_names": ["u"],
+            "pde_residuals": [{"name": "PDE", "expression": "D(u,x)"}],
+            "conditions": [{"name": "fixed surface", "expression": f"At(u,x,{location})"}],
+        }
+    )
+
+
+@pytest.mark.parametrize(
+    ("bounds", "location"), [((0.0, 0.7), 0.7), ((0.1, 1.0), 0.1), ((0.0, 1.0), 0.7)]
+)
+def test_float32_fixed_surface_drift_rejects_before_any_model_call(bounds, location, torch):
+    template = _fixed_surface_template(bounds, location)
+    calls = []
+
+    with pytest.raises(ValueError, match="fixed surface.*cannot be represented.*dtype=float32"):
+        _audit(template, _candidate(_record_calls(calls), dtype="float32"))
+
+    assert calls == []
+
+
+@pytest.mark.parametrize(
+    ("bounds", "location", "dtype"),
+    [
+        ((0.0, 0.7), 0.7, "float64"),
+        ((0.1, 1.0), 0.1, "float64"),
+        ((0.0, 0.5), 0.5, "float32"),
+        ((0.0, 1.0), 0.5, "float32"),
+    ],
+)
+def test_representable_fixed_surfaces_keep_their_declared_location(bounds, location, dtype, torch):
+    template = _fixed_surface_template(bounds, location)
+
+    result = _audit(template, _candidate(lambda points: points * 0.0, dtype=dtype))
+
+    surface = result["obligations"][1]
+    assert surface["fixed_coordinates"] == {"x": location}
+    assert surface["sample_points"] == [[location]]
+    assert surface["diagnostic_report"]["status"] == "INCONCLUSIVE"
+
+
+def test_fixed_surface_rounding_cannot_refute_a_valid_linear_field(torch):
+    template = replace(
+        _fixed_surface_template((0.0, 0.7), 0.7),
+        pde_residuals=(TemplateConstraint("PDE", "D(u,x)-1000000000"),),
+    )
+
+    def field(points):
+        return 1e9 * (points.to(torch.float64) - 0.7)
+
+    result = _audit(template, _candidate(field), samples_per_axis=2)
+    assert all(
+        item["diagnostic_report"]["status"] == "INCONCLUSIVE" for item in result["obligations"]
+    )
+    with pytest.raises(ValueError, match="fixed surface.*cannot be represented.*dtype=float32"):
+        _audit(template, _candidate(field, dtype="float32"), samples_per_axis=2)
+
+
 def test_public_import_does_not_require_or_import_torch():
     result = subprocess.run(
         [

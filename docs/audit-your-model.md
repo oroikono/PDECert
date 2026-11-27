@@ -140,6 +140,12 @@ coordinate. `max_sample_points` bounds the total rows across all obligations
 before model evaluation. It is not a wall-time or memory limit. The recorded
 grids are also checked before any model call: nonfinite or out-of-domain
 dtype-cast points are rejected, including interior points rounded onto a boundary.
+Fixed coordinates must also retain the compiled obligation's surface location
+after the dtype cast. For example, float32 rounds a fixed `x=0.7` to
+`0.699999988079071`. That point can remain inside the domain while leaving the
+required surface, so the audit rejects it before any model call. Float64
+preserves this compiled coordinate. The audit does not move the surface, add a
+coordinate tolerance, or change the model's precision automatically.
 Choose a compatible precision rather than silently moving those samples. The
 points support replay, but finite coverage can miss defects between points.
 Tolerance and floating-point arithmetic affect threshold decisions: a
